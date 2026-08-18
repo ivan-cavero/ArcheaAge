@@ -81,6 +81,21 @@
         font-size: 13px;
         color: #8b94a7;
       }
+      #progress {
+        margin: 0 24px 16px;
+      }
+      #progress-bar {
+        height: 6px;
+        width: 0;
+        background: #4f8cff;
+        border-radius: 3px;
+        transition: width 0.2s;
+      }
+      #progress-text {
+        font-size: 12px;
+        color: #8b94a7;
+        margin-top: 4px;
+      }
     </style>
   </head>
   <body>
@@ -88,6 +103,7 @@
 
     <section id="versions"></section>
     <section id="servers"></section>
+    <div id="progress"><div id="progress-bar"></div><div id="progress-text"></div></div>
     <div id="status">Conectando al registry…</div>
 
     <script type="module" src="/src/main.js"></script>

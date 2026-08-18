@@ -11,6 +11,13 @@ function setStatus(text) {
   $("#status").textContent = text;
 }
 
+function setProgress(pct, label) {
+  const bar = $("#progress-bar");
+  const text = $("#progress-text");
+  bar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+  text.textContent = label;
+}
+
 async function fetchJson(path) {
   const res = await fetch(`${REGISTRY}${path}`);
   if (!res.ok) throw new Error(`HTTP ${res.status} ${path}`);
@@ -86,16 +93,40 @@ async function refreshServers() {
   }
 }
 
-// Lanzar: delega al backend Tauri (client_ensure + client_launch).
-// En dev (navegador) solo muestra el flujo.
+// --- Flujo de juego: ensure (descarga/verifica) → launch ---
+
 async function play(version, serverId) {
-  setStatus(
-    `Preparando ${version} / ${serverId}… (client manager en el backend Tauri)`,
-  );
-  if (window.__TAURI__) {
-    const { invoke } = await import("@tauri-apps/api/core");
+  if (!window.__TAURI__) {
+    setStatus("Flujo completo solo dentro de la app Tauri (dev = navegador).");
+    return;
+  }
+  const { invoke } = await import("@tauri-apps/api/core");
+  const { listen } = await import("@tauri-apps/api/event");
+
+  // progreso de descarga en vivo
+  await listen("client-progress", (ev) => {
+    const { file, downloaded, total } = ev.payload;
+    const pct = total ? (downloaded / total) * 100 : 0;
+    setProgress(pct, `Descargando ${file}… ${(downloaded / 1048576).toFixed(0)}/${(total / 1048576).toFixed(0)} MB`);
+  });
+
+  setStatus(`Preparando client ${version}…`);
+  setProgress(0, "Comprobando instalación…");
+  let status;
+  try {
+    status = await invoke("client_ensure", { version });
+  } catch (err) {
+    setStatus(`Descarga fallida: ${err}`);
+    setProgress(0, "");
+    return;
+  }
+  setProgress(100, status.verified ? "Client verificado ✓" : "Client instalado (parcial)");
+
+  try {
     const result = await invoke("client_launch", { version, serverId });
-    setStatus(JSON.stringify(result));
+    setStatus(result);
+  } catch (err) {
+    setStatus(`Error al lanzar: ${err}`);
   }
 }
 

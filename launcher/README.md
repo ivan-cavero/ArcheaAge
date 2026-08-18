@@ -4,7 +4,9 @@ Launcher multi-versión en **Tauri v2** (Rust + web): selector de versión → s
 
 ## Estado
 
-**Scaffold**: el frontend (selector de versiones + server browser) funciona contra el Registry; los comandos Rust (`client_status`, `client_launch`) son stubs — el client manager real (manifiesto, SHA256, parcheo delta) es el workstream M1.
+- **Frontend**: selector de versiones + server browser con players en vivo (poll 10s), barra de progreso de descarga (eventos `client-progress`).
+- **Client manager (Rust)**: `client_ensure` descarga por manifiesto del registry con verificación SHA256 y eventos de progreso; `client_status` comprueba instalación por tamaño; `client_launch` escribe la config del client (`archeaage.config.json`) y lanza `archeage.exe`.
+- **Pendiente (M2)**: aplicación de patches del manifiesto (pak/lua/sqlite), resume de descargas, formato exacto `settings.aelcf` del launcher oficial.
 
 ## Dev
 
