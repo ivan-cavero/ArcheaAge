@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ArcheaAge Launcher</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        background: #0f1420;
+        color: #e8ecf4;
+      }
+      header {
+        padding: 16px 24px;
+        border-bottom: 1px solid #232b3d;
+      }
+      h1 {
+        margin: 0;
+        font-size: 18px;
+      }
+      #versions {
+        display: flex;
+        gap: 12px;
+        padding: 16px 24px;
+      }
+      .version-card {
+        border: 1px solid #232b3d;
+        border-radius: 8px;
+        padding: 12px 16px;
+        cursor: pointer;
+        background: #151b2b;
+        min-width: 200px;
+      }
+      .version-card.active {
+        border-color: #4f8cff;
+      }
+      .version-card h2 {
+        margin: 0 0 4px;
+        font-size: 15px;
+      }
+      .version-card p {
+        margin: 0;
+        font-size: 12px;
+        color: #8b94a7;
+      }
+      #servers {
+        padding: 0 24px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 8px 12px;
+        border-bottom: 1px solid #1d2436;
+      }
+      .online {
+        color: #3ddc84;
+      }
+      button {
+        background: #4f8cff;
+        color: #fff;
+        border: 0;
+        border-radius: 6px;
+        padding: 6px 14px;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      #status {
+        padding: 8px 24px 16px;
+        font-size: 13px;
+        color: #8b94a7;
+      }
+    </style>
+  </head>
+  <body>
+    <header><h1>⛵ ArcheaAge Launcher</h1></header>
+
+    <section id="versions"></section>
+    <section id="servers"></section>
+    <div id="status">Conectando al registry…</div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

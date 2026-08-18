@@ -1,0 +1,26 @@
+# .NET
+bin/
+obj/
+*.user
+
+# Rust / Tauri
+launcher/node_modules/
+launcher/dist/
+launcher/src-tauri/target/
+launcher/src-tauri/gen/
+
+# Node
+node_modules/
+
+# Assets del juego (nunca al repo)
+.client_files/
+.server_files/
+*.sqlite3
+game_pak
+
+# Config local
+Config.Local.json
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,52 @@
+{
+  "version": "1.2",
+  "client": "1.2.4.0 (r208022)",
+  "base": {
+    "source": "https://cdn.archeaage.dev/1.2/base/",
+    "files": [
+      {
+        "path": "game_pak",
+        "size": 8589934592,
+        "sha256": "REPLACE_WITH_REAL_HASH",
+        "chunks": [
+          { "index": 0, "size": 4194304, "sha256": "REPLACE_WITH_REAL_HASH" }
+        ]
+      },
+      {
+        "path": "bin32/archeage.exe",
+        "size": 0,
+        "sha256": "REPLACE_WITH_REAL_HASH"
+      },
+      {
+        "path": "compact.sqlite3",
+        "size": 0,
+        "sha256": "REPLACE_WITH_REAL_HASH"
+      }
+    ]
+  },
+  "patches": [
+    {
+      "path": "game_pak",
+      "type": "pak",
+      "url": "https://cdn.archeaage.dev/1.2/patches/mods-1.2.1.pak",
+      "sha256": "REPLACE_WITH_REAL_HASH"
+    }
+  ],
+  "contentPacks": [
+    {
+      "id": "zones-hiram-port",
+      "version": "1.0",
+      "files": [
+        {
+          "path": "game_pak",
+          "type": "pak",
+          "url": "https://cdn.archeaage.dev/1.2/packs/zones-hiram-port-1.0.pak",
+          "sha256": "REPLACE_WITH_REAL_HASH"
+        }
+      ]
+    }
+  ],
+  "login": {
+    "protocol": "trino_1_2"
+  }
+}
