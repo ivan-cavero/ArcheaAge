@@ -3,5 +3,5 @@
   "identifier": "default",
   "description": "Capacidades por defecto del launcher",
   "windows": ["main"],
-  "permissions": ["core:default"]
+  "permissions": ["core:default", "dialog:default"]
 }

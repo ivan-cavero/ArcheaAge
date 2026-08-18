@@ -16,16 +16,14 @@ function setStatus(text, isError = false) {
 function setConn(online) {
   $("#conn").classList.toggle("online", online);
   $("#conn").classList.toggle("offline", !online);
-  $("#conn-text").textContent = online
-    ? "registry conectado"
-    : "registry sin conexión";
+  $("#conn-text").textContent = online ? "registry conectado" : "registry sin conexión";
 }
 
 function setProgress(pct, label) {
   const bar = $("#progress-bar");
   const pctEl = $("#progress-pct");
   bar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
-  pctEl.textContent = `${Math.round(pct)}%`;
+  pctEl.textContent = Number.isFinite(pct) ? `${Math.round(pct)}%` : "…";
   $("#progress-label").textContent = label;
   $("#progress").classList.remove("hidden");
 }
@@ -45,9 +43,40 @@ async function fetchJson(path) {
 }
 
 function pillClass(status) {
-  return ["live", "beta", "maintenance", "planned"].includes(status)
-    ? status
-    : "planned";
+  return ["live", "beta", "maintenance", "planned"].includes(status) ? status : "planned";
+}
+
+// --- Carpeta de instalación ---
+
+function showInstallDir(dir) {
+  $("#installdir-path").textContent = dir || "—";
+}
+
+async function refreshInstallDir() {
+  if (!window.__TAURI__ || !currentVersion) return;
+  const { invoke } = await import("@tauri-apps/api/core");
+  try {
+    const st = await invoke("client_status", { version: currentVersion });
+    showInstallDir(st.install_dir);
+  } catch {
+    /* registry caído: no tocar */
+  }
+}
+
+async function chooseInstallDir() {
+  if (!window.__TAURI__) return;
+  const { open } = await import("@tauri-apps/plugin-dialog");
+  const { invoke } = await import("@tauri-apps/api/core");
+  const dir = await open({ directory: true, title: "Carpeta de instalación del client" });
+  if (typeof dir === "string" && dir) {
+    try {
+      const st = await invoke("client_set_install_dir", { version: currentVersion, dir });
+      showInstallDir(st.install_dir);
+      setStatus("Carpeta de instalación actualizada.");
+    } catch (err) {
+      setStatus(`Error al cambiar carpeta: ${err}`, true);
+    }
+  }
 }
 
 // --- Render seguro (sin innerHTML: los datos vienen del registry) ---
@@ -83,9 +112,7 @@ function renderVersions(versions) {
     const players = document.createElement("span");
     players.append(
       document.createTextNode("online "),
-      Object.assign(document.createElement("b"), {
-        textContent: v.playersOnline,
-      }),
+      Object.assign(document.createElement("b"), { textContent: v.playersOnline }),
     );
     stats.append(servers, players);
 
@@ -105,6 +132,7 @@ function highlightCurrent() {
 async function selectVersion(id) {
   currentVersion = id;
   highlightCurrent();
+  await refreshInstallDir();
   await refreshServers();
   clearInterval(serversTimer);
   serversTimer = setInterval(refreshServers, 10000);
@@ -172,27 +200,29 @@ async function refreshServers() {
   }
 }
 
-// --- Flujo de juego: ensure (descarga/verifica) → launch ---
+// --- Flujo de juego: ensure (descarga/extrae/instala) → launch ---
 
 async function play(version, serverId) {
   if (!window.__TAURI__) {
-    setStatus(
-      "Flujo completo solo dentro de la app Tauri (dev = navegador).",
-      true,
-    );
+    setStatus("Flujo completo solo dentro de la app Tauri (dev = navegador).", true);
     return;
   }
   const { invoke } = await import("@tauri-apps/api/core");
   const { listen } = await import("@tauri-apps/api/event");
 
-  // progreso de descarga en vivo
+  // progreso en vivo por etapas
   await listen("client-progress", (ev) => {
-    const { file, downloaded, total } = ev.payload;
-    const pct = total ? (downloaded / total) * 100 : 0;
-    setProgress(
-      pct,
-      `Descargando ${file}… ${fmtMB(downloaded)} / ${fmtMB(total)}`,
-    );
+    const { stage, file, downloaded, total } = ev.payload;
+    if (stage === "download") {
+      const pct = total ? (downloaded / total) * 100 : 0;
+      setProgress(pct, `Descargando ${file}… ${fmtMB(downloaded)} / ${fmtMB(total)}`);
+    } else if (stage === "verify") {
+      setProgress(0, `Verificando ${file}…`);
+    } else if (stage === "extract") {
+      setProgress(0, "Extrayendo con 7-Zip…");
+    } else if (stage === "done") {
+      setProgress(downloaded ? 100 : 0, downloaded ? "Instalación verificada ✓" : "Instalación incompleta");
+    }
   });
 
   setProgress(0, "Comprobando instalación…");
@@ -200,14 +230,13 @@ async function play(version, serverId) {
   try {
     status = await invoke("client_ensure", { version });
   } catch (err) {
-    setStatus(`Descarga fallida: ${err}`, true);
+    setStatus(`Instalación fallida: ${err}`, true);
     hideProgress();
     return;
   }
-  if (status.verified) {
-    setProgress(100, "Client verificado ✓ — lanzando…");
-  } else {
-    setStatus("Client instalado incompleto (verifica el manifiesto).", true);
+  showInstallDir(status.install_dir);
+  if (!status.verified) {
+    setStatus("Client instalado incompleto (verifica la carpeta y vuelve a intentar).", true);
     hideProgress();
     return;
   }
@@ -223,10 +252,9 @@ async function play(version, serverId) {
 (async function init() {
   const clock = $("#clock");
   clock.textContent = new Date().toLocaleTimeString();
-  setInterval(
-    () => (clock.textContent = new Date().toLocaleTimeString()),
-    1000,
-  );
+  setInterval(() => (clock.textContent = new Date().toLocaleTimeString()), 1000);
+
+  $("#btn-installdir").onclick = chooseInstallDir;
 
   try {
     const { versions } = await fetchJson("/versions");
@@ -235,9 +263,6 @@ async function play(version, serverId) {
     if (versions.length) selectVersion(versions[0].id);
   } catch (err) {
     setConn(false);
-    setStatus(
-      `No se pudo conectar al registry (${REGISTRY}): ${err.message}`,
-      true,
-    );
+    setStatus(`No se pudo conectar al registry (${REGISTRY}): ${err.message}`, true);
   }
 })();

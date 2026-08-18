@@ -25,6 +25,7 @@ struct ClientStatusView {
     installed: bool,
     verified: bool,
     files: usize,
+    install_dir: String,
 }
 
 fn view(s: &client::InstallStatus) -> ClientStatusView {
@@ -32,6 +33,7 @@ fn view(s: &client::InstallStatus) -> ClientStatusView {
         installed: s.installed,
         verified: s.verified,
         files: s.files,
+        install_dir: s.install_dir.clone(),
     }
 }
 
@@ -42,12 +44,20 @@ async fn client_status(version: String) -> Result<ClientStatusView, String> {
     Ok(view(&client::status(&version, &manifest)))
 }
 
-/// Descarga/parchea/verifica el client (base → patches) según el manifiesto.
-/// Emite `client-progress` a la UI.
+/// Descarga (temp) → verifica → extrae (7-Zip) → instala → limpia → valida.
+/// Emite `client-progress` (stage: download|verify|extract|done) a la UI.
 #[tauri::command]
 async fn client_ensure(app: tauri::AppHandle, version: String) -> Result<ClientStatusView, String> {
     let manifest = fetch_manifest(&version).await?;
-    client::ensure(&app, &version, &manifest).await?;
+    let st = client::ensure(&app, &version, &manifest).await?;
+    Ok(view(&st))
+}
+
+/// Cambia la carpeta de instalación de una versión.
+#[tauri::command]
+async fn client_set_install_dir(version: String, dir: String) -> Result<ClientStatusView, String> {
+    client::set_install_dir(&version, &dir)?;
+    let manifest = fetch_manifest(&version).await?;
     Ok(view(&client::status(&version, &manifest)))
 }
 
@@ -102,9 +112,11 @@ async fn client_launch(version: String, server_id: String) -> Result<String, Str
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             client_status,
             client_ensure,
+            client_set_install_dir,
             client_launch
         ])
         .run(tauri::generate_context!())

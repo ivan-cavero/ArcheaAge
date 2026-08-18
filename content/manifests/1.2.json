@@ -1,52 +1,69 @@
 {
   "version": "1.2",
   "client": "1.2.4.0 (r208022)",
-  "base": {
-    "source": "https://cdn.archeaage.dev/1.2/base/",
-    "files": [
-      {
-        "path": "game_pak",
-        "size": 8589934592,
-        "sha256": "REPLACE_WITH_REAL_HASH",
-        "chunks": [
-          { "index": 0, "size": 4194304, "sha256": "REPLACE_WITH_REAL_HASH" }
-        ]
-      },
-      {
-        "path": "bin32/archeage.exe",
-        "size": 0,
-        "sha256": "REPLACE_WITH_REAL_HASH"
-      },
-      {
-        "path": "compact.sqlite3",
-        "size": 0,
-        "sha256": "REPLACE_WITH_REAL_HASH"
-      }
-    ]
-  },
-  "patches": [
+  "files": [
     {
-      "path": "game_pak",
-      "type": "pak",
-      "url": "https://cdn.archeaage.dev/1.2/patches/mods-1.2.1.pak",
-      "sha256": "REPLACE_WITH_REAL_HASH"
+      "name": "compact.sqlite3",
+      "kind": "direct",
+      "url": "drive:18Nm_Q7OgWOfdw_8Xl4TBXa1Z51uGHEIh",
+      "size": 129956864,
+      "sha256": "e580b61b0956c6a664bc8f006f81b243e11a6f7663c6c51b9a4b463f6cd5b0bf"
+    },
+    {
+      "name": "aaemu client.z01",
+      "kind": "archive",
+      "url": "drive:1YChiTh5WrS02vP1z8LmI93ghHBYBV6aE",
+      "size": 1610612736,
+      "sha256": ""
+    },
+    {
+      "name": "aaemu client.z02",
+      "kind": "archive",
+      "url": "drive:1VZVWlif8teegJbFKPH5aB4QBWOSBuFbS",
+      "size": 1610612736,
+      "sha256": ""
+    },
+    {
+      "name": "aaemu client.z03",
+      "kind": "archive",
+      "url": "drive:1fl5mb-zoYDCAahAB4u2umY4UxiY6Uayv",
+      "size": 1610612736,
+      "sha256": ""
+    },
+    {
+      "name": "aaemu client.z04",
+      "kind": "archive",
+      "url": "drive:1GgbtIvqtl4ZuEHD2sRJslY56q2nI30L-",
+      "size": 1610612736,
+      "sha256": ""
+    },
+    {
+      "name": "aaemu client.z05",
+      "kind": "archive",
+      "url": "drive:1XkT_KtvWpQ8_snP3cJlcz9wyQaRik0pj",
+      "size": 1610612736,
+      "sha256": ""
+    },
+    {
+      "name": "aaemu client.zip",
+      "kind": "archive",
+      "url": "drive:1khKIZVMUuKA4ID75XGMCH-8NySQTH-r8",
+      "size": 758110151,
+      "sha256": ""
     }
   ],
-  "contentPacks": [
-    {
-      "id": "zones-hiram-port",
-      "version": "1.0",
-      "files": [
-        {
-          "path": "game_pak",
-          "type": "pak",
-          "url": "https://cdn.archeaage.dev/1.2/packs/zones-hiram-port-1.0.pak",
-          "sha256": "REPLACE_WITH_REAL_HASH"
-        }
-      ]
-    }
+  "extract": {
+    "archive": "aaemu client.z01",
+    "tool": "7z"
+  },
+  "verify": [
+    { "path": "game_pak", "minSize": 8000000000 },
+    { "path": "bin32/archeage.exe", "minSize": 1000000 },
+    { "path": "compact.sqlite3", "minSize": 100000000 }
   ],
   "login": {
     "protocol": "trino_1_2"
-  }
+  },
+  "patches": [],
+  "contentPacks": []
 }
