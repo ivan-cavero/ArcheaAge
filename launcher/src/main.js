@@ -16,7 +16,9 @@ function setStatus(text, isError = false) {
 function setConn(online) {
   $("#conn").classList.toggle("online", online);
   $("#conn").classList.toggle("offline", !online);
-  $("#conn-text").textContent = online ? "registry conectado" : "registry sin conexión";
+  $("#conn-text").textContent = online
+    ? "registry conectado"
+    : "registry sin conexión";
 }
 
 function setProgress(pct, label) {
@@ -43,7 +45,9 @@ async function fetchJson(path) {
 }
 
 function pillClass(status) {
-  return ["live", "beta", "maintenance", "planned"].includes(status) ? status : "planned";
+  return ["live", "beta", "maintenance", "planned"].includes(status)
+    ? status
+    : "planned";
 }
 
 // --- Render seguro (sin innerHTML: los datos vienen del registry) ---
@@ -79,7 +83,9 @@ function renderVersions(versions) {
     const players = document.createElement("span");
     players.append(
       document.createTextNode("online "),
-      Object.assign(document.createElement("b"), { textContent: v.playersOnline }),
+      Object.assign(document.createElement("b"), {
+        textContent: v.playersOnline,
+      }),
     );
     stats.append(servers, players);
 
@@ -170,7 +176,10 @@ async function refreshServers() {
 
 async function play(version, serverId) {
   if (!window.__TAURI__) {
-    setStatus("Flujo completo solo dentro de la app Tauri (dev = navegador).", true);
+    setStatus(
+      "Flujo completo solo dentro de la app Tauri (dev = navegador).",
+      true,
+    );
     return;
   }
   const { invoke } = await import("@tauri-apps/api/core");
@@ -180,7 +189,10 @@ async function play(version, serverId) {
   await listen("client-progress", (ev) => {
     const { file, downloaded, total } = ev.payload;
     const pct = total ? (downloaded / total) * 100 : 0;
-    setProgress(pct, `Descargando ${file}… ${fmtMB(downloaded)} / ${fmtMB(total)}`);
+    setProgress(
+      pct,
+      `Descargando ${file}… ${fmtMB(downloaded)} / ${fmtMB(total)}`,
+    );
   });
 
   setProgress(0, "Comprobando instalación…");
@@ -211,7 +223,10 @@ async function play(version, serverId) {
 (async function init() {
   const clock = $("#clock");
   clock.textContent = new Date().toLocaleTimeString();
-  setInterval(() => (clock.textContent = new Date().toLocaleTimeString()), 1000);
+  setInterval(
+    () => (clock.textContent = new Date().toLocaleTimeString()),
+    1000,
+  );
 
   try {
     const { versions } = await fetchJson("/versions");
@@ -220,6 +235,9 @@ async function play(version, serverId) {
     if (versions.length) selectVersion(versions[0].id);
   } catch (err) {
     setConn(false);
-    setStatus(`No se pudo conectar al registry (${REGISTRY}): ${err.message}`, true);
+    setStatus(
+      `No se pudo conectar al registry (${REGISTRY}): ${err.message}`,
+      true,
+    );
   }
 })();

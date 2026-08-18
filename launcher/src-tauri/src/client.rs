@@ -34,12 +34,12 @@ pub struct ManifestFile {
     pub sha256: String,
 }
 
-// Aplicación de patches (pak/lua/sqlite) en M2.
-#[allow(dead_code)]
 #[derive(Deserialize)]
 pub struct PatchedFile {
     pub path: String,
+    /// Tipo de patch: "pak" | "lua" | "sqlite" — consumido por el merge (M2).
     #[serde(rename = "type")]
+    #[allow(dead_code)]
     pub kind: String,
     pub url: String,
     pub sha256: String,
@@ -181,6 +181,54 @@ pub async fn ensure(app: &tauri::AppHandle, version: &str, manifest: &Manifest) 
         if !f.sha256.is_empty() && !f.sha256.starts_with("REPLACE_WITH") {
             verify_sha256(&full, &f.sha256).await?;
         }
+    }
+
+    // Patches: deltas de nuestros mods (pak/lua/sqlite). Se descargan y verifican;
+    // el merge a nivel de pak es una herramienta aparte (aapatcher/AAEmu-Packer) — M2.
+    for p in &manifest.patches {
+        let fname = if p.path.is_empty() {
+            p.url.rsplit('/').next().unwrap_or("patch").to_string()
+        } else {
+            let normalized = p.path.replace('\\', "/");
+            normalized.rsplit('/').next().unwrap_or("patch").to_string()
+        };
+        let full = dir.join("patches").join(&fname);
+        if full.exists() && verify_sha256(&full, &p.sha256).await.is_ok() {
+            continue; // ya descargado y verificado
+        }
+        if let Some(parent) = full.parent() {
+            std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        }
+
+        let resp = http
+            .get(&p.url)
+            .send()
+            .await
+            .map_err(|e| format!("GET {}: {e}", p.url))?;
+        if !resp.status().is_success() {
+            return Err(format!("GET {}: HTTP {}", p.url, resp.status()));
+        }
+        let total = resp.content_length().unwrap_or(0);
+        let mut stream = resp.bytes_stream();
+        let mut out = tokio::fs::File::create(&full)
+            .await
+            .map_err(|e| e.to_string())?;
+        let mut downloaded: u64 = 0;
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk.map_err(|e| e.to_string())?;
+            out.write_all(&chunk).await.map_err(|e| e.to_string())?;
+            downloaded += chunk.len() as u64;
+            let _ = app.emit(
+                "client-progress",
+                Progress {
+                    file: format!("patch/{}", fname),
+                    downloaded,
+                    total,
+                },
+            );
+        }
+        out.flush().await.map_err(|e| e.to_string())?;
+        verify_sha256(&full, &p.sha256).await?;
     }
     Ok(())
 }

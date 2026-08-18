@@ -26,10 +26,22 @@
       body {
         margin: 0;
         min-height: 100vh;
-        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+        font-family:
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          sans-serif;
         background:
-          radial-gradient(1200px 600px at 85% -10%, rgba(79, 140, 255, 0.16), transparent 60%),
-          radial-gradient(900px 500px at -10% 110%, rgba(53, 224, 200, 0.10), transparent 55%),
+          radial-gradient(
+            1200px 600px at 85% -10%,
+            rgba(79, 140, 255, 0.16),
+            transparent 60%
+          ),
+          radial-gradient(
+            900px 500px at -10% 110%,
+            rgba(53, 224, 200, 0.1),
+            transparent 55%
+          ),
           linear-gradient(160deg, #0a1120 0%, var(--bg) 55%, #0b0f1a 100%);
         color: var(--text);
         overflow-x: hidden;
@@ -107,8 +119,13 @@
       }
 
       @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.4; }
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
       }
 
       /* ---------- Layout ---------- */
@@ -131,8 +148,14 @@
       }
 
       @keyframes fadeUp {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
       .section-title {
@@ -166,7 +189,10 @@
         padding: 16px;
         cursor: pointer;
         background: rgba(255, 255, 255, 0.02);
-        transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        transition:
+          transform 0.18s ease,
+          border-color 0.18s ease,
+          box-shadow 0.18s ease;
         overflow: hidden;
       }
       .version-card::before {
@@ -329,7 +355,10 @@
         color: #fff;
         background: linear-gradient(135deg, var(--accent), #3a6fd8);
         box-shadow: 0 4px 14px rgba(79, 140, 255, 0.3);
-        transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease,
+          filter 0.15s ease;
       }
       .btn:hover {
         transform: translateY(-1px);
@@ -390,8 +419,12 @@
         transition: width 0.25s ease;
       }
       @keyframes shimmer {
-        from { background-position: 200% 0; }
-        to { background-position: -200% 0; }
+        from {
+          background-position: 200% 0;
+        }
+        to {
+          background-position: -200% 0;
+        }
       }
 
       /* ---------- Footer ---------- */
@@ -426,7 +459,9 @@
         <h1>ArcheaAge</h1>
         <p class="tagline">Launcher multi-versión</p>
       </div>
-      <div class="conn" id="conn"><span class="dot"></span><span id="conn-text">registry</span></div>
+      <div class="conn" id="conn">
+        <span class="dot"></span><span id="conn-text">registry</span>
+      </div>
     </header>
 
     <main>

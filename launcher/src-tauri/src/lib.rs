@@ -73,12 +73,14 @@ async fn client_launch(version: String, server_id: String) -> Result<String, Str
     let manifest = fetch_manifest(&version).await?;
     let dir = client::install_dir(&version);
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let patches: Vec<String> = manifest.patches.iter().map(|p| p.url.clone()).collect();
     let cfg = serde_json::json!({
         "version": version,
         "serverId": server_id,
         "pathToGame": dir.join("bin32").join("archeage.exe").to_string_lossy(),
         "serverIPAddress": host,
         "loginType": manifest.login.protocol,
+        "patches": patches,
     });
     std::fs::write(dir.join("archeaage.config.json"), serde_json::to_string_pretty(&cfg).unwrap())
         .map_err(|e| e.to_string())?;
