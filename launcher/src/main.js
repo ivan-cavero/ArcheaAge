@@ -7,21 +7,43 @@ let serversTimer = null;
 
 const $ = (sel) => document.querySelector(sel);
 
-function setStatus(text) {
-  $("#status").textContent = text;
+function setStatus(text, isError = false) {
+  const el = $("#status");
+  el.textContent = text;
+  el.classList.toggle("error", isError);
+}
+
+function setConn(online) {
+  $("#conn").classList.toggle("online", online);
+  $("#conn").classList.toggle("offline", !online);
+  $("#conn-text").textContent = online ? "registry conectado" : "registry sin conexión";
 }
 
 function setProgress(pct, label) {
   const bar = $("#progress-bar");
-  const text = $("#progress-text");
+  const pctEl = $("#progress-pct");
   bar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
-  text.textContent = label;
+  pctEl.textContent = `${Math.round(pct)}%`;
+  $("#progress-label").textContent = label;
+  $("#progress").classList.remove("hidden");
+}
+
+function hideProgress() {
+  $("#progress").classList.add("hidden");
+}
+
+function fmtMB(bytes) {
+  return `${(bytes / 1048576).toFixed(0)} MB`;
 }
 
 async function fetchJson(path) {
   const res = await fetch(`${REGISTRY}${path}`);
   if (!res.ok) throw new Error(`HTTP ${res.status} ${path}`);
   return res.json();
+}
+
+function pillClass(status) {
+  return ["live", "beta", "maintenance", "planned"].includes(status) ? status : "planned";
 }
 
 // --- Render seguro (sin innerHTML: los datos vienen del registry) ---
@@ -34,12 +56,34 @@ function renderVersions(versions) {
     card.className = "version-card";
     card.dataset.id = v.id;
 
-    const title = document.createElement("h2");
+    const top = document.createElement("div");
+    top.className = "top";
+    const title = document.createElement("h3");
     title.textContent = v.name;
-    const meta = document.createElement("p");
-    meta.textContent = `${v.client} · ${v.servers} servers · ${v.playersOnline} online · ${v.status}`;
+    const pill = document.createElement("span");
+    pill.className = `pill ${pillClass(v.status)}`;
+    pill.textContent = v.status;
+    top.append(title, pill);
 
-    card.append(title, meta);
+    const client = document.createElement("p");
+    client.className = "client";
+    client.textContent = v.client;
+
+    const stats = document.createElement("div");
+    stats.className = "stats";
+    const servers = document.createElement("span");
+    servers.append(
+      document.createTextNode("servers "),
+      Object.assign(document.createElement("b"), { textContent: v.servers }),
+    );
+    const players = document.createElement("span");
+    players.append(
+      document.createTextNode("online "),
+      Object.assign(document.createElement("b"), { textContent: v.playersOnline }),
+    );
+    stats.append(servers, players);
+
+    card.append(top, client, stats);
     card.onclick = () => selectVersion(v.id);
     el.appendChild(card);
   }
@@ -60,36 +104,65 @@ async function selectVersion(id) {
   serversTimer = setInterval(refreshServers, 10000);
 }
 
+function serverRow(s) {
+  const row = document.createElement("div");
+  row.className = "server-row";
+
+  const name = document.createElement("div");
+  name.className = "server-name";
+  const dot = document.createElement("span");
+  dot.className = `sdot ${s.status}`;
+  const label = document.createElement("span");
+  label.textContent = s.name;
+  name.append(dot, label);
+
+  const status = document.createElement("div");
+  status.className = "server-status";
+  status.textContent = s.status;
+
+  const players = document.createElement("div");
+  players.className = "players";
+  const num = document.createElement("span");
+  num.className = "num";
+  num.append(
+    Object.assign(document.createElement("b"), { textContent: s.players }),
+    document.createTextNode(` / ${s.maxPlayers}`),
+  );
+  const bar = document.createElement("div");
+  bar.className = "pbar";
+  const fill = document.createElement("i");
+  const pct = s.maxPlayers ? Math.round((s.players / s.maxPlayers) * 100) : 0;
+  fill.style.width = `${Math.min(100, pct)}%`;
+  bar.appendChild(fill);
+  players.append(num, bar);
+
+  const btn = document.createElement("button");
+  btn.className = "btn";
+  btn.textContent = "Jugar";
+  btn.disabled = s.status !== "online";
+  btn.onclick = () => play(s.version, s.id);
+
+  row.append(name, status, players, btn);
+  return row;
+}
+
 async function refreshServers() {
   if (!currentVersion) return;
   try {
     const { servers } = await fetchJson(`/versions/${currentVersion}/servers`);
-    const tbody = $("#servers");
-    tbody.replaceChildren();
-
+    const el = $("#servers");
+    el.replaceChildren();
     if (servers.length) {
-      for (const s of servers) {
-        const row = tbody.insertRow();
-        row.insertCell().textContent = s.name;
-        const status = row.insertCell();
-        status.textContent = s.status;
-        status.className = s.status === "online" ? "online" : "";
-        row.insertCell().textContent = `${s.players}/${s.maxPlayers}`;
-        const playCell = row.insertCell();
-        const btn = document.createElement("button");
-        btn.textContent = "Jugar";
-        btn.onclick = () => play(currentVersion, s.id);
-        playCell.appendChild(btn);
-      }
+      for (const s of servers) el.appendChild(serverRow(s));
     } else {
-      const row = tbody.insertRow();
-      const cell = row.insertCell();
-      cell.colSpan = 4;
-      cell.textContent = "Sin servers online para esta versión.";
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "Sin servers online para esta versión.";
+      el.appendChild(empty);
     }
     setStatus(`Última actualización: ${new Date().toLocaleTimeString()}`);
   } catch (err) {
-    setStatus(`Error: ${err.message}`);
+    setStatus(`Error: ${err.message}`, true);
   }
 }
 
@@ -97,7 +170,7 @@ async function refreshServers() {
 
 async function play(version, serverId) {
   if (!window.__TAURI__) {
-    setStatus("Flujo completo solo dentro de la app Tauri (dev = navegador).");
+    setStatus("Flujo completo solo dentro de la app Tauri (dev = navegador).", true);
     return;
   }
   const { invoke } = await import("@tauri-apps/api/core");
@@ -107,35 +180,46 @@ async function play(version, serverId) {
   await listen("client-progress", (ev) => {
     const { file, downloaded, total } = ev.payload;
     const pct = total ? (downloaded / total) * 100 : 0;
-    setProgress(pct, `Descargando ${file}… ${(downloaded / 1048576).toFixed(0)}/${(total / 1048576).toFixed(0)} MB`);
+    setProgress(pct, `Descargando ${file}… ${fmtMB(downloaded)} / ${fmtMB(total)}`);
   });
 
-  setStatus(`Preparando client ${version}…`);
   setProgress(0, "Comprobando instalación…");
   let status;
   try {
     status = await invoke("client_ensure", { version });
   } catch (err) {
-    setStatus(`Descarga fallida: ${err}`);
-    setProgress(0, "");
+    setStatus(`Descarga fallida: ${err}`, true);
+    hideProgress();
     return;
   }
-  setProgress(100, status.verified ? "Client verificado ✓" : "Client instalado (parcial)");
+  if (status.verified) {
+    setProgress(100, "Client verificado ✓ — lanzando…");
+  } else {
+    setStatus("Client instalado incompleto (verifica el manifiesto).", true);
+    hideProgress();
+    return;
+  }
 
   try {
     const result = await invoke("client_launch", { version, serverId });
     setStatus(result);
   } catch (err) {
-    setStatus(`Error al lanzar: ${err}`);
+    setStatus(`Error al lanzar: ${err}`, true);
   }
 }
 
 (async function init() {
+  const clock = $("#clock");
+  clock.textContent = new Date().toLocaleTimeString();
+  setInterval(() => (clock.textContent = new Date().toLocaleTimeString()), 1000);
+
   try {
     const { versions } = await fetchJson("/versions");
+    setConn(true);
     renderVersions(versions);
     if (versions.length) selectVersion(versions[0].id);
   } catch (err) {
-    setStatus(`No se pudo conectar al registry (${REGISTRY}): ${err.message}`);
+    setConn(false);
+    setStatus(`No se pudo conectar al registry (${REGISTRY}): ${err.message}`, true);
   }
 })();

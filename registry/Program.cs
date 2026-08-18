@@ -35,6 +35,24 @@ app.MapPost("/heartbeat", (Heartbeat body, RegistryStore store) =>
     return Results.Ok();
 });
 
+// Demo: servidores ficticios con players fluctuantes para desarrollo de la UI.
+// ponytail: solo para dev; desactivar en producción (Demo=false).
+if (app.Configuration.GetValue<bool>("Demo"))
+{
+    _ = Task.Run(async () =>
+    {
+        var rnd = new Random();
+        var store = app.Services.GetRequiredService<RegistryStore>();
+        while (true)
+        {
+            foreach (var (id, name) in new[] { ("eu-1", "ArcheaAge EU-1"), ("na-1", "ArcheaAge NA-1") })
+                store.Heartbeat(new Heartbeat("dev-secret", "1.2", id, name,
+                    "online", rnd.Next(40, 220), 500));
+            await Task.Delay(10000);
+        }
+    });
+}
+
 app.Run();
 
 // ---------------------------------------------------------------------------

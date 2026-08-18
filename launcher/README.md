@@ -4,9 +4,9 @@ Launcher multi-versión en **Tauri v2** (Rust + web): selector de versión → s
 
 ## Estado
 
-- **Frontend**: selector de versiones + server browser con players en vivo (poll 10s), barra de progreso de descarga (eventos `client-progress`).
-- **Client manager (Rust)**: `client_ensure` descarga por manifiesto del registry con verificación SHA256 y eventos de progreso; `client_status` comprueba instalación por tamaño; `client_launch` escribe la config del client (`archeaage.config.json`) y lanza `archeage.exe`.
-- **Pendiente (M2)**: aplicación de patches del manifiesto (pak/lua/sqlite), resume de descargas, formato exacto `settings.aelcf` del launcher oficial.
+- **UI moderna**: tema oscuro glassmorphism, selector de versiones con pills de estado, server browser con dots de estado pulsantes y barras de ocupación, barra de progreso animada con porcentaje, indicador de conexión al registry.
+- **Client manager (Rust)**: `client_ensure` descarga por manifiesto del registry con **resume (HTTP Range)**, verificación SHA256 y eventos `client-progress`; `client_status` comprueba instalación por tamaño; `client_launch` escribe la config del client (`archeaage.config.json`) y lanza `archeage.exe`.
+- **Pendiente (M2)**: aplicación de patches del manifiesto (pak/lua/sqlite), formato exacto `settings.aelcf` del launcher oficial.
 
 ## Dev
 

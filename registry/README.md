@@ -18,7 +18,8 @@ Metaserver: lista de versiones, servidores por versión con **jugadores online e
 // appsettings.json
 {
   "Tokens": { "1.2": "dev-secret" },
-  "Versions": [ { "Id": "1.2" } ]
+  "Versions": [ { "Id": "1.2" } ],
+  "Demo": true   // servidores ficticios con players fluctuantes (dev de la UI)
 }
 ```
 

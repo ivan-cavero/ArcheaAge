@@ -125,20 +125,44 @@ pub async fn ensure(app: &tauri::AppHandle, version: &str, manifest: &Manifest) 
             manifest.base.source.trim_end_matches('/'),
             f.path.replace('\\', "/")
         );
-        let resp = http
-            .get(&url)
+
+        // Resume: si hay un archivo parcial, pedir desde el offset (HTTP Range).
+        let existing = if full.exists() {
+            full.metadata().map(|m| m.len()).unwrap_or(0)
+        } else {
+            0
+        };
+        let mut req = http.get(&url);
+        if existing > 0 {
+            req = req.header(reqwest::header::RANGE, format!("bytes={existing}-"));
+        }
+        let resp = req
             .send()
             .await
             .map_err(|e| format!("GET {url}: {e}"))?;
         if !resp.status().is_success() {
             return Err(format!("GET {url}: HTTP {}", resp.status()));
         }
-        let total = resp.content_length().unwrap_or(f.size);
+        // 206 = el server respeta el Range (append); 200 = re-descarga completa.
+        let resuming = existing > 0 && resp.status() == reqwest::StatusCode::PARTIAL_CONTENT;
+        let mut out = if resuming {
+            tokio::fs::OpenOptions::new()
+                .append(true)
+                .open(&full)
+                .await
+                .map_err(|e| e.to_string())?
+        } else {
+            if existing > 0 {
+                // El server ignora el Range: empezar de cero.
+                let _ = std::fs::remove_file(&full);
+            }
+            tokio::fs::File::create(&full)
+                .await
+                .map_err(|e| e.to_string())?
+        };
+        let total = existing + resp.content_length().unwrap_or(f.size);
         let mut stream = resp.bytes_stream();
-        let mut out = tokio::fs::File::create(&full)
-            .await
-            .map_err(|e| e.to_string())?;
-        let mut downloaded: u64 = 0;
+        let mut downloaded: u64 = existing;
         while let Some(chunk) = stream.next().await {
             let chunk = chunk.map_err(|e| e.to_string())?;
             out.write_all(&chunk).await.map_err(|e| e.to_string())?;
