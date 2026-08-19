@@ -1,6 +1,7 @@
-mod client;
+pub mod client;
 
 use serde::Serialize;
+use tauri::Emitter;
 
 /// Registry base URL: override con ARCHEAAGE_REGISTRY.
 fn registry_url() -> String {
@@ -49,7 +50,10 @@ async fn client_status(version: String) -> Result<ClientStatusView, String> {
 #[tauri::command]
 async fn client_ensure(app: tauri::AppHandle, version: String) -> Result<ClientStatusView, String> {
     let manifest = fetch_manifest(&version).await?;
-    let st = client::ensure(&app, &version, &manifest).await?;
+    let st = client::ensure(&version, &manifest, &|p| {
+        let _ = app.emit("client-progress", p);
+    })
+    .await?;
     Ok(view(&st))
 }
 

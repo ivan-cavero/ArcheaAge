@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use tauri::Emitter;
 
 // ---------------------------------------------------------------------------
 // Manifiesto (contrato con content/manifests/{v}.json)
@@ -209,9 +208,38 @@ fn is_html(resp: &reqwest::Response) -> bool {
         .unwrap_or(false)
 }
 
-async fn download_stream(
-    client: &reqwest::Client,
-    url: &str,
+/// Detecta un archivo corrupto: página HTML de error de Drive en vez del binario.
+fn looks_like_html_bytes(buf: &[u8]) -> bool {
+    let head = String::from_utf8_lossy(buf).to_lowercase();
+    head.contains("<!doctype") || head.contains("<html")
+}
+
+fn looks_like_html(path: &Path) -> bool {
+    let mut buf = [0u8; 512];
+    let n = std::fs::File::open(path)
+        .ok()
+        .and_then(|mut f| std::io::Read::read(&mut f, &mut buf).ok())
+        .unwrap_or(0);
+    looks_like_html_bytes(&buf[..n])
+}
+
+/// Tamaño usable de un archivo parcial: limpia los corruptos (HTML o > esperado).
+fn usable_existing(dest: &Path, expected: u64) -> u64 {
+    if !dest.exists() {
+        return 0;
+    }
+    let len = dest.metadata().map(|m| m.len()).unwrap_or(0);
+    if (expected > 0 && len > expected) || looks_like_html(dest) {
+        let _ = std::fs::remove_file(dest);
+        0
+    } else {
+        len
+    }
+}
+
+/// Escribe el body de una respuesta ya enviada a `dest` con resume y validación.
+async fn write_stream(
+    resp: reqwest::Response,
     dest: &Path,
     existing: u64,
     expected: u64,
@@ -220,15 +248,9 @@ async fn download_stream(
     use futures_util::StreamExt;
     use tokio::io::AsyncWriteExt;
 
-    let mut req = client.get(url);
-    if existing > 0 {
-        req = req.header(reqwest::header::RANGE, format!("bytes={existing}-"));
-    }
-    let resp = req.send().await.map_err(|e| format!("GET {url}: {e}"))?;
     if !resp.status().is_success() {
-        return Err(format!("GET {url}: HTTP {}", resp.status()));
+        return Err(format!("HTTP {}", resp.status()));
     }
-    // 206 = Range respetado (append); 200 = re-descarga completa.
     let resuming = existing > 0 && resp.status() == reqwest::StatusCode::PARTIAL_CONTENT;
     let mut out = if resuming {
         tokio::fs::OpenOptions::new()
@@ -247,13 +269,29 @@ async fn download_stream(
     let total = existing + resp.content_length().unwrap_or(expected);
     let mut stream = resp.bytes_stream();
     let mut downloaded: u64 = existing;
+    let mut first: Vec<u8> = Vec::new();
     while let Some(chunk) = stream.next().await {
         let chunk = chunk.map_err(|e| e.to_string())?;
+        // Detección temprana: si el server devuelve HTML de error en vez del binario.
+        if first.len() < 512 {
+            first.extend_from_slice(&chunk[..chunk.len().min(512 - first.len())]);
+            if looks_like_html_bytes(&first) && expected > 1024 {
+                let _ = std::fs::remove_file(dest);
+                return Err("Drive devolvió HTML en vez del archivo".to_string());
+            }
+        }
         out.write_all(&chunk).await.map_err(|e| e.to_string())?;
         downloaded += chunk.len() as u64;
         on_progress(downloaded, total);
     }
     out.flush().await.map_err(|e| e.to_string())?;
+    // Validación de tamaño: si no coincide con lo esperado, el archivo es basura.
+    if expected > 0 && downloaded != expected {
+        let _ = std::fs::remove_file(dest);
+        return Err(format!(
+            "tamaño incorrecto: esperado {expected}, got {downloaded}"
+        ));
+    }
     Ok(downloaded)
 }
 
@@ -264,27 +302,31 @@ async fn drive_download(
     expected: u64,
     on_progress: &(dyn Fn(u64, u64) + Send + Sync),
 ) -> Result<(), String> {
-    use futures_util::StreamExt;
-    use tokio::io::AsyncWriteExt;
-
     let client = reqwest::Client::builder()
         .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
         .build()
         .map_err(|e| e.to_string())?;
 
-    let existing = if dest.exists() {
-        dest.metadata().map(|m| m.len()).unwrap_or(0)
-    } else {
-        0
-    };
+    let existing = usable_existing(dest, expected);
 
-    // 1. uc?id=...&export=download → 303 → usercontent → HTML con uuid (o el archivo si es pequeño)
+    // 1. uc?id=...&export=download → 303 → usercontent → HTML con uuid
     let uc_url = format!("https://drive.google.com/uc?id={id}&export=download");
     let resp = client
         .get(&uc_url)
         .send()
         .await
         .map_err(|e| format!("GET {uc_url}: {e}"))?;
+
+    // Cookie de sesión: reqwest sigue la 303 automáticamente y el Set-Cookie
+    // queda en la respuesta final (HTML). La capturamos para la 2ª request.
+    let session_cookie = resp
+        .headers()
+        .get_all(reqwest::header::SET_COOKIE)
+        .iter()
+        .filter_map(|v| v.to_str().ok())
+        .map(|c| c.split(';').next().unwrap_or("").to_string())
+        .collect::<Vec<_>>()
+        .join("; ");
 
     if is_html(&resp) || resp.status() == reqwest::StatusCode::NOT_FOUND {
         let body = resp.text().await.map_err(|e| e.to_string())?;
@@ -293,48 +335,28 @@ async fn drive_download(
         let dl_url = format!(
             "https://drive.usercontent.google.com/download?id={id}&export=download&confirm=t&uuid={uuid}"
         );
-        download_stream(&client, &dl_url, dest, existing, expected, on_progress).await?;
+        let mut req = client.get(&dl_url);
+        if !session_cookie.is_empty() {
+            req = req.header(reqwest::header::COOKIE, &session_cookie);
+        }
+        // Drive EXIGE Range para servir archivos grandes (sin él devuelve HTML).
+        req = req.header(reqwest::header::RANGE, format!("bytes={existing}-"));
+        let resp = req
+            .send()
+            .await
+            .map_err(|e| format!("GET {dl_url}: {e}"))?;
+        if !resp.status().is_success() {
+            return Err(format!("GET {dl_url}: HTTP {}", resp.status()));
+        }
+        write_stream(resp, dest, existing, expected, on_progress).await?;
     } else {
         // Archivo pequeño sin confirmación: stream directo.
-        let url = uc_url;
-        let mut req = client.get(&url);
-        if existing > 0 {
-            req = req.header(reqwest::header::RANGE, format!("bytes={existing}-"));
-        }
-        let resp = req.send().await.map_err(|e| format!("GET {url}: {e}"))?;
-        if !resp.status().is_success() {
-            return Err(format!("GET {url}: HTTP {}", resp.status()));
-        }
-        let resuming = existing > 0 && resp.status() == reqwest::StatusCode::PARTIAL_CONTENT;
-        let mut out = if resuming {
-            tokio::fs::OpenOptions::new()
-                .append(true)
-                .open(dest)
-                .await
-                .map_err(|e| e.to_string())?
-        } else {
-            if existing > 0 {
-                let _ = std::fs::remove_file(dest);
-            }
-            tokio::fs::File::create(dest)
-                .await
-                .map_err(|e| e.to_string())?
-        };
-        let total = existing + resp.content_length().unwrap_or(expected);
-        let mut stream = resp.bytes_stream();
-        let mut downloaded: u64 = existing;
-        while let Some(chunk) = stream.next().await {
-            let chunk = chunk.map_err(|e| e.to_string())?;
-            out.write_all(&chunk).await.map_err(|e| e.to_string())?;
-            downloaded += chunk.len() as u64;
-            on_progress(downloaded, total);
-        }
-        out.flush().await.map_err(|e| e.to_string())?;
+        write_stream(resp, dest, existing, expected, on_progress).await?;
     }
     Ok(())
 }
 
-/// Descarga con reintentos (Drive rate-limitea; backoff entre intentos).
+/// Descarga con reintentos (Drive rate-limitea; backoff exponencial entre intentos).
 async fn drive_download_retry(
     id: &str,
     dest: &Path,
@@ -342,18 +364,21 @@ async fn drive_download_retry(
     on_progress: &(dyn Fn(u64, u64) + Send + Sync),
 ) -> Result<(), String> {
     let mut last_err = String::new();
-    for attempt in 0..3 {
+    for attempt in 0..8 {
         match drive_download(id, dest, expected, on_progress).await {
             Ok(()) => return Ok(()),
             Err(e) => {
-                last_err = e;
-                if attempt < 2 {
-                    tokio::time::sleep(std::time::Duration::from_secs(3 + attempt * 5)).await;
+                if attempt < 7 {
+                    // Drive bloquea por IP durante minutos: backoff largo.
+                    let wait = 60 + attempt * 60;
+                    println!("  ↻ reintento {}/8 en {wait}s ({e})", attempt + 1);
+                    tokio::time::sleep(std::time::Duration::from_secs(wait)).await;
                 }
+                last_err = e;
             }
         }
     }
-    Err(format!("descarga fallida tras 3 intentos: {last_err}"))
+    Err(format!("descarga fallida tras 8 intentos: {last_err}"))
 }
 
 // ---------------------------------------------------------------------------
@@ -441,14 +466,10 @@ async fn extract_with_7z(exe: &Path, archive: &Path, dest: &Path) -> Result<(), 
 // Pipeline: descargar (temp) → verificar → extraer → instalar → limpiar → validar
 // ---------------------------------------------------------------------------
 
-fn emit(app: &tauri::AppHandle, p: Progress) {
-    let _ = app.emit("client-progress", p);
-}
-
 pub async fn ensure(
-    app: &tauri::AppHandle,
     version: &str,
     manifest: &Manifest,
+    on_progress: &(dyn Fn(Progress) + Send + Sync),
 ) -> Result<InstallStatus, String> {
     let dir = install_dir(version);
     let tmp = dir.join(".download");
@@ -468,9 +489,7 @@ pub async fn ensure(
             continue;
         }
         let dest = tmp.join(&f.name);
-        emit(
-            app,
-            Progress {
+        on_progress(            Progress {
                 stage: "download".into(),
                 file: f.name.clone(),
                 downloaded: 0,
@@ -479,9 +498,7 @@ pub async fn ensure(
         );
         if let Some(id) = drive_file_id(&f.url) {
             drive_download_retry(id, &dest, f.size, &|d, t| {
-                emit(
-                    app,
-                    Progress {
+                on_progress(                    Progress {
                         stage: "download".into(),
                         file: f.name.clone(),
                         downloaded: d,
@@ -494,9 +511,7 @@ pub async fn ensure(
             return Err(format!("URL no soportada: {}", f.url));
         }
 
-        emit(
-            app,
-            Progress {
+        on_progress(            Progress {
                 stage: "verify".into(),
                 file: f.name.clone(),
                 downloaded: 0,
@@ -533,9 +548,7 @@ pub async fn ensure(
             if ok {
                 continue;
             }
-            emit(
-                app,
-                Progress {
+            on_progress(                Progress {
                     stage: "download".into(),
                     file: f.name.clone(),
                     downloaded: 0,
@@ -544,9 +557,7 @@ pub async fn ensure(
             );
             if let Some(id) = drive_file_id(&f.url) {
                 drive_download_retry(id, &dest, f.size, &|d, t| {
-                    emit(
-                        app,
-                        Progress {
+                    on_progress(                        Progress {
                             stage: "download".into(),
                             file: f.name.clone(),
                             downloaded: d,
@@ -567,9 +578,7 @@ pub async fn ensure(
                 .insert(f.name.clone(), hash);
         }
 
-        emit(
-            app,
-            Progress {
+        on_progress(            Progress {
                 stage: "extract".into(),
                 file: manifest.extract.archive.clone(),
                 downloaded: 0,
@@ -596,9 +605,7 @@ pub async fn ensure(
         if let Some(parent) = full.parent() {
             std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
         }
-        emit(
-            app,
-            Progress {
+        on_progress(            Progress {
                 stage: "download".into(),
                 file: format!("patch/{fname}"),
                 downloaded: 0,
@@ -632,9 +639,7 @@ pub async fn ensure(
     // 4. Validar instalación.
     save_config(&cfg)?;
     let st = status(version, manifest);
-    emit(
-        app,
-        Progress {
+    on_progress(        Progress {
             stage: "done".into(),
             file: String::new(),
             downloaded: if st.verified { 1 } else { 0 },

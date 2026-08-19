@@ -16,7 +16,9 @@ function setStatus(text, isError = false) {
 function setConn(online) {
   $("#conn").classList.toggle("online", online);
   $("#conn").classList.toggle("offline", !online);
-  $("#conn-text").textContent = online ? "registry conectado" : "registry sin conexión";
+  $("#conn-text").textContent = online
+    ? "registry conectado"
+    : "registry sin conexión";
 }
 
 function setProgress(pct, label) {
@@ -43,7 +45,9 @@ async function fetchJson(path) {
 }
 
 function pillClass(status) {
-  return ["live", "beta", "maintenance", "planned"].includes(status) ? status : "planned";
+  return ["live", "beta", "maintenance", "planned"].includes(status)
+    ? status
+    : "planned";
 }
 
 // --- Carpeta de instalación ---
@@ -67,10 +71,16 @@ async function chooseInstallDir() {
   if (!window.__TAURI__) return;
   const { open } = await import("@tauri-apps/plugin-dialog");
   const { invoke } = await import("@tauri-apps/api/core");
-  const dir = await open({ directory: true, title: "Carpeta de instalación del client" });
+  const dir = await open({
+    directory: true,
+    title: "Carpeta de instalación del client",
+  });
   if (typeof dir === "string" && dir) {
     try {
-      const st = await invoke("client_set_install_dir", { version: currentVersion, dir });
+      const st = await invoke("client_set_install_dir", {
+        version: currentVersion,
+        dir,
+      });
       showInstallDir(st.install_dir);
       setStatus("Carpeta de instalación actualizada.");
     } catch (err) {
@@ -112,7 +122,9 @@ function renderVersions(versions) {
     const players = document.createElement("span");
     players.append(
       document.createTextNode("online "),
-      Object.assign(document.createElement("b"), { textContent: v.playersOnline }),
+      Object.assign(document.createElement("b"), {
+        textContent: v.playersOnline,
+      }),
     );
     stats.append(servers, players);
 
@@ -204,7 +216,10 @@ async function refreshServers() {
 
 async function play(version, serverId) {
   if (!window.__TAURI__) {
-    setStatus("Flujo completo solo dentro de la app Tauri (dev = navegador).", true);
+    setStatus(
+      "Flujo completo solo dentro de la app Tauri (dev = navegador).",
+      true,
+    );
     return;
   }
   const { invoke } = await import("@tauri-apps/api/core");
@@ -215,13 +230,19 @@ async function play(version, serverId) {
     const { stage, file, downloaded, total } = ev.payload;
     if (stage === "download") {
       const pct = total ? (downloaded / total) * 100 : 0;
-      setProgress(pct, `Descargando ${file}… ${fmtMB(downloaded)} / ${fmtMB(total)}`);
+      setProgress(
+        pct,
+        `Descargando ${file}… ${fmtMB(downloaded)} / ${fmtMB(total)}`,
+      );
     } else if (stage === "verify") {
       setProgress(0, `Verificando ${file}…`);
     } else if (stage === "extract") {
       setProgress(0, "Extrayendo con 7-Zip…");
     } else if (stage === "done") {
-      setProgress(downloaded ? 100 : 0, downloaded ? "Instalación verificada ✓" : "Instalación incompleta");
+      setProgress(
+        downloaded ? 100 : 0,
+        downloaded ? "Instalación verificada ✓" : "Instalación incompleta",
+      );
     }
   });
 
@@ -236,7 +257,10 @@ async function play(version, serverId) {
   }
   showInstallDir(status.install_dir);
   if (!status.verified) {
-    setStatus("Client instalado incompleto (verifica la carpeta y vuelve a intentar).", true);
+    setStatus(
+      "Client instalado incompleto (verifica la carpeta y vuelve a intentar).",
+      true,
+    );
     hideProgress();
     return;
   }
@@ -252,7 +276,10 @@ async function play(version, serverId) {
 (async function init() {
   const clock = $("#clock");
   clock.textContent = new Date().toLocaleTimeString();
-  setInterval(() => (clock.textContent = new Date().toLocaleTimeString()), 1000);
+  setInterval(
+    () => (clock.textContent = new Date().toLocaleTimeString()),
+    1000,
+  );
 
   $("#btn-installdir").onclick = chooseInstallDir;
 
@@ -263,6 +290,9 @@ async function play(version, serverId) {
     if (versions.length) selectVersion(versions[0].id);
   } catch (err) {
     setConn(false);
-    setStatus(`No se pudo conectar al registry (${REGISTRY}): ${err.message}`, true);
+    setStatus(
+      `No se pudo conectar al registry (${REGISTRY}): ${err.message}`,
+      true,
+    );
   }
 })();
