@@ -4,8 +4,8 @@ using Microsoft.Extensions.Logging;
 namespace ArcheaAge.Plugins.Example;
 
 /// <summary>
-/// Plugin de ejemplo: loguea eventos del bus y muestra el patrón de suscripción.
-/// Los plugins se cargan en el server (fork de AAEmu) — el loader llega en M2.
+/// Example plugin: logs bus events and shows the subscription pattern.
+/// Plugins are loaded in the server (AAEmu fork) — the loader lands in M2.
 /// </summary>
 public sealed class ExamplePlugin : IAaPlugin
 {
@@ -15,13 +15,13 @@ public sealed class ExamplePlugin : IAaPlugin
 
     public void OnLoad(IPluginContext context)
     {
-        context.Logger.LogInformation("Plugin {Id} v{Version} cargado.", Id, Version);
+        context.Logger.LogInformation("Plugin {Id} v{Version} loaded.", Id, Version);
 
         context.Events.Subscribe<PlayerLoggedIn>(e =>
-            context.Logger.LogInformation("👋 {Name} ha entrado al mundo.", e.Name));
+            context.Logger.LogInformation("👋 {Name} entered the world.", e.Name));
 
         context.Events.Subscribe<QuestCompleted>(e =>
-            context.Logger.LogInformation("Quest {QuestId} completada por {CharacterId}.", e.QuestId, e.CharacterId));
+            context.Logger.LogInformation("Quest {QuestId} completed by {CharacterId}.", e.QuestId, e.CharacterId));
     }
 
     public void OnUnload()

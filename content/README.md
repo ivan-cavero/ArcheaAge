@@ -1,21 +1,21 @@
 # Content packs
 
-Manifiestos de client y contenido custom que el launcher descarga/aplica.
+Client manifests and custom content that the launcher downloads/applies.
 
-## Estructura
+## Structure
 
 ```text
 content/
-├── manifests/          # manifiestos por versión (los sirve el Registry)
+├── manifests/          # per-version manifests (served by the Registry)
 │   └── 1.2.json
-└── packs/              # (futuro) deltas de contenido: zonas portadas, mobs, UI
+└── packs/              # (future) content deltas: ported zones, mobs, UI
 ```
 
-## Reglas
+## Rules
 
-- **Base** (`manifests/{v}.json.base`): el client original, descargado una vez por versión (multi-GB, MEGA/Drive vía wiki de AAEmu). **No se redistribuye** — el launcher lo descarga del CDN/apunta a la fuente.
-- **Patches**: nuestros cambios sobre el base (pak/lua/sqlite) — deltas pequeños.
-- **Content packs**: contenido custom opcional por servidor (zonas portadas entre versiones, mobs nuevos, UI) — el launcher los aplica en orden: base → patches → packs del server elegido.
-- Cada archivo/chunk lleva `sha256` → verificación de integridad antes de lanzar.
+- **Base** (`manifests/{v}.json.base`): the original client, downloaded once per version (multi-GB, MEGA/Drive via the AAEmu wiki). **Not redistributed** — the launcher downloads it from the CDN/points at the source.
+- **Patches**: our changes on top of the base (pak/lua/sqlite) — small deltas.
+- **Content packs**: optional per-server custom content (zones ported between versions, new mobs, UI) — the launcher applies them in order: base → patches → chosen server's packs.
+- Every file/chunk carries `sha256` → integrity check before launching.
 
-Esquema completo: `docs/SPEC.md` §2.
+Full schema: `docs/SPEC.md` §2.

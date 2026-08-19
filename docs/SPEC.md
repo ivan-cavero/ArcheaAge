@@ -1,25 +1,25 @@
-# Spec — Registry, Launcher y SDK de plugins
+# Spec — Registry, Launcher and plugin SDK
 
-> Decisiones bloqueadas: launcher en **Tauri (Rust + web)**, versión insignia **1.2**, arranque por **spec + scaffold**.
-> Este doc es el contrato técnico. Los archivos de scaffold implementan esta spec.
+> Locked decisions: launcher on **Tauri (Rust + web)**, flagship version **1.2**, start via **spec + scaffold**.
+> This document is the technical contract. The scaffold files implement this spec.
 
 ---
 
 ## 1. Registry / Metaserver (ASP.NET Core, minimal API)
 
-Servicio central que el launcher consulta. **No** participa en el protocolo del juego.
+Central service the launcher queries. It does **not** participate in the game protocol.
 
 ### 1.1 Endpoints
 
-| Método | Ruta | Descripción |
+| Method | Path | Description |
 | --- | --- | --- |
-| `GET` | `/health` | Liveness para el launcher/CI |
-| `GET` | `/versions` | Versiones soportadas + resumen (nombre, client, estado) |
-| `GET` | `/versions/{version}/servers` | Servers de la versión con **players online en vivo** |
-| `GET` | `/versions/{version}/manifest` | Manifiesto del client (archivos, hashes, chunks, patches, content packs) |
-| `POST` | `/heartbeat` | Los Game servers reportan estado + players (auth por token) |
+| `GET` | `/health` | Liveness for the launcher/CI |
+| `GET` | `/versions` | Supported versions + summary (name, client, state) |
+| `GET` | `/versions/{version}/servers` | Servers for the version with **live online players** |
+| `GET` | `/versions/{version}/manifest` | Client manifest (files, hashes, chunks, patches, content packs) |
+| `POST` | `/heartbeat` | Game servers report state + players (token auth) |
 
-### 1.2 Modelo de datos
+### 1.2 Data model
 
 ```jsonc
 // GET /versions
@@ -53,9 +53,9 @@ Servicio central que el launcher consulta. **No** participa en el protocolo del 
   ]
 }
 
-// POST /heartbeat  (Game → Registry, cada 15s)
+// POST /heartbeat  (Game → Registry, every 15s)
 {
-  "token": "xxx",                          // secreto compartido por versión
+  "token": "xxx",                          // shared secret per version
   "version": "1.2",
   "serverId": "eu-1",
   "serverName": "ArcheaAge EU-1",
@@ -65,22 +65,22 @@ Servicio central que el launcher consulta. **No** participa en el protocolo del 
 }
 ```
 
-### 1.3 Estado
+### 1.3 State
 
-- **En memoria** (ConcurrentDictionary) para el scaffold: heartbeat actualiza la entrada; entrada sin heartbeat en 60s → `offline`.
-- **Migración futura**: MySQL (mismo stack que AAEmu) cuando haya historial/métricas. `ponytail: in-memory first, MySQL when metrics/history matter`.
+- **In-memory** (ConcurrentDictionary) for the scaffold: a heartbeat updates the entry; an entry without a heartbeat in 60s → `offline`.
+- **Future migration**: MySQL (same stack as AAEmu) when there's history/metrics. `ponytail: in-memory first, MySQL when metrics/history matter`.
 
-### 1.4 Seguridad
+### 1.4 Security
 
-- `/heartbeat` requiere `Authorization: Bearer <token>` (token por versión en configuración).
-- Endpoints de lectura públicos (el launcher no tiene cuentas propias de momento).
-- CORS abierto solo al origen del launcher dev.
+- `/heartbeat` requires `Authorization: Bearer <token>` (per-version token in configuration).
+- Read endpoints are public (the launcher has no accounts of its own for now).
+- CORS open only to the launcher dev origin.
 
 ---
 
-## 2. Manifiesto de client (content/)
+## 2. Client manifest (content/)
 
-El contrato entre Registry y el client manager del launcher.
+The contract between the Registry and the launcher's client manager.
 
 ```jsonc
 // content/manifests/1.2.json
@@ -88,7 +88,7 @@ El contrato entre Registry y el client manager del launcher.
   "version": "1.2",
   "client": "1.2.4.0 (r208022)",
   "base": {
-    // client base original — el jugador lo descarga una vez (multi-GB)
+    // original base client — the player downloads it once (multi-GB)
     "source": "https://cdn.archeaage.dev/1.2/base/",
     "files": [
       {
@@ -101,67 +101,67 @@ El contrato entre Registry y el client manager del launcher.
     ]
   },
   "patches": [
-    // nuestros cambios sobre el base — delta que el launcher aplica
+    // our changes over the base — the delta the launcher applies
     { "path": "game_pak", "type": "pak", "url": "https://cdn.archeaage.dev/1.2/patches/mods-1.2.1.pak", "sha256": "…" }
   ],
   "contentPacks": [
-    // contenido custom (zonas portadas, mobs, UI) — opcional por servidor
+    // custom content (ported zones, mobs, UI) — optional per server
     { "id": "zones-hiram-port", "version": "1.0", "files": [ { "path": "game_pak", "type": "pak", "url": "…", "sha256": "…" } ] }
   ],
-  "login": { "protocol": "trino_1_2" }     // loginType que escribe el launcher
+  "login": { "protocol": "trino_1_2" }     // loginType the launcher writes
 }
 ```
 
-Reglas:
+Rules:
 
-- **Base se descarga una vez** por versión; los patches/content packs son deltas pequeños.
-- Cada archivo/chunk tiene `sha256` → verificación de integridad antes de lanzar.
-- El launcher aplica: base → patches → content packs del servidor elegido, en ese orden.
+- **Base is downloaded once** per version; patches/content packs are small deltas.
+- Every file/chunk has `sha256` → integrity check before launching.
+- The launcher applies: base → patches → chosen server's content packs, in that order.
 
 ---
 
 ## 3. Launcher (Tauri v2, Rust + web)
 
-### 3.1 Pantallas (v1)
+### 3.1 Screens (v1)
 
-1. **Selector de versión**: cards con las versiones del Registry (nombre, client, estado, players totales).
-2. **Server browser** (por versión): lista de servers con players online en vivo (poll al Registry cada 10s), estado, botón "Jugar".
-3. **Client manager**: progreso de descarga/parcheo (base → patches → content packs), verificación SHA256, resume.
-4. **Launch**: escribe la config del client para la versión (pathToGame, serverIPAddress → Login de esa versión, loginType) y lanza `archeage.exe`.
+1. **Version selector**: cards with the Registry's versions (name, client, state, total players).
+2. **Server browser** (per version): server list with live online players (poll the Registry every 10s), state, "Play" button.
+3. **Client manager**: download/patch progress (base → patches → content packs), SHA256 verification, resume.
+4. **Launch**: writes the client config for the version (pathToGame, serverIPAddress → that version's Login, loginType) and launches `archeage.exe`.
 
-### 3.2 Comandos Tauri (Rust)
+### 3.2 Tauri commands (Rust)
 
-| Comando | Entrada | Salida | Notas |
+| Command | Input | Output | Notes |
 | --- | --- | --- | --- |
-| `registry_get` | `path` | JSON | Proxy HTTP al Registry (evita CORS en producción) |
-| `client_ensure` | `version`, `serverId` | `{ status, progress }` | Descarga/parchea/verifica; eventos de progreso al frontend |
-| `client_status` | `version` | `{ installed, verified, files }` | Estado local |
-| `client_launch` | `version`, `server` | `{ ok }` | Escribe `settings.aelcf`-equivalente y lanza `archeage.exe` |
+| `registry_get` | `path` | JSON | HTTP proxy to the Registry (avoids CORS in production) |
+| `client_ensure` | `version`, `serverId` | `{ status, progress }` | Download/patch/verify; progress events to the frontend |
+| `client_status` | `version` | `{ installed, verified, files }` | Local state |
+| `client_launch` | `version`, `server` | `{ ok }` | Writes `settings.aelcf`-equivalent and launches `archeage.exe` |
 
-### 3.3 Layout local (Windows)
+### 3.3 Local layout (Windows)
 
 ```text
 %LOCALAPPDATA%/ArcheaAge/
 ├── clients/
-│   ├── 1.2/          # instalación por versión
+│   ├── 1.2/          # per-version install
 │   │   ├── game_pak
 │   │   ├── bin32/archeage.exe
 │   │   └── compact.sqlite3
-│   └── 3.0/          # (futuro)
-├── config.json       # versiones/servers recordados, credenciales por versión
+│   └── 3.0/          # (future)
+├── config.json       # remembered versions/servers, per-version credentials
 └── logs/
 ```
 
 ---
 
-## 4. SDK de plugins (ArcheaAge.Sdk, .NET)
+## 4. Plugin SDK (ArcheaAge.Sdk, .NET)
 
-Contrato mínimo para que un plugin compile **sin clonar el server** (paquete NuGet `ArcheaAge.Sdk`).
+Minimal contract so a plugin compiles **without cloning the server** (NuGet package `ArcheaAge.Sdk`).
 
 ```csharp
 namespace ArcheaAge.Sdk;
 
-/// <summary>Contrato de un plugin. El server carga ensamblados que implementan IAaPlugin.</summary>
+/// <summary>Plugin contract. The server loads assemblies implementing IAaPlugin.</summary>
 public interface IAaPlugin
 {
     string Id { get; }          // "dev.archeaage.tradepack-tweaks"
@@ -177,7 +177,7 @@ public interface IPluginContext
     ILogger Logger { get; }
 }
 
-/// <summary>Bus de eventos tipado. El server publica eventos; los plugins se suscriben.</summary>
+/// <summary>Typed event bus. The server publishes events; plugins subscribe.</summary>
 public interface IEventBus
 {
     void Subscribe<T>(Action<T> handler) where T : GameEvent;
@@ -187,49 +187,49 @@ public interface IEventBus
 
 public abstract record GameEvent(DateTime OccurredAt);
 
-// Eventos de ejemplo (el server los publica en sus managers)
+// Example events (the server publishes them from its managers)
 public sealed record PlayerLoggedIn(long AccountId, long CharacterId, string Name) : GameEvent(DateTime.UtcNow);
 public sealed record QuestCompleted(long CharacterId, uint QuestId) : GameEvent(DateTime.UtcNow);
 public sealed record ItemCrafted(long CharacterId, uint ItemTemplateId, int Count) : GameEvent(DateTime.UtcNow);
 ```
 
-Reglas:
+Rules:
 
-- El SDK **no referencia AAEmu** (contrato puro) → el adaptador server-side (que traduce eventos de AAEmu al bus) vive en el fork, no en el SDK.
-- Versionado semántico del SDK; el server carga plugins compatibles con su versión de SDK.
-- El loader (`Assembly.LoadFrom` + reflexión sobre `IAaPlugin`) se implementa en el fork (workstream M2).
+- The SDK **does not reference AAEmu** (pure contract) → the server-side adapter (translating AAEmu events to the bus) lives in the fork, not in the SDK.
+- Semantic versioning of the SDK; the server loads plugins compatible with its SDK version.
+- The loader (`Assembly.LoadFrom` + reflection over `IAaPlugin`) is implemented in the fork (workstream M2).
 
 ---
 
-## 5. Estructura del monorepo (scaffold)
+## 5. Monorepo structure (scaffold)
 
 ```text
 ArcheaAge/
 ├── README.md
-├── .gitmodules            # server/ → AAEmu (submodule, sin clonar aún)
+├── .gitmodules            # server/ → AAEmu (submodule, not cloned yet)
 ├── .github/workflows/ci.yml
 ├── docs/                  # INVESTIGACION.md, ARQUITECTURA.md, SPEC.md
 ├── registry/              # ArcheaAge.Registry (ASP.NET Core minimal API)
-├── sdk/                   # ArcheaAge.Sdk (contrato de plugins, NuGet)
+├── sdk/                   # ArcheaAge.Sdk (plugin contract, NuGet)
 ├── plugins/
 │   ├── README.md
-│   └── Example/           # ArcheaAge.Plugins.Example (referencia el SDK)
+│   └── Example/           # ArcheaAge.Plugins.Example (references the SDK)
 ├── launcher/              # Tauri v2 (Rust + web)
 │   ├── index.html, src/, vite.config.js, package.json
 │   └── src-tauri/         # Cargo.toml, tauri.conf.json, src/
 └── content/
     ├── README.md
-    └── manifests/1.2.json # manifest de ejemplo
+    └── manifests/1.2.json # example manifest
 ```
 
-- `server/` es un **submodule** (`git submodule update --init`) — no se clona en el scaffold.
-- CI: `dotnet build/test` (registry + sdk + plugins) y `cargo check` (launcher).
+- `server/` is a **submodule** (`git submodule update --init`) — not cloned in the scaffold.
+- CI: `dotnet build/test` (registry + sdk + plugins) and `cargo check` (launcher).
 
 ---
 
-## 6. Fuera de alcance del scaffold (workstreams futuros)
+## 6. Out of scaffold scope (future workstreams)
 
-- Fix de barcos/sync/performance en el fork (M2+).
-- Línea de versión 3.0 (M3+).
-- Loader de plugins dentro del fork + adaptador de eventos (M2).
-- Anti-cheat, cuentas propias, CDN real, multi-servidor (M4+).
+- Boat/sync/performance fixes in the fork (M2+).
+- 3.0 version line (M3+).
+- Plugin loader inside the fork + event adapter (M2).
+- Anti-cheat, own accounts, real CDN, multi-server (M4+).

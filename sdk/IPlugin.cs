@@ -1,12 +1,12 @@
 namespace ArcheaAge.Sdk;
 
 /// <summary>
-/// Contrato de un plugin. El server (fork de AAEmu) carga ensamblados que
-/// implementan esta interfaz — el loader se implementa en el fork (workstream M2).
+/// Plugin contract. The server (AAEmu fork) loads assemblies implementing
+/// this interface — the loader lives in the fork (workstream M2).
 /// </summary>
 public interface IAaPlugin
 {
-    /// <summary>Identificador único estilo DNS inverso: "dev.archeaage.tradepack-tweaks".</summary>
+    /// <summary>Unique DNS-style identifier: "dev.archeaage.tradepack-tweaks".</summary>
     string Id { get; }
 
     string Name { get; }
@@ -18,7 +18,7 @@ public interface IAaPlugin
     void OnUnload();
 }
 
-/// <summary>Contexto inyectado al cargar el plugin.</summary>
+/// <summary>Context injected when the plugin is loaded.</summary>
 public interface IPluginContext
 {
     IEventBus Events { get; }
@@ -27,9 +27,9 @@ public interface IPluginContext
 }
 
 /// <summary>
-/// Bus de eventos tipado. El server publica eventos de juego (login, quest,
-/// craft, combate...); los plugins se suscriben. El adaptador que traduce los
-/// eventos de AAEmu a este bus vive en el fork, no en el SDK.
+/// Typed event bus. The server publishes game events (login, quest,
+/// craft, combat...); plugins subscribe. The adapter translating AAEmu
+/// events to this bus lives in the fork, not in the SDK.
 /// </summary>
 public interface IEventBus
 {
@@ -42,7 +42,7 @@ public interface IEventBus
 
 public abstract record GameEvent(DateTime OccurredAt);
 
-// --- Eventos de ejemplo (el fork los publicará en sus managers) ---
+// --- Example events (the fork will publish them from its managers) ---
 
 public sealed record PlayerLoggedIn(long AccountId, long CharacterId, string Name)
     : GameEvent(DateTime.UtcNow);

@@ -1,18 +1,18 @@
 # Plugins
 
-Catálogo de plugins comunitarios para ArcheaAge. Cada plugin:
+Community plugin catalog for ArcheaAge. Each plugin:
 
-1. Referencia `ArcheaAge.Sdk` (NuGet) — no clona el server.
-2. Implementa `IAaPlugin` (Id, Name, Version, OnLoad/OnUnload).
-3. Se suscribe a eventos del bus (`PlayerLoggedIn`, `QuestCompleted`, `ItemCrafted`, ...).
-4. Trae sus propios tests (el CI los ejecuta contra cada release del SDK — matriz de compatibilidad).
+1. References `ArcheaAge.Sdk` (NuGet) — does not clone the server.
+2. Implements `IAaPlugin` (Id, Name, Version, OnLoad/OnUnload).
+3. Subscribes to bus events (`PlayerLoggedIn`, `QuestCompleted`, `ItemCrafted`, ...).
+4. Ships its own tests (CI runs them against each SDK release — compatibility matrix).
 
-## Reglas de entrada al catálogo
+## Catalog entry rules
 
-- Código open source (LGPLv3 o compatible).
-- Build verde + tests en CI.
-- Sin acceso a datos de jugadores fuera del contrato del SDK.
-- Los cambios que tocan el client (zonas, modelos, UI) van como **content packs** en `../content/`, no en el plugin.
+- Open source code (LGPLv3 or compatible).
+- Green build + tests in CI.
+- No access to player data outside the SDK contract.
+- Changes that touch the client (zones, models, UI) ship as **content packs** in `../content/`, not in the plugin.
 
 ## Example
 
@@ -20,4 +20,4 @@ Catálogo de plugins comunitarios para ArcheaAge. Cada plugin:
 dotnet build plugins/Example
 ```
 
-Referencia de estructura: `Example/ExamplePlugin.cs`.
+Structure reference: `Example/ExamplePlugin.cs`.

@@ -18,7 +18,7 @@ async fn fetch_manifest(version: &str) -> Result<client::Manifest, String> {
     }
     resp.json::<client::Manifest>()
         .await
-        .map_err(|e| format!("manifest inválido: {e}"))
+        .map_err(|e| format!("invalid manifest: {e}"))
 }
 
 #[derive(Serialize)]
@@ -38,7 +38,7 @@ fn view(s: &client::InstallStatus) -> ClientStatusView {
     }
 }
 
-/// Estado local del client de una versión (instalado/verificado).
+/// Local client state for a version (installed/verified).
 #[tauri::command]
 async fn client_status(version: String) -> Result<ClientStatusView, String> {
     let manifest = fetch_manifest(&version).await?;
@@ -57,7 +57,7 @@ async fn client_ensure(app: tauri::AppHandle, version: String) -> Result<ClientS
     Ok(view(&st))
 }
 
-/// Cambia la carpeta de instalación de una versión.
+/// Changes the install folder for a version.
 #[tauri::command]
 async fn client_set_install_dir(version: String, dir: String) -> Result<ClientStatusView, String> {
     client::set_install_dir(&version, &dir)?;
@@ -65,8 +65,8 @@ async fn client_set_install_dir(version: String, dir: String) -> Result<ClientSt
     Ok(view(&client::status(&version, &manifest)))
 }
 
-/// Lanza archeage.exe contra el login server de la versión elegida.
-/// Escribe la config del client en el install dir y arranca el proceso.
+/// Launches archeage.exe against the login server of the chosen version.
+/// Writes the client config in the install dir and starts the process.
 #[tauri::command]
 async fn client_launch(version: String, server_id: String) -> Result<String, String> {
     use std::process::Command;
@@ -83,7 +83,7 @@ async fn client_launch(version: String, server_id: String) -> Result<String, Str
         .ok_or_else(|| format!("server {server_id} no encontrado en version {version}"))?;
     let host = server["host"].as_str().unwrap_or("127.0.0.1").to_string();
 
-    // 2. config del client (equivalente a settings.aelcf del launcher oficial)
+    // 2. client config (equivalent to settings.aelcf from the official launcher)
     let manifest = fetch_manifest(&version).await?;
     let dir = client::install_dir(&version);
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
@@ -99,7 +99,7 @@ async fn client_launch(version: String, server_id: String) -> Result<String, Str
     std::fs::write(dir.join("archeaage.config.json"), serde_json::to_string_pretty(&cfg).unwrap())
         .map_err(|e| e.to_string())?;
 
-    // 3. lanzar el client (si está instalado)
+    // 3. launch the client (if installed)
     let exe = dir.join("bin32").join("archeage.exe");
     if !exe.exists() {
         return Err(format!(

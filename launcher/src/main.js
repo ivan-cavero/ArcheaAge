@@ -1,5 +1,5 @@
-// Registry base URL. En dev apunta al registry local; en producción lo
-// inyecta el backend Tauri (comando registry_get).
+// Registry base URL. In dev it points to the local registry; in production the
+// Tauri backend injects it (registry_get command).
 const REGISTRY = "http://localhost:5080";
 
 let currentVersion = null;
@@ -17,8 +17,8 @@ function setConn(online) {
   $("#conn").classList.toggle("online", online);
   $("#conn").classList.toggle("offline", !online);
   $("#conn-text").textContent = online
-    ? "registry conectado"
-    : "registry sin conexión";
+    ? "registry connected"
+    : "registry offline";
 }
 
 function setProgress(pct, label) {
@@ -50,7 +50,7 @@ function pillClass(status) {
     : "planned";
 }
 
-// --- Carpeta de instalación ---
+// --- Install folder ---
 
 function showInstallDir(dir) {
   $("#installdir-path").textContent = dir || "—";
@@ -63,7 +63,7 @@ async function refreshInstallDir() {
     const st = await invoke("client_status", { version: currentVersion });
     showInstallDir(st.install_dir);
   } catch {
-    /* registry caído: no tocar */
+    /* registry down: do not touch */
   }
 }
 
@@ -73,7 +73,7 @@ async function chooseInstallDir() {
   const { invoke } = await import("@tauri-apps/api/core");
   const dir = await open({
     directory: true,
-    title: "Carpeta de instalación del client",
+    title: "Client install folder",
   });
   if (typeof dir === "string" && dir) {
     try {
@@ -82,14 +82,14 @@ async function chooseInstallDir() {
         dir,
       });
       showInstallDir(st.install_dir);
-      setStatus("Carpeta de instalación actualizada.");
+      setStatus("Install folder updated.");
     } catch (err) {
-      setStatus(`Error al cambiar carpeta: ${err}`, true);
+      setStatus(`Failed to change folder: ${err}`, true);
     }
   }
 }
 
-// --- Render seguro (sin innerHTML: los datos vienen del registry) ---
+// --- Safe rendering (no innerHTML: data comes from the registry) ---
 
 function renderVersions(versions) {
   const el = $("#versions");
@@ -184,7 +184,7 @@ function serverRow(s) {
 
   const btn = document.createElement("button");
   btn.className = "btn";
-  btn.textContent = "Jugar";
+  btn.textContent = "Play";
   btn.disabled = s.status !== "online";
   btn.onclick = () => play(s.version, s.id);
 
@@ -203,21 +203,21 @@ async function refreshServers() {
     } else {
       const empty = document.createElement("div");
       empty.className = "empty";
-      empty.textContent = "Sin servers online para esta versión.";
+      empty.textContent = "No servers online for this version.";
       el.appendChild(empty);
     }
-    setStatus(`Última actualización: ${new Date().toLocaleTimeString()}`);
+    setStatus(`Last refresh: ${new Date().toLocaleTimeString()}`);
   } catch (err) {
     setStatus(`Error: ${err.message}`, true);
   }
 }
 
-// --- Flujo de juego: ensure (descarga/extrae/instala) → launch ---
+// --- Play flow: ensure (download/extract/install) → launch ---
 
 async function play(version, serverId) {
   if (!window.__TAURI__) {
     setStatus(
-      "Flujo completo solo dentro de la app Tauri (dev = navegador).",
+      "Full flow only inside the Tauri app (dev = browser).",
       true,
     );
     return;
@@ -225,40 +225,40 @@ async function play(version, serverId) {
   const { invoke } = await import("@tauri-apps/api/core");
   const { listen } = await import("@tauri-apps/api/event");
 
-  // progreso en vivo por etapas
+  // live per-stage progress
   await listen("client-progress", (ev) => {
     const { stage, file, downloaded, total } = ev.payload;
     if (stage === "download") {
       const pct = total ? (downloaded / total) * 100 : 0;
       setProgress(
         pct,
-        `Descargando ${file}… ${fmtMB(downloaded)} / ${fmtMB(total)}`,
+        `Downloading ${file}… ${fmtMB(downloaded)} / ${fmtMB(total)}`,
       );
     } else if (stage === "verify") {
-      setProgress(0, `Verificando ${file}…`);
+      setProgress(0, `Verifying ${file}…`);
     } else if (stage === "extract") {
-      setProgress(0, "Extrayendo con 7-Zip…");
+      setProgress(0, "Extracting with 7-Zip…");
     } else if (stage === "done") {
       setProgress(
         downloaded ? 100 : 0,
-        downloaded ? "Instalación verificada ✓" : "Instalación incompleta",
+        downloaded ? "Installation verified ✓" : "Incomplete installation",
       );
     }
   });
 
-  setProgress(0, "Comprobando instalación…");
+  setProgress(0, "Checking installation…");
   let status;
   try {
     status = await invoke("client_ensure", { version });
   } catch (err) {
-    setStatus(`Instalación fallida: ${err}`, true);
+    setStatus(`Installation failed: ${err}`, true);
     hideProgress();
     return;
   }
   showInstallDir(status.install_dir);
   if (!status.verified) {
     setStatus(
-      "Client instalado incompleto (verifica la carpeta y vuelve a intentar).",
+      "Client installed incompletely (check the folder and retry).",
       true,
     );
     hideProgress();
@@ -269,7 +269,7 @@ async function play(version, serverId) {
     const result = await invoke("client_launch", { version, serverId });
     setStatus(result);
   } catch (err) {
-    setStatus(`Error al lanzar: ${err}`, true);
+    setStatus(`Failed to launch: ${err}`, true);
   }
 }
 
@@ -291,7 +291,7 @@ async function play(version, serverId) {
   } catch (err) {
     setConn(false);
     setStatus(
-      `No se pudo conectar al registry (${REGISTRY}): ${err.message}`,
+      `Could not reach the registry (${REGISTRY}): ${err.message}`,
       true,
     );
   }

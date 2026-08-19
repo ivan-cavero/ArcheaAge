@@ -1,16 +1,16 @@
 # ArcheaAge.Registry
 
-Metaserver: lista de versiones, servidores por versión con **jugadores online en vivo** (heartbeat de los Game servers) y manifiestos de client.
+Metaserver: version list, per-version servers with **live online players** (Game server heartbeats) and client manifests.
 
 ## Endpoints
 
-| Método | Ruta | Descripción |
+| Method | Path | Description |
 | --- | --- | --- |
 | `GET` | `/health` | Liveness |
-| `GET` | `/versions` | Versiones + resumen |
-| `GET` | `/versions/{v}/servers` | Servers de la versión |
-| `GET` | `/versions/{v}/manifest` | Manifiesto del client (lee `content/manifests/{v}.json`) |
-| `POST` | `/heartbeat` | Game → Registry (Bearer token por versión) |
+| `GET` | `/versions` | Versions + summary |
+| `GET` | `/versions/{v}/servers` | Servers for the version |
+| `GET` | `/versions/{v}/manifest` | Client manifest (reads `content/manifests/{v}.json`) |
+| `POST` | `/heartbeat` | Game → Registry (per-version Bearer token) |
 
 ## Config
 
@@ -19,7 +19,7 @@ Metaserver: lista de versiones, servidores por versión con **jugadores online e
 {
   "Tokens": { "1.2": "dev-secret" },
   "Versions": [ { "Id": "1.2" } ],
-  "Demo": true   // servidores ficticios con players fluctuantes (dev de la UI)
+  "Demo": true   // fake servers with fluctuating players (UI dev)
 }
 ```
 
@@ -30,4 +30,4 @@ dotnet run --project registry
 curl http://localhost:5080/versions
 ```
 
-El manifiesto se sirve desde `content/manifests/` (relativo al repo). Sin servidores heartbeateando, `/servers` devuelve lista vacía si existe manifiesto, 404 si no.
+The manifest is served from `content/manifests/` (relative to the repo). With no servers heartbeating, `/servers` returns an empty list if a manifest exists, 404 otherwise.

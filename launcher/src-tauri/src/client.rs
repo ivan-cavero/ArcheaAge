@@ -3,12 +3,12 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 // ---------------------------------------------------------------------------
-// Manifiesto (contrato con content/manifests/{v}.json)
+// Manifest (contract with content/manifests/{v}.json)
 // ---------------------------------------------------------------------------
 
 #[derive(Deserialize)]
 pub struct Manifest {
-    /// Parte del contrato; la versión se pasa como argumento y client es informativo.
+    /// Part of the contract; the version is passed as an argument and client is informational.
     #[allow(dead_code)]
     pub version: String,
     #[allow(dead_code)]
@@ -24,23 +24,23 @@ pub struct Manifest {
 #[derive(Deserialize)]
 pub struct ManifestFile {
     pub name: String,
-    /// "direct" = se instala tal cual | "archive" = parte de un archivo comprimido
+    /// "direct" = installed as-is | "archive" = part of a compressed archive
     pub kind: String,
     /// "drive:FILEID" | "https://..."
     pub url: String,
-    /// 0 = desconocido (se usa el Content-Length real)
+    /// 0 = unknown (the real Content-Length is used)
     #[serde(default)]
     pub size: u64,
-    /// "" = desconocido (el launcher lo calcula en la primera descarga y lo guarda)
+    /// "" = unknown (the launcher computes it on the first download and stores it)
     #[serde(default)]
     pub sha256: String,
 }
 
 #[derive(Deserialize)]
 pub struct ExtractConfig {
-    /// Parte que usa 7-Zip como entrada del spanned archive
+    /// Part that 7-Zip uses as input for the spanned archive
     pub archive: String,
-    /// Herramienta de extracción (siempre "7z" por ahora).
+    /// Extraction tool (always "7z" for now).
     #[allow(dead_code)]
     #[serde(default)]
     pub tool: String,
@@ -62,7 +62,7 @@ pub struct LoginManifest {
 #[derive(Deserialize)]
 pub struct PatchedFile {
     pub path: String,
-    /// Tipo de patch: "pak" | "lua" | "sqlite" — consumido por el merge (M2).
+    /// Patch type: "pak" | "lua" | "sqlite" — consumed by the merge (M2).
     #[serde(rename = "type")]
     #[allow(dead_code)]
     pub kind: String,
@@ -71,7 +71,7 @@ pub struct PatchedFile {
 }
 
 // ---------------------------------------------------------------------------
-// Estado / progreso (expuestos a la UI)
+// Status / progress (exposed to the UI)
 // ---------------------------------------------------------------------------
 
 #[derive(Serialize, Clone)]
@@ -93,7 +93,7 @@ pub struct Progress {
 }
 
 // ---------------------------------------------------------------------------
-// Config persistida del launcher (carpetas de instalación, hashes conocidos)
+// Persisted launcher config (install folders, known hashes)
 // ---------------------------------------------------------------------------
 
 #[derive(Serialize, Deserialize, Default)]
@@ -137,7 +137,7 @@ fn save_config(cfg: &LauncherConfig) -> Result<(), String> {
     std::fs::write(&path, serde_json::to_string_pretty(cfg).unwrap()).map_err(|e| e.to_string())
 }
 
-/// Carpeta de instalación de una versión (configurable por el usuario).
+/// Install folder for a version (user-configurable).
 pub fn install_dir(version: &str) -> PathBuf {
     let cfg = load_config();
     cfg.versions
@@ -162,7 +162,7 @@ pub fn set_install_dir(version: &str, dir: &str) -> Result<(), String> {
 }
 
 // ---------------------------------------------------------------------------
-// Estado local de la instalación
+// Local install state
 // ---------------------------------------------------------------------------
 
 fn file_ok(full: &Path, min_size: u64) -> bool {
@@ -187,7 +187,7 @@ pub fn status(version: &str, manifest: &Manifest) -> InstallStatus {
 }
 
 // ---------------------------------------------------------------------------
-// Descarga desde Google Drive (confirm token + cookies + Range resume)
+// Download from Google Drive (confirm token + cookies + Range resume)
 // ---------------------------------------------------------------------------
 
 fn drive_file_id(url: &str) -> Option<&str> {
@@ -208,7 +208,7 @@ fn is_html(resp: &reqwest::Response) -> bool {
         .unwrap_or(false)
 }
 
-/// Detecta un archivo corrupto: página HTML de error de Drive en vez del binario.
+/// Detects a corrupt file: Drive error HTML page instead of the binary.
 fn looks_like_html_bytes(buf: &[u8]) -> bool {
     let head = String::from_utf8_lossy(buf).to_lowercase();
     head.contains("<!doctype") || head.contains("<html")
@@ -223,7 +223,7 @@ fn looks_like_html(path: &Path) -> bool {
     looks_like_html_bytes(&buf[..n])
 }
 
-/// Tamaño usable de un archivo parcial: limpia los corruptos (HTML o > esperado).
+/// Usable size of a partial file: cleans up corrupt ones (HTML or > expected).
 fn usable_existing(dest: &Path, expected: u64) -> u64 {
     if !dest.exists() {
         return 0;
@@ -237,7 +237,7 @@ fn usable_existing(dest: &Path, expected: u64) -> u64 {
     }
 }
 
-/// Escribe el body de una respuesta ya enviada a `dest` con resume y validación.
+/// Writes the body of an already-sent response to `dest` with resume and validation.
 async fn write_stream(
     resp: reqwest::Response,
     dest: &Path,
@@ -272,12 +272,12 @@ async fn write_stream(
     let mut first: Vec<u8> = Vec::new();
     while let Some(chunk) = stream.next().await {
         let chunk = chunk.map_err(|e| e.to_string())?;
-        // Detección temprana: si el server devuelve HTML de error en vez del binario.
+        // Early detection: if the server returns error HTML instead of the binary.
         if first.len() < 512 {
             first.extend_from_slice(&chunk[..chunk.len().min(512 - first.len())]);
             if looks_like_html_bytes(&first) && expected > 1024 {
                 let _ = std::fs::remove_file(dest);
-                return Err("Drive devolvió HTML en vez del archivo".to_string());
+                return Err("Drive returned HTML instead of the file".to_string());
             }
         }
         out.write_all(&chunk).await.map_err(|e| e.to_string())?;
@@ -285,17 +285,17 @@ async fn write_stream(
         on_progress(downloaded, total);
     }
     out.flush().await.map_err(|e| e.to_string())?;
-    // Validación de tamaño: si no coincide con lo esperado, el archivo es basura.
+    // Size validation: if it doesn't match the expected size, the file is garbage.
     if expected > 0 && downloaded != expected {
         let _ = std::fs::remove_file(dest);
         return Err(format!(
-            "tamaño incorrecto: esperado {expected}, got {downloaded}"
+            "size mismatch: expected {expected}, got {downloaded}"
         ));
     }
     Ok(downloaded)
 }
 
-/// Descarga un archivo de Drive (id) a `dest` con resume y progreso.
+/// Downloads a Drive file (id) to `dest` with resume and progress.
 async fn drive_download(
     id: &str,
     dest: &Path,
@@ -309,7 +309,7 @@ async fn drive_download(
 
     let existing = usable_existing(dest, expected);
 
-    // 1. uc?id=...&export=download → 303 → usercontent → HTML con uuid
+    // 1. uc?id=...&export=download → 303 → usercontent → HTML with uuid
     let uc_url = format!("https://drive.google.com/uc?id={id}&export=download");
     let resp = client
         .get(&uc_url)
@@ -317,8 +317,8 @@ async fn drive_download(
         .await
         .map_err(|e| format!("GET {uc_url}: {e}"))?;
 
-    // Cookie de sesión: reqwest sigue la 303 automáticamente y el Set-Cookie
-    // queda en la respuesta final (HTML). La capturamos para la 2ª request.
+    // Session cookie: reqwest follows the 303 automatically and the Set-Cookie
+    // stays in the final response (HTML). We capture it for the 2nd request.
     let session_cookie = resp
         .headers()
         .get_all(reqwest::header::SET_COOKIE)
@@ -331,7 +331,7 @@ async fn drive_download(
     if is_html(&resp) || resp.status() == reqwest::StatusCode::NOT_FOUND {
         let body = resp.text().await.map_err(|e| e.to_string())?;
         let uuid = extract_uuid(&body)
-            .ok_or_else(|| format!("Drive no devolvió token de confirmación para {id}"))?;
+            .ok_or_else(|| format!("Drive did not return a confirmation token for {id}"))?;
         let dl_url = format!(
             "https://drive.usercontent.google.com/download?id={id}&export=download&confirm=t&uuid={uuid}"
         );
@@ -339,7 +339,7 @@ async fn drive_download(
         if !session_cookie.is_empty() {
             req = req.header(reqwest::header::COOKIE, &session_cookie);
         }
-        // Drive EXIGE Range para servir archivos grandes (sin él devuelve HTML).
+        // Drive REQUIRES Range to serve large files (without it, it returns HTML).
         req = req.header(reqwest::header::RANGE, format!("bytes={existing}-"));
         let resp = req
             .send()
@@ -350,13 +350,13 @@ async fn drive_download(
         }
         write_stream(resp, dest, existing, expected, on_progress).await?;
     } else {
-        // Archivo pequeño sin confirmación: stream directo.
+        // Small file without confirmation: direct stream.
         write_stream(resp, dest, existing, expected, on_progress).await?;
     }
     Ok(())
 }
 
-/// Descarga con reintentos (Drive rate-limitea; backoff exponencial entre intentos).
+/// Download with retries (Drive rate-limits; exponential backoff between attempts).
 async fn drive_download_retry(
     id: &str,
     dest: &Path,
@@ -369,16 +369,16 @@ async fn drive_download_retry(
             Ok(()) => return Ok(()),
             Err(e) => {
                 if attempt < 7 {
-                    // Drive bloquea por IP durante minutos: backoff largo.
+                    // Drive blocks by IP for minutes: long backoff.
                     let wait = 60 + attempt * 60;
-                    println!("  ↻ reintento {}/8 en {wait}s ({e})", attempt + 1);
+                    println!("  ↻ retry {}/8 in {wait}s ({e})", attempt + 1);
                     tokio::time::sleep(std::time::Duration::from_secs(wait)).await;
                 }
                 last_err = e;
             }
         }
     }
-    Err(format!("descarga fallida tras 8 intentos: {last_err}"))
+    Err(format!("download failed after 8 attempts: {last_err}"))
 }
 
 // ---------------------------------------------------------------------------
@@ -404,13 +404,13 @@ pub async fn sha256_of(path: &Path) -> Result<String, String> {
     Ok(format!("{:x}", hasher.finalize()))
 }
 
-/// Solo usado por los tests (el pipeline usa sha256_of + comparación directa).
+/// Only used by tests (the pipeline uses sha256_of + direct comparison).
 #[allow(dead_code)]
 async fn verify_sha256(path: &Path, expected: &str) -> Result<(), String> {
     let got = sha256_of(path).await?;
     if got != expected.to_lowercase() {
         return Err(format!(
-            "SHA256 mismatch en {}: esperado {expected}, got {got}",
+            "SHA256 mismatch in {}: expected {expected}, got {got}",
             path.display()
         ));
     }
@@ -418,7 +418,7 @@ async fn verify_sha256(path: &Path, expected: &str) -> Result<(), String> {
 }
 
 // ---------------------------------------------------------------------------
-// Extracción con 7-Zip
+// Extraction with 7-Zip
 // ---------------------------------------------------------------------------
 
 fn find_7z() -> Option<PathBuf> {
@@ -455,7 +455,7 @@ async fn extract_with_7z(exe: &Path, archive: &Path, dest: &Path) -> Result<(), 
         .map_err(|e| e.to_string())?;
     if !out.status.success() {
         return Err(format!(
-            "7-Zip falló: {}",
+            "7-Zip failed: {}",
             String::from_utf8_lossy(&out.stderr)
         ));
     }
@@ -463,7 +463,7 @@ async fn extract_with_7z(exe: &Path, archive: &Path, dest: &Path) -> Result<(), 
 }
 
 // ---------------------------------------------------------------------------
-// Pipeline: descargar (temp) → verificar → extraer → instalar → limpiar → validar
+// Pipeline: download (temp) → verify → extract → install → clean up → validate
 // ---------------------------------------------------------------------------
 
 pub async fn ensure(
@@ -482,7 +482,7 @@ pub async fn ensure(
 
     let before = status(version, manifest);
 
-    // 1. Archivos "direct" (compact.sqlite3) → temp → verificar → mover al install dir.
+    // 1. "direct" files (compact.sqlite3) → temp → verify → move to install dir.
     for f in manifest.files.iter().filter(|f| f.kind == "direct") {
         let target = dir.join(&f.name);
         if file_ok(&target, f.size) {
@@ -508,7 +508,7 @@ pub async fn ensure(
             })
             .await?;
         } else {
-            return Err(format!("URL no soportada: {}", f.url));
+            return Err(format!("unsupported URL: {}", f.url));
         }
 
         on_progress(            Progress {
@@ -520,7 +520,7 @@ pub async fn ensure(
         );
         let hash = sha256_of(&dest).await?;
         if !f.sha256.is_empty() && !f.sha256.starts_with("REPLACE_WITH") && hash != f.sha256 {
-            return Err(format!("SHA256 mismatch en {}: {}", f.name, hash));
+            return Err(format!("SHA256 mismatch in {}: {}", f.name, hash));
         }
         std::fs::rename(&dest, &target).map_err(|e| e.to_string())?;
         cfg.versions
@@ -530,7 +530,7 @@ pub async fn ensure(
             .insert(f.name.clone(), hash);
     }
 
-    // 2. Archivos "archive" (partes del spanned zip) → temp → extraer con 7-Zip.
+    // 2. "archive" files (spanned zip parts) → temp → extract with 7-Zip.
     let archives: Vec<&ManifestFile> = manifest
         .files
         .iter()
@@ -567,9 +567,9 @@ pub async fn ensure(
                 })
                 .await?;
             } else {
-                return Err(format!("URL no soportada: {}", f.url));
+                return Err(format!("unsupported URL: {}", f.url));
             }
-            // Calcular y recordar el hash (el manifiesto no lo trae).
+            // Compute and remember the hash (the manifest does not carry it).
             let hash = sha256_of(&dest).await?;
             cfg.versions
                 .entry(version.to_string())
@@ -585,12 +585,12 @@ pub async fn ensure(
                 total: 0,
             },
         );
-        let exe = find_7z().ok_or("7-Zip no encontrado — instala 7-Zip (7-zip.org) o añádelo al PATH")?;
+        let exe = find_7z().ok_or("7-Zip not found — install 7-Zip (7-zip.org) or add it to the PATH")?;
         extract_with_7z(&exe, &tmp.join(&manifest.extract.archive), &dir).await?;
     }
 
-    // 3. Patches: deltas de nuestros mods (pak/lua/sqlite). Se descargan y verifican;
-    // el merge a nivel de pak es una herramienta aparte (aapatcher/AAEmu-Packer) — M2.
+    // 3. Patches: deltas of our mods (pak/lua/sqlite). Downloaded and verified;
+    // the pak-level merge is a separate tool (aapatcher/AAEmu-Packer) — M2.
     for p in &manifest.patches {
         let fname = if p.path.is_empty() {
             p.url.rsplit('/').next().unwrap_or("patch").to_string()
@@ -600,7 +600,7 @@ pub async fn ensure(
         };
         let full = dir.join("patches").join(&fname);
         if full.exists() && sha256_of(&full).await.map(|h| h == p.sha256).unwrap_or(false) {
-            continue; // ya descargado y verificado
+            continue; // already downloaded and verified
         }
         if let Some(parent) = full.parent() {
             std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
@@ -629,14 +629,14 @@ pub async fn ensure(
                 .map_err(|e| e.to_string())?;
         }
         if !p.sha256.is_empty() && sha256_of(&full).await? != p.sha256 {
-            return Err(format!("SHA256 mismatch en patch {fname}"));
+            return Err(format!("SHA256 mismatch in patch {fname}"));
         }
     }
 
-    // 4. Limpiar temporales.
+    // 4. Clean up temp files.
     let _ = std::fs::remove_dir_all(&tmp);
 
-    // 4. Validar instalación.
+    // 4. Validate install.
     save_config(&cfg)?;
     let st = status(version, manifest);
     on_progress(        Progress {
@@ -694,8 +694,8 @@ mod tests {
         assert_eq!(extract_uuid("<html>no token</html>"), None);
     }
 
-    /// Prueba real contra Google Drive: descarga compact.sqlite3 (124 MB) y
-    /// verifica su SHA256. Lenta y dependiente de red — se corre manualmente.
+    /// Real test against Google Drive: downloads compact.sqlite3 (124 MB) and
+    /// verifies its SHA256. Slow and network-dependent — run manually.
     #[tokio::test]
     #[ignore]
     async fn drive_download_compact_sqlite() {

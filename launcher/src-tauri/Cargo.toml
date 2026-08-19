@@ -1,7 +1,7 @@
 [package]
 name = "archeaage-launcher"
 version = "0.1.0"
-description = "Launcher multi-versión de ArcheaAge"
+description = "ArcheaAge multi-version launcher"
 edition = "2021"
 
 [lib]

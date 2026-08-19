@@ -1,6 +1,6 @@
 # ArcheaAge.Sdk
 
-Contrato de plugins para servidores ArcheaAge. **No referencia AAEmu** — un plugin se compila contra este paquete (NuGet `ArcheaAge.Sdk`) sin clonar el server.
+Plugin contract for ArcheaAge servers. **Does not reference AAEmu** — a plugin compiles against this package (NuGet `ArcheaAge.Sdk`) without cloning the server.
 
 ```csharp
 public sealed class MyPlugin : IAaPlugin
@@ -12,18 +12,18 @@ public sealed class MyPlugin : IAaPlugin
     public void OnLoad(IPluginContext ctx)
     {
         ctx.Events.Subscribe<PlayerLoggedIn>(e =>
-            ctx.Logger.LogInformation("Bienvenido {Name}!", e.Name));
+            ctx.Logger.LogInformation("Welcome {Name}!", e.Name));
     }
 
     public void OnUnload() { }
 }
 ```
 
-## Reglas
+## Rules
 
-- El SDK es **contrato puro** (interfaces + eventos). El adaptador server-side vive en el fork.
-- Versionado semántico; el server carga plugins compatibles con su versión de SDK.
-- El loader (`Assembly.LoadFrom` + reflexión) se implementa en el fork (M2).
+- The SDK is **pure contract** (interfaces + events). The server-side adapter lives in the fork.
+- Semantic versioning; the server loads plugins compatible with its SDK version.
+- The loader (`Assembly.LoadFrom` + reflection) is implemented in the fork (M2).
 
 ## Dev
 

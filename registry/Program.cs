@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<RegistryStore>();
 var app = builder.Build();
 
-// --- Lectura pública (el launcher consulta esto) ---
+// --- Public reads (the launcher queries these) ---
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
@@ -25,7 +25,7 @@ app.MapGet("/versions/{version}/manifest", (string version, RegistryStore store)
     return manifest is null ? Results.NotFound() : Results.Ok(manifest);
 });
 
-// --- Escritura (los Game servers reportan estado) ---
+// --- Writes (Game servers report state) ---
 
 app.MapPost("/heartbeat", (Heartbeat body, RegistryStore store) =>
 {
@@ -35,8 +35,8 @@ app.MapPost("/heartbeat", (Heartbeat body, RegistryStore store) =>
     return Results.Ok();
 });
 
-// Demo: servidores ficticios con players fluctuantes para desarrollo de la UI.
-// ponytail: solo para dev; desactivar en producción (Demo=false).
+// Demo: fake servers with fluctuating players for UI development.
+// ponytail: dev-only; disable in production (Demo=false).
 if (app.Configuration.GetValue<bool>("Demo"))
 {
     _ = Task.Run(async () =>
@@ -57,7 +57,7 @@ app.Run();
 
 // ---------------------------------------------------------------------------
 
-/// <summary>Estado en memoria del Registry.</summary>
+/// <summary>In-memory Registry state.</summary>
 public sealed class RegistryStore(IConfiguration config)
 {
     private readonly ConcurrentDictionary<string, ServerInfo> _servers = new();
@@ -67,10 +67,10 @@ public sealed class RegistryStore(IConfiguration config)
 
     public IEnumerable<VersionSummary> Versions()
     {
-        // Versiones conocidas: viven en la config (o seed por defecto).
+        // Known versions: live in config (or default seed).
         var known = config.GetSection("Versions").GetChildren()
             .Select(c => c["Id"]!)
-            .Concat(["1.2"]) // seed por defecto para dev
+            .Concat(["1.2"]) // default seed for dev
             .Distinct();
 
         foreach (var id in known)
@@ -111,7 +111,7 @@ public sealed class RegistryStore(IConfiguration config)
     private bool HasManifest(string version) =>
         File.Exists(Path.Combine(ManifestDir, $"{version}.json"));
 
-    // ponytail: in-memory + prune por timeout; MySQL cuando haya historial/métricas
+    // ponytail: in-memory + timeout-based prune; MySQL when there's history/metrics
     private void Prune()
     {
         var cutoff = DateTime.UtcNow.AddSeconds(-60);

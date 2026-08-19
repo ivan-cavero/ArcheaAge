@@ -1,31 +1,31 @@
 # ArcheaAge
 
-Servidor privado de **ArcheAge** open source: fork de [AAEmu](https://github.com/AAEmu/AAEmu) (LGPLv3), launcher multi-versión, plugins comunitarios y contenido custom.
+Open source private **ArcheAge** server: fork of [AAEmu](https://github.com/AAEmu/AAEmu) (LGPLv3), multi-version launcher, community plugins and custom content.
 
-> **Estado**: investigación + spec + scaffold inicial. Ver `docs/INVESTIGACION.md` (el porqué), `docs/ARQUITECTURA.md` (el qué) y `docs/SPEC.md` (el contrato técnico).
+> **Status**: research + spec + initial scaffold. See `docs/INVESTIGACION.md` (the why), `docs/ARQUITECTURA.md` (the what) and `docs/SPEC.md` (the technical contract).
 
-## Visión
+## Vision
 
-1. **Launcher** (Tauri): eliges versión → ves servidores con jugadores online → descarga/parchea el client (con nuestras modificaciones) → juegas.
-2. **Server** open source: fork de AAEmu, versión insignia **1.2**, línea **3.0** ("edad de oro") después.
-3. **Plugins**: cualquiera desarrolla y propone plugins (modelo AzerothCore) vía `ArcheaAge.Sdk`.
-4. **Contenido custom**: modificar lo original, mejorarlo, añadir zonas y desarrollo nuevo (content packs vía launcher).
+1. **Launcher** (Tauri): pick a version → see servers with online players → download/patch the client (with our modifications) → play.
+2. **Server** open source: AAEmu fork, flagship version **1.2**, **3.0** line ("golden age") later.
+3. **Plugins**: anyone develops and proposes plugins (AzerothCore model) via `ArcheaAge.Sdk`.
+4. **Custom content**: modify the original, improve it, add zones and new development (content packs via the launcher).
 
-## Estructura
+## Structure
 
 ```text
-registry/   # Metaserver ASP.NET Core: versiones, servers, players online, manifiestos
-sdk/        # ArcheaAge.Sdk — contrato de plugins (NuGet, sin dependencia de AAEmu)
-plugins/    # Catálogo de plugins (Example incluido)
-launcher/   # Tauri v2 (Rust + web): selector de versión + server browser + client manager
-content/    # Manifiestos de client y content packs
-server/     # Fork de AAEmu — submodule, ver abajo
-docs/       # Investigación, arquitectura, spec
+registry/   # ASP.NET Core metaserver: versions, servers, online players, manifests
+sdk/        # ArcheaAge.Sdk — plugin contract (NuGet, no AAEmu dependency)
+plugins/    # Plugin catalog (Example included)
+launcher/   # Tauri v2 (Rust + web): version selector + server browser + client manager
+content/    # Client manifests and content packs
+server/     # AAEmu fork — submodule, see below
+docs/       # Research, architecture, spec
 ```
 
-## Arranque rápido
+## Quick start
 
-### Registry (requiere .NET 10)
+### Registry (requires .NET 10)
 
 ```bash
 dotnet run --project registry
@@ -39,7 +39,7 @@ dotnet build sdk
 dotnet build plugins/Example
 ```
 
-### Launcher (requiere Rust + Node)
+### Launcher (requires Rust + Node)
 
 ```bash
 cd launcher
@@ -47,14 +47,14 @@ npm install
 npm run tauri dev
 ```
 
-### Server (fork de AAEmu)
+### Server (AAEmu fork)
 
 ```bash
-git submodule update --init server   # clona el fork
-# seguir la skill oficial de setup: .agents/skills/aaemu-setup (docs en el submodule)
+git submodule update --init server   # clones the fork
+# follow the official setup skill: .agents/skills/aaemu-setup (docs in the submodule)
 ```
 
-## Licencia
+## License
 
-Código del server: LGPLv3 (igual que AAEmu). Código propio (registry, sdk, launcher, content): LGPLv3.
-El client de ArcheAge y los datos del juego son propiedad de XLGAMES — no se redistribuyen. No afiliado con XLGAMES.
+Server code: LGPLv3 (same as AAEmu). Own code (registry, sdk, launcher, content): LGPLv3.
+The ArcheAge client and game data are property of XLGAMES — not redistributed. Not affiliated with XLGAMES.
