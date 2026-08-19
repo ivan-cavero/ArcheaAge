@@ -216,10 +216,7 @@ async function refreshServers() {
 
 async function play(version, serverId) {
   if (!window.__TAURI__) {
-    setStatus(
-      "Full flow only inside the Tauri app (dev = browser).",
-      true,
-    );
+    setStatus("Full flow only inside the Tauri app (dev = browser).", true);
     return;
   }
   const { invoke } = await import("@tauri-apps/api/core");
