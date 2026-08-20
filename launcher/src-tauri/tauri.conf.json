@@ -13,9 +13,13 @@
     "windows": [
       {
         "title": "ArcheaAge Launcher",
-        "width": 1100,
-        "height": 700,
-        "resizable": true
+        "width": 1536,
+        "height": 960,
+        "minWidth": 1000,
+        "minHeight": 700,
+        "resizable": true,
+        "decorations": false,
+        "center": true
       }
     ],
     "security": {
@@ -23,6 +27,7 @@
     }
   },
   "bundle": {
-    "active": false
+    "active": false,
+    "resources": ["sevenzip/**/*"]
   }
 }
