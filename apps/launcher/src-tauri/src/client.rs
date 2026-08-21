@@ -440,48 +440,6 @@ async fn drive_download_retry(
     Err(format!("download failed after 8 attempts: {last_err}"))
 }
 
-/// Downloads from a plain HTTPS/CDN URL (e.g. S3) with Range resume + progress.
-async fn http_download_retry(
-    url: &str,
-    dest: &Path,
-    expected: u64,
-    on_progress: &(dyn Fn(u64, u64) + Send + Sync),
-) -> Result<(), String> {
-    let mut last_err = String::new();
-    for attempt in 0..6 {
-        let res = http_download(url, dest, expected, on_progress).await;
-        match res {
-            Ok(()) => return Ok(()),
-            Err(e) => {
-                if attempt < 5 {
-                    let wait = 5 + attempt * 10;
-                    println!("  ↻ http retry {}/6 in {wait}s ({e})", attempt + 1);
-                    tokio::time::sleep(std::time::Duration::from_secs(wait)).await;
-                }
-                last_err = e;
-            }
-        }
-    }
-    Err(format!("download failed after 6 attempts: {last_err}"))
-}
-
-async fn http_download(
-    url: &str,
-    dest: &Path,
-    expected: u64,
-    on_progress: &(dyn Fn(u64, u64) + Send + Sync),
-) -> Result<(), String> {
-    let client = reqwest::Client::new();
-    let existing = usable_existing(dest, expected);
-    let mut req = client.get(url);
-    if existing > 0 {
-        req = req.header(reqwest::header::RANGE, format!("bytes={existing}-"));
-    }
-    let resp = req.send().await.map_err(|e| format!("GET {url}: {e}"))?;
-    write_stream(resp, dest, existing, expected, on_progress).await?;
-    Ok(())
-}
-
 // ---------------------------------------------------------------------------
 // SHA256
 // ---------------------------------------------------------------------------
