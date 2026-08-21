@@ -57,6 +57,9 @@ pub struct VerifyEntry {
 pub struct LoginManifest {
     #[serde(default)]
     pub protocol: String,
+    /// Public login server port; defaults to 1237 when absent.
+    #[serde(default)]
+    pub port: Option<u16>,
 }
 
 #[derive(Deserialize)]
@@ -165,8 +168,33 @@ pub fn set_install_dir(version: &str, dir: &str) -> Result<(), String> {
 // Local install state
 // ---------------------------------------------------------------------------
 
+/// Size of a file, or the recursive total of a directory.
+///
+/// Windows reports directories as 0 bytes, so a folder-based verify entry like
+/// `game_pak` (a ~8 GB directory) would never pass a `metadata().len()` check.
+fn file_size(path: &Path) -> Option<u64> {
+    let meta = path.metadata().ok()?;
+    if !meta.is_dir() {
+        return Some(meta.len());
+    }
+    let mut total = 0u64;
+    let mut stack = vec![path.to_path_buf()];
+    while let Some(dir) = stack.pop() {
+        for entry in std::fs::read_dir(&dir).ok()?.flatten() {
+            let ft = entry.file_type().ok()?;
+            let p = entry.path();
+            if ft.is_dir() {
+                stack.push(p);
+            } else {
+                total = total.saturating_add(entry.metadata().map(|m| m.len()).unwrap_or(0));
+            }
+        }
+    }
+    Some(total)
+}
+
 fn file_ok(full: &Path, min_size: u64) -> bool {
-    full.exists() && full.metadata().map(|m| m.len()).unwrap_or(0) >= min_size
+    full.exists() && file_size(full).unwrap_or(0) >= min_size
 }
 
 pub fn status(version: &str, manifest: &Manifest) -> InstallStatus {
@@ -199,6 +227,26 @@ fn extract_uuid(html: &str) -> Option<String> {
     let start = html.find(MARK)? + MARK.len();
     let end = html[start..].find('"')? + start;
     Some(html[start..end].to_string())
+}
+
+/// Recognizes Google Drive error pages (quota, "too many downloads", …) so the
+/// user gets a clear message instead of a generic "no confirmation token".
+fn drive_error_hint(html: &str) -> Option<&'static str> {
+    let lower = html.to_lowercase();
+    if lower.contains("too many users have viewed")
+        || lower.contains("can't view or download")
+        || lower.contains("cannot view or download")
+        || lower.contains("download quota")
+    {
+        return Some(
+            "Google Drive quota reached for this file (\"too many users have viewed or \
+             downloaded it recently\"). Wait a few hours or use a mirror.",
+        );
+    }
+    if lower.contains("file cannot be downloaded") || lower.contains("access denied") {
+        return Some("Google Drive blocked access to this file (not publicly shared?).");
+    }
+    None
 }
 
 fn is_html(resp: &reqwest::Response) -> bool {
@@ -252,6 +300,11 @@ async fn write_stream(
         return Err(format!("HTTP {}", resp.status()));
     }
     let resuming = existing > 0 && resp.status() == reqwest::StatusCode::PARTIAL_CONTENT;
+    // Bytes that already belong to `dest` before this response is written.
+    // Only count them when we actually resume (206); otherwise the response
+    // carries the full file and counting `existing` again would double it and
+    // trigger a false "size mismatch" below.
+    let base = if resuming { existing } else { 0 };
     let mut out = if resuming {
         tokio::fs::OpenOptions::new()
             .append(true)
@@ -266,9 +319,9 @@ async fn write_stream(
             .await
             .map_err(|e| e.to_string())?
     };
-    let total = existing + resp.content_length().unwrap_or(expected);
+    let total = base + resp.content_length().unwrap_or(expected);
     let mut stream = resp.bytes_stream();
-    let mut downloaded: u64 = existing;
+    let mut downloaded: u64 = base;
     let mut first: Vec<u8> = Vec::new();
     while let Some(chunk) = stream.next().await {
         let chunk = chunk.map_err(|e| e.to_string())?;
@@ -277,7 +330,10 @@ async fn write_stream(
             first.extend_from_slice(&chunk[..chunk.len().min(512 - first.len())]);
             if looks_like_html_bytes(&first) && expected > 1024 {
                 let _ = std::fs::remove_file(dest);
-                return Err("Drive returned HTML instead of the file".to_string());
+                let head = String::from_utf8_lossy(&first);
+                let msg = drive_error_hint(&head)
+                    .unwrap_or("Drive returned HTML instead of the file");
+                return Err(msg.to_string());
             }
         }
         out.write_all(&chunk).await.map_err(|e| e.to_string())?;
@@ -330,6 +386,9 @@ async fn drive_download(
 
     if is_html(&resp) || resp.status() == reqwest::StatusCode::NOT_FOUND {
         let body = resp.text().await.map_err(|e| e.to_string())?;
+        if let Some(hint) = drive_error_hint(&body) {
+            return Err(format!("{hint} (file {id})"));
+        }
         let uuid = extract_uuid(&body)
             .ok_or_else(|| format!("Drive did not return a confirmation token for {id}"))?;
         let dl_url = format!(
@@ -381,6 +440,48 @@ async fn drive_download_retry(
     Err(format!("download failed after 8 attempts: {last_err}"))
 }
 
+/// Downloads from a plain HTTPS/CDN URL (e.g. S3) with Range resume + progress.
+async fn http_download_retry(
+    url: &str,
+    dest: &Path,
+    expected: u64,
+    on_progress: &(dyn Fn(u64, u64) + Send + Sync),
+) -> Result<(), String> {
+    let mut last_err = String::new();
+    for attempt in 0..6 {
+        let res = http_download(url, dest, expected, on_progress).await;
+        match res {
+            Ok(()) => return Ok(()),
+            Err(e) => {
+                if attempt < 5 {
+                    let wait = 5 + attempt * 10;
+                    println!("  ↻ http retry {}/6 in {wait}s ({e})", attempt + 1);
+                    tokio::time::sleep(std::time::Duration::from_secs(wait)).await;
+                }
+                last_err = e;
+            }
+        }
+    }
+    Err(format!("download failed after 6 attempts: {last_err}"))
+}
+
+async fn http_download(
+    url: &str,
+    dest: &Path,
+    expected: u64,
+    on_progress: &(dyn Fn(u64, u64) + Send + Sync),
+) -> Result<(), String> {
+    let client = reqwest::Client::new();
+    let existing = usable_existing(dest, expected);
+    let mut req = client.get(url);
+    if existing > 0 {
+        req = req.header(reqwest::header::RANGE, format!("bytes={existing}-"));
+    }
+    let resp = req.send().await.map_err(|e| format!("GET {url}: {e}"))?;
+    write_stream(resp, dest, existing, expected, on_progress).await?;
+    Ok(())
+}
+
 // ---------------------------------------------------------------------------
 // SHA256
 // ---------------------------------------------------------------------------
@@ -421,7 +522,29 @@ async fn verify_sha256(path: &Path, expected: &str) -> Result<(), String> {
 // Extraction with 7-Zip
 // ---------------------------------------------------------------------------
 
-fn find_7z() -> Option<PathBuf> {
+/// Locates a 7-Zip CLI. The launcher ships its own copy (7z.exe + 7z.dll under
+/// the Tauri resources), so end users never need to install 7-Zip. Only when the
+/// bundled copy is missing do we fall back to a system installation.
+fn find_7z(resource_dir: Option<&Path>) -> Option<PathBuf> {
+    // 1. Bundled with the launcher (embedded via `bundle.resources`).
+    let mut bundled: Vec<PathBuf> = Vec::new();
+    if let Some(dir) = resource_dir {
+        bundled.push(dir.join("sevenzip").join("7z.exe"));
+        bundled.push(dir.join("7z.exe"));
+    }
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(dir) = exe.parent() {
+            bundled.push(dir.join("sevenzip").join("7z.exe"));
+            bundled.push(dir.join("7z.exe"));
+        }
+    }
+    for cand in bundled {
+        if cand.is_file() {
+            return Some(cand);
+        }
+    }
+
+    // 2. System installation (PATH or standard locations).
     for cand in ["7z", "7za", "7zz"] {
         if std::process::Command::new(cand)
             .arg("i")
@@ -462,6 +585,74 @@ async fn extract_with_7z(exe: &Path, archive: &Path, dest: &Path) -> Result<(), 
     Ok(())
 }
 
+/// Some distributions wrap the client in nested archives (e.g. a spanned ZIP
+/// that contains a single `.7z`). After the first extraction, extract any
+/// remaining archive found at the install root, repeating until none are left.
+async fn extract_nested_archives(exe: &Path, dir: &Path) -> Result<(), String> {
+    for _ in 0..3 {
+        let archives: Vec<PathBuf> = std::fs::read_dir(dir)
+            .ok()
+            .into_iter()
+            .flatten()
+            .flatten()
+            .map(|e| e.path())
+            .filter(|p| {
+                if !p.is_file() {
+                    return false;
+                }
+                p.extension()
+                    .and_then(|e| e.to_str())
+                    .is_some_and(|e| matches!(e.to_ascii_lowercase().as_str(), "7z" | "zip" | "rar"))
+            })
+            .collect();
+        if archives.is_empty() {
+            return Ok(());
+        }
+        for arc in &archives {
+            extract_with_7z(exe, arc, dir).await?;
+            let _ = std::fs::remove_file(arc);
+        }
+    }
+    Ok(())
+}
+
+/// If the archive wrapped the whole client in a single top-level folder
+/// (e.g. `AAEmu Client/game_pak`), move its contents up to the install root so
+/// the expected paths (`game_pak`, `bin32`) live where the manifest says.
+fn normalize_client_root(dir: &Path) {
+    if ["game_pak", "bin32"].iter().any(|n| dir.join(n).exists()) {
+        return;
+    }
+    let work = [".download", ".nested"];
+    let Some(nested) = std::fs::read_dir(dir)
+        .ok()
+        .into_iter()
+        .flatten()
+        .flatten()
+        .filter(|e| e.file_type().map(|t| t.is_dir()).unwrap_or(false))
+        .map(|e| e.path())
+        .find(|p| {
+            let name = p.file_name().and_then(|n| n.to_str()).unwrap_or("");
+            !work.contains(&name) && ["game_pak", "bin32"].iter().any(|n| p.join(n).exists())
+        })
+    else {
+        return;
+    };
+    let tmp = dir.join(".nested");
+    if std::fs::rename(&nested, &tmp).is_err() {
+        return;
+    }
+    if let Ok(entries) = std::fs::read_dir(&tmp) {
+        for e in entries.flatten() {
+            let target = dir.join(e.file_name());
+            if !target.exists() {
+                let _ = std::fs::rename(e.path(), &target);
+            }
+        }
+    }
+    let _ = std::fs::remove_dir_all(&tmp);
+}
+
 // ---------------------------------------------------------------------------
 // Pipeline: download (temp) → verify → extract → install → clean up → validate
 // ---------------------------------------------------------------------------
@@ -469,6 +660,7 @@ async fn extract_with_7z(exe: &Path, archive: &Path, dest: &Path) -> Result<(), 
 pub async fn ensure(
     version: &str,
     manifest: &Manifest,
+    resource_dir: Option<&Path>,
     on_progress: &(dyn Fn(Progress) + Send + Sync),
 ) -> Result<InstallStatus, String> {
     let dir = install_dir(version);
@@ -481,6 +673,19 @@ pub async fn ensure(
     let http = reqwest::Client::new();
 
     let before = status(version, manifest);
+
+    // Fail fast: if the archives must be extracted, 7-Zip is required. Check
+    // BEFORE downloading gigabytes so the user can install it first.
+    let needs_extract =
+        !before.verified && manifest.files.iter().any(|f| f.kind == "archive");
+    let exe = if needs_extract {
+        Some(find_7z(resource_dir).ok_or(
+            "7-Zip extractor not found (the launcher ships its own copy — \
+             reinstall the launcher, or install 7-Zip from 7-zip.org)",
+        )?)
+    } else {
+        None
+    };
 
     // 1. "direct" files (compact.sqlite3) → temp → verify → move to install dir.
     for f in manifest.files.iter().filter(|f| f.kind == "direct") {
@@ -585,8 +790,14 @@ pub async fn ensure(
                 total: 0,
             },
         );
-        let exe = find_7z().ok_or("7-Zip not found — install 7-Zip (7-zip.org) or add it to the PATH")?;
-        extract_with_7z(&exe, &tmp.join(&manifest.extract.archive), &dir).await?;
+        extract_with_7z(exe.as_ref().unwrap(), &tmp.join(&manifest.extract.archive), &dir)
+            .await?;
+        // Some distributions wrap everything in a second archive (e.g. a
+        // spanned ZIP containing a single .7z) — extract it too, recursively.
+        extract_nested_archives(exe.as_ref().unwrap(), &dir).await?;
+        // Some archives wrap the whole client in a single top-level folder
+        // (e.g. "AAEmu Client/"). Move its contents up to the install root.
+        normalize_client_root(&dir);
     }
 
     // 3. Patches: deltas of our mods (pak/lua/sqlite). Downloaded and verified;
@@ -692,6 +903,133 @@ mod tests {
             Some("527b795a-5efc-4040-9e1e-6dda68af95af")
         );
         assert_eq!(extract_uuid("<html>no token</html>"), None);
+    }
+
+    #[test]
+    fn file_size_sums_directories_recursively() {
+        let dir = std::env::temp_dir().join("archeaage-test-dirsize");
+        std::fs::create_dir_all(dir.join("game_pak")).unwrap();
+        std::fs::create_dir_all(dir.join("game_pak").join("sub")).unwrap();
+        std::fs::write(dir.join("game_pak").join("a.pak"), vec![0u8; 100]).unwrap();
+        std::fs::write(dir.join("game_pak").join("sub").join("b.pak"), vec![0u8; 50]).unwrap();
+        std::fs::write(dir.join("top.bin"), vec![0u8; 10]).unwrap();
+        // Windows reports a directory as 0 bytes; the recursive total is what
+        // the manifest's `game_pak` verify entry relies on.
+        assert_eq!(file_size(&dir).unwrap(), 160);
+        assert!(file_ok(&dir, 150));
+        assert!(!file_ok(&dir, 161));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn drive_error_hint_recognizes_quota() {
+        let quota = "<html>Sorry, you can't view or download this file at this time. Too many users \
+                     have viewed or downloaded this file recently.</html>";
+        assert!(drive_error_hint(quota).is_some());
+        assert!(drive_error_hint("<html>Access denied for this account</html>").is_some());
+        // The regular confirm page (virus scan warning + uuid form) is NOT an error.
+        assert_eq!(
+            drive_error_hint(
+                r#"<html><title>Google Drive - Virus scan warning</title><input type="hidden" name="uuid" value="527b795a"></html>"#
+            ),
+            None
+        );
+    }
+
+    #[test]
+    fn normalize_moves_wrapped_client_up() {
+        let dir = std::env::temp_dir().join("archeaage-test-normalize");
+        let client = dir.join("AAEmu Client");
+        std::fs::create_dir_all(client.join("game_pak")).unwrap();
+        std::fs::write(client.join("game_pak").join("game0.pak"), b"x").unwrap();
+        std::fs::create_dir_all(client.join("bin32")).unwrap();
+        std::fs::write(client.join("bin32").join("archeage.exe"), b"x").unwrap();
+        std::fs::write(dir.join("compact.sqlite3"), b"sqlite").unwrap();
+
+        normalize_client_root(&dir);
+
+        assert!(dir.join("game_pak").join("game0.pak").exists());
+        assert!(dir.join("bin32").join("archeage.exe").exists());
+        assert!(dir.join("compact.sqlite3").exists());
+        assert!(!dir.join("AAEmu Client").exists());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn find_7z_prefers_bundled_over_system() {
+        let dir = std::env::temp_dir().join("archeaage-7z-bundled");
+        let bundle = dir.join("sevenzip");
+        std::fs::create_dir_all(&bundle).unwrap();
+        std::fs::write(bundle.join("7z.exe"), b"MZ").unwrap();
+        // The bundled copy (resource dir) must win over the system install.
+        assert_eq!(find_7z(Some(&dir)), Some(bundle.join("7z.exe")));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Regression: a partial file + a full (200) response used to double-count
+    /// the existing bytes, delete the file and fail with "size mismatch".
+    #[tokio::test]
+    async fn write_stream_full_response_with_partial_file() {
+        use tokio::io::{AsyncReadExt, AsyncWriteExt};
+        use tokio::net::TcpListener;
+
+        let body: &[u8] = b"hello";
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        tokio::spawn(async move {
+            let (mut sock, _) = listener.accept().await.unwrap();
+            let mut buf = [0u8; 4096];
+            let _ = sock.read(&mut buf).await;
+            let head = format!(
+                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nContent-Type: application/octet-stream\r\n\r\n",
+                body.len()
+            );
+            sock.write_all(head.as_bytes()).await.unwrap();
+            sock.write_all(body).await.unwrap();
+        });
+
+        let dir = std::env::temp_dir().join("archeaage-test-resume");
+        std::fs::create_dir_all(&dir).unwrap();
+        let dest = dir.join("part.bin");
+        std::fs::write(&dest, b"ab").unwrap(); // existing partial of 2 bytes
+
+        let url = format!("http://{addr}/");
+        let resp = reqwest::get(&url).await.unwrap();
+        let got = write_stream(resp, &dest, 2, 5, &|_, _| {}).await.unwrap();
+        assert_eq!(got, 5);
+        assert_eq!(std::fs::read(&dest).unwrap(), body); // full file, not "abhello"
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Full end-to-end pipeline against the real manifest (~8.3 GB): downloads
+    /// the direct file + all spanned ZIP parts from Google Drive, verifies,
+    /// extracts with the bundled/system 7-Zip and validates the install.
+    /// Installs into the real launcher location (%LOCALAPPDATA%\\ArcheaAge). Run manually.
+    #[tokio::test]
+    #[ignore]
+    async fn full_client_ensure_pipeline() {
+        let manifest_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap()
+            .join("content/manifests/1.2.json");
+        let raw = std::fs::read_to_string(&manifest_path).unwrap();
+        let manifest: Manifest = serde_json::from_str(&raw).unwrap();
+        let version = manifest.version.clone();
+
+        let st = ensure(&version, &manifest, None, &|p| {
+            if p.stage == "download" && p.downloaded % (64 * 1024 * 1024) < 65536 {
+                println!("  {}: {}/{} bytes", p.file, p.downloaded, p.total);
+            } else if p.stage == "extract" {
+                println!("  extracting with 7-Zip…");
+            } else if p.stage == "done" {
+                println!("  done: verified={}", p.downloaded > 0);
+            }
+        })
+        .await
+        .expect("full client pipeline must succeed");
+        assert!(st.verified, "client must be fully installed and verified");
     }
 
     /// Real test against Google Drive: downloads compact.sqlite3 (124 MB) and

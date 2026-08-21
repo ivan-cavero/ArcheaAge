@@ -1,7 +1,7 @@
 pub mod client;
 
 use serde::Serialize;
-use tauri::Emitter;
+use tauri::{Emitter, Manager};
 
 /// Registry base URL: override con ARCHEAAGE_REGISTRY.
 fn registry_url() -> String {
@@ -50,7 +50,9 @@ async fn client_status(version: String) -> Result<ClientStatusView, String> {
 #[tauri::command]
 async fn client_ensure(app: tauri::AppHandle, version: String) -> Result<ClientStatusView, String> {
     let manifest = fetch_manifest(&version).await?;
-    let st = client::ensure(&version, &manifest, &|p| {
+    // Directory where the bundled 7-Zip lives (embedded via bundle.resources).
+    let resource_dir = app.path().resource_dir().ok();
+    let st = client::ensure(&version, &manifest, resource_dir.as_deref(), &|p| {
         let _ = app.emit("client-progress", p);
     })
     .await?;
@@ -65,8 +67,48 @@ async fn client_set_install_dir(version: String, dir: String) -> Result<ClientSt
     Ok(view(&client::status(&version, &manifest)))
 }
 
-/// Launches archeage.exe against the login server of the chosen version.
-/// Writes the client config in the install dir and starts the process.
+/// Launch configuration per login protocol (see docs/VERSIONS.md).
+/// Mirrors the official AAEmu-Launcher per-client launch arguments.
+struct LaunchConfig {
+    /// executable path relative to the install dir
+    exe: &'static str,
+    /// argument template — `{ip}`, `{port}`, `{user}`, `{pass}` get substituted
+    args: &'static str,
+}
+
+fn launch_config(login_type: &str) -> Option<LaunchConfig> {
+    let cfg = match login_type {
+        "trino_1_2" | "trino_3_5" => LaunchConfig {
+            exe: "bin32/archeage.exe",
+            args: "-t +auth_ip {ip} -auth_port {port} -handle 00000000:00000000 -lang en_us",
+        },
+        "trino_6_0" => LaunchConfig {
+            exe: "bin64/archeage.exe",
+            args: "-t +auth {ip} -auth_port {port} -handle 00000000:00000000 -lang en_us -time_offset 300",
+        },
+        "trino_7_0" => LaunchConfig {
+            exe: "launch_game.exe",
+            args: "-eac_launcher_settings settings_32.json -t +auth_ip {ip} -auth_port {port} -handle 00000000:00000000 -lang en_us",
+        },
+        "kakao_8_0" => LaunchConfig {
+            exe: "bin64/archeage.exe",
+            args: "-t +auth_ip {ip} -auth_port {port} -authtoken {pass}",
+        },
+        "mailru_1_0" => LaunchConfig {
+            exe: "bin32/archeage.exe",
+            args: "-r +auth_ip {ip}:{port} -uid {user} -token {pass}",
+        },
+        "xlworld_1_0" => LaunchConfig {
+            exe: "bin64/archeage.exe",
+            args: "-k {pass}",
+        },
+        _ => return None,
+    };
+    Some(cfg)
+}
+
+/// Launches the game client of the chosen version directly — no third-party
+/// launcher involved. Uses the per-protocol arguments from `launch_config`.
 #[tauri::command]
 async fn client_launch(version: String, server_id: String) -> Result<String, String> {
     use std::process::Command;
@@ -83,34 +125,54 @@ async fn client_launch(version: String, server_id: String) -> Result<String, Str
         .ok_or_else(|| format!("server {server_id} no encontrado en version {version}"))?;
     let host = server["host"].as_str().unwrap_or("127.0.0.1").to_string();
 
-    // 2. client config (equivalent to settings.aelcf from the official launcher)
+    // 2. launch config según el protocolo de login del manifest
     let manifest = fetch_manifest(&version).await?;
-    let dir = client::install_dir(&version);
-    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
-    let patches: Vec<String> = manifest.patches.iter().map(|p| p.url.clone()).collect();
-    let cfg = serde_json::json!({
-        "version": version,
-        "serverId": server_id,
-        "pathToGame": dir.join("bin32").join("archeage.exe").to_string_lossy(),
-        "serverIPAddress": host,
-        "loginType": manifest.login.protocol,
-        "patches": patches,
-    });
-    std::fs::write(dir.join("archeaage.config.json"), serde_json::to_string_pretty(&cfg).unwrap())
-        .map_err(|e| e.to_string())?;
+    let cfg = launch_config(&manifest.login.protocol)
+        .ok_or_else(|| format!("loginType '{}' sin soporte de lanzamiento", manifest.login.protocol))?;
+    let login_port = manifest.login.port.unwrap_or(1237);
 
-    // 3. launch the client (if installed)
-    let exe = dir.join("bin32").join("archeage.exe");
+    let dir = client::install_dir(&version);
+    let exe = dir.join(cfg.exe);
     if !exe.exists() {
         return Err(format!(
             "client no instalado en {} — ejecuta client_ensure primero",
-            dir.display()
+            exe.display()
         ));
     }
+
+    // 3. sustituye {ip}/{port}/{user}/{pass} y lanza
+    let args_str = cfg
+        .args
+        .replace("{ip}", &host)
+        .replace("{port}", &login_port.to_string())
+        .replace("{user}", "test")
+        .replace("{pass}", "test");
+    let args: Vec<&str> = args_str.split_whitespace().collect();
+
+    let bin_dir = exe.parent().map(|p| p.to_path_buf()).unwrap_or(dir);
     let _child = Command::new(&exe)
+        .current_dir(&bin_dir)
+        .args(&args)
         .spawn()
         .map_err(|e| format!("no se pudo lanzar {}: {e}", exe.display()))?;
-    Ok(format!("archeage.exe lanzado ({version}/{server_id})"))
+    Ok(format!(
+        "{} lanzado ({version}/{server_id}) · login {host}:{login_port} · {}",
+        cfg.exe, manifest.login.protocol
+    ))
+}
+
+/// Opens the install folder of a version in Windows Explorer.
+#[tauri::command]
+async fn open_install_dir(version: String) -> Result<String, String> {
+    let dir = client::install_dir(&version);
+    if !dir.exists() {
+        return Err(format!("no instalado en {}", dir.display()));
+    }
+    std::process::Command::new("explorer.exe")
+        .arg(&dir)
+        .spawn()
+        .map_err(|e| format!("no se pudo abrir {}: {e}", dir.display()))?;
+    Ok(dir.to_string_lossy().into_owned())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -121,7 +183,8 @@ pub fn run() {
             client_status,
             client_ensure,
             client_set_install_dir,
-            client_launch
+            client_launch,
+            open_install_dir
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

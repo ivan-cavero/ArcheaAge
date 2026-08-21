@@ -4,14 +4,14 @@ Multi-version launcher built on **Tauri v2** (Rust + web): version selector → 
 
 ## Status
 
-- **Modern UI**: dark glassmorphism theme, version selector with status pills, server browser with pulsing dots and load bars, per-stage progress bar (download/verify/extract), install folder picker, registry connection indicator.
-- **Full pipeline (Rust)**: `client_ensure` = download to temp → verify SHA256 → extract with 7-Zip (spanned zip) → install into the chosen folder → clean up temp files → validate (`game_pak`, `archeage.exe`, `compact.sqlite3`). Downloads from **real Google Drive** (confirm token + cookies + Range resume) — tested with `compact.sqlite3` (124 MB, SHA256 verified).
+- **Modern UI**: game-launcher style (hero with big PLAY, version chips, install-status badge, tabs for Play/Servers/News, news feed, animated aurora background, glassmorphism).
+- **Full pipeline (Rust)**: `client_ensure` = download to temp → verify SHA256 → extract with 7-Zip (spanned zip) → install into the chosen folder → normalize the client root → clean up temp files → validate (`game_pak`, `bin32/archeage.exe`, `compact.sqlite3`). Folder-based verify entries are measured recursively. Downloads from **real Google Drive** (confirm token + cookies + Range resume) with clear quota/HTML errors and 7-Zip detection before the download starts. **7-Zip is bundled** (`src-tauri/sevenzip/`) — end users never need to install it.
 - **Pending (M2)**: real pak-level patch merge (aapatcher/AAEmu-Packer tool), exact `settings.aelcf` format from the official launcher.
 
 ## Dev
 
 ```bash
-# 1. Registry running (another terminal)
+# 1. Registry running (another terminal, port 5080)
 dotnet run --project ../registry
 
 # 2. Launcher
