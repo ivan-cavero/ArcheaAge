@@ -1,0 +1,159 @@
+/* ArcheaAge Launcher — global design tokens & shared primitives.
+   Component-specific styles live scoped inside each .vue SFC. */
+
+:root {
+  color-scheme: dark;
+  --bg: #07100d;
+  --bg-2: #0b1512;
+  --surface: #101a17;
+  --surface-el: #141f1b;
+  --input: #0a1210;
+  --primary: #8dbb3e;
+  --primary-2: #6e982f;
+  --primary-b: #a7d84b;
+  --primary-d: #496d27;
+  --gold: #b8a76a;
+  --gold-l: #d3c58a;
+  --gold-d: #776b3f;
+  --text: #e7e5d9;
+  --text-2: #aaa99d;
+  --text-m: #777970;
+  --text-g: #a1cf4b;
+  --text-gd: #c6b77b;
+  --on: #63b83e;
+  --mt: #d88725;
+  --off: #8e4e4e;
+  --brd: rgba(150, 180, 100, 0.08);
+  --brd-g: rgba(190, 170, 100, 0.1);
+  --brd-s: rgba(150, 180, 100, 0.14);
+  --ff-d: "Cinzel", Georgia, serif;
+  --ff-u: "Inter", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--ff-u);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg);
+  user-select: none;
+}
+
+#app {
+  height: 100%;
+}
+
+/* === Shared: card === */
+.cd {
+  border: 1px solid var(--brd);
+  border-radius: 6px;
+  background: rgba(16, 26, 23, 0.6);
+  position: relative;
+}
+.cd::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(150, 180, 100, 0.05),
+    transparent
+  );
+  border-radius: 6px 6px 0 0;
+  pointer-events: none;
+}
+
+/* === Shared: status badge === */
+.bd {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9.5px;
+  font-weight: 500;
+}
+.bd .d {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+.bd-on {
+  color: var(--on);
+}
+.bd-on .d {
+  background: var(--on);
+  box-shadow: 0 0 4px rgba(99, 184, 62, 0.4);
+  animation: pu 2.5s infinite;
+}
+.bd-mt {
+  color: var(--mt);
+}
+.bd-mt .d {
+  background: var(--mt);
+}
+.bd-off {
+  color: var(--off);
+}
+.bd-off .d {
+  background: var(--off);
+}
+
+@keyframes pu {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* === Shared: thin progress bar === */
+.pb {
+  height: 3px;
+  border-radius: 1.5px;
+  background: rgba(150, 180, 100, 0.08);
+  overflow: hidden;
+}
+.pb i {
+  display: block;
+  height: 100%;
+  border-radius: 1.5px;
+  background: linear-gradient(90deg, var(--primary-d), var(--primary-2));
+  transition: width 0.4s ease;
+}
+
+/* === Shared: section label (Cinzel small caps with gold rule) === */
+.sec-lb {
+  font-family: var(--ff-d);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: var(--text-gd);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sec-lb::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold-d), transparent);
+  opacity: 0.3;
+}
