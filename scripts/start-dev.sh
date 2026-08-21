@@ -36,13 +36,9 @@ if ! podman machine info >/dev/null 2>&1; then
   podman machine start >/dev/null 2>&1 || true
 fi
 
-# Fix stale conmon namespace (common after a podman machine restart): if we
-# can't exec into the DB container, reset the namespace and restart it.
-if podman ps -a --format "{{.Names}}" | grep -q "^archeaage-mariadb$" \
-   && ! podman exec archeaage-mariadb mariadb -u root -e "SELECT 1;" >/dev/null 2>&1; then
-  say "Resetting podman namespace (conmon)…"
-  podman system migrate 2>/dev/null || true
-fi
+# NOTE: do NOT run `podman system migrate` automatically here — on this
+# WSL2 setup it leaves containers unable to start (silent instant-exit).
+# If exec/start fail repeatedly: podman machine stop && podman machine start.
 
 if podman ps --format "{{.Names}}" | grep -q "^archeaage-mariadb$"; then
   say "MariaDB container already running"
@@ -54,18 +50,25 @@ elif find_compose && podman compose version >/dev/null 2>&1; then
   (cd "$ROOT" && podman compose up -d)
 else
   say "Compose not available — falling back to podman run…"
+  # Windows podman needs drive-letter paths for bind mounts (Git Bash's
+  # /f/... form gets mangled by MSYS path conversion).
+  ROOT_WIN="$(cygpath -m "$ROOT" 2>/dev/null || echo "$ROOT")"
   podman run -d --name archeaage-mariadb \
     -e MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=yes \
     --network host \
     -v mariadb-data:/var/lib/mysql \
-    mariadb:11.4 >/dev/null
+    -v "${ROOT_WIN}/servers/aaemu/SQL:/sql-src:ro" \
+    -v "${ROOT_WIN}/scripts/docker-initdb/01-init-archeaage.sh:/docker-entrypoint-initdb.d/01-init-archeaage.sh:ro" \
+    docker.io/library/mariadb:11.4 >/dev/null
 fi
 
-# Wait for the DB to accept connections. WSL2 relays the VM's ports to
-# 127.0.0.1 (wslrelay.exe), so prefer localhost; fall back to the VM IP.
+# Wait for the DB to accept connections. Checked over TCP (Windows
+# localhost -> wslrelay -> VM) — the same path AAEmu uses — because
+# `podman exec` can fail to join the conmon/user namespace across sessions.
+# (Python does the probing: Git Bash's bash lacks /dev/tcp support.)
 DB_READY=""
 for _ in $(seq 1 30); do
-  if podman exec archeaage-mariadb mariadb -u root -e "SELECT 1;" >/dev/null 2>&1; then
+  if python -c "import socket; socket.create_connection(('127.0.0.1', 3306), 2).close()" 2>/dev/null; then
     DB_READY=1
     break
   fi
