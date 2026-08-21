@@ -213,7 +213,6 @@ Rules:
 ```text
 ArcheaAge/
 ├── README.md
-├── ArcheaAge.slnx         # .NET solution: apps/registry + sdk + plugins
 ├── .gitmodules            # servers/aaemu → ivan-cavero/AAEmu (fork)
 ├── .github/workflows/ci.yml
 ├── docs/                  # INVESTIGACION.md, ARQUITECTURA.md, SPEC.md, ADR/, VERSIONS.md

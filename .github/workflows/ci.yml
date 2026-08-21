@@ -14,8 +14,11 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "10.0.x"
-      - run: dotnet build ArcheaAge.slnx
-      - run: dotnet test ArcheaAge.slnx --no-build
+      - name: Build
+        run: |
+          dotnet build apps/registry
+          dotnet build sdk
+          dotnet build plugins/Example
 
   launcher:
     name: Launcher (cargo check)

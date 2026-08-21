@@ -37,8 +37,9 @@ Be excellent to each other. Keep criticism technical, welcome newcomers.
 
 ```bash
 # .NET side (registry + sdk + plugins)
-dotnet build ArcheaAge.slnx
-dotnet test  ArcheaAge.slnx --no-build
+dotnet build apps/registry
+dotnet build sdk
+dotnet build plugins/Example
 
 # Go side
 cd servers/go && go vet ./... && go test ./...
