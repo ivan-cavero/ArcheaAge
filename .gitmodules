@@ -1,4 +1,4 @@
 [submodule "server"]
 	path = server
-	url = https://github.com/AAEmu/AAEmu.git
-	branch = develop
+	url = https://github.com/ivan-cavero/AAEmu.git
+	branch = archeaage/develop
