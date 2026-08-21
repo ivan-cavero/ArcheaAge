@@ -13,10 +13,17 @@ launcher/src-tauri/gen/
 node_modules/
 
 # Assets del juego (nunca al repo)
+# NOTA: git no soporta comentarios inline — cada regla va sola en su línea.
 .client_files/
 .server_files/
+# Clientes descargados (.7z/.zip multi-volumen, ~158 GB). Suben a S3, no a git.
+.clients/
 *.sqlite3
 game_pak
+
+# Python
+__pycache__/
+*.pyc
 
 # Config local
 Config.Local.json
@@ -24,3 +31,9 @@ Config.Local.json
 # IDE
 .vscode/
 .idea/
+
+# Archivo residual accidental (fue bash a carpeta con espacio)
+/NUL
+
+# ZCode harness
+.zcode/
