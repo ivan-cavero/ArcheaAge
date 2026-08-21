@@ -72,7 +72,7 @@
 
 ### 2.4 Plugins (new, ours — see INVESTIGACION.md §6)
 
-- Typed event bus + hook points in the managers + module loader (`modules/`, `Assembly.LoadFrom`) + **NuGet SDK** (`ArcheaAge.Sdk`) so the community compiles plugins without cloning the server.
+- Typed event bus + hook points in the managers + **Go plugin model** (dynamic `.so` loading; Lua kept for content scripts — see ADR-001) so the community compiles plugins without cloning the server.
 - CI that compiles every catalog plugin against each release (compatibility matrix).
 - Plugins run **server-side** (no client changes required). Mods that do touch the client (zones, models, data) travel as **content packs** through the launcher.
 
@@ -82,7 +82,7 @@
 
 | Change type | Where it's implemented | How it reaches the player |
 | --- | --- | --- |
-| Rules, balance, events, new systems | **Server-side plugin** (C#/Lua) | Nothing to download — the server applies it |
+| Rules, balance, events, new systems | **Server-side plugin** (Go/Lua) | Nothing to download — the server applies it |
 | New items, mobs, quests, NPCs | Server DB (reference `compact.sqlite3` + data) | Server-side; if the client needs assets, content pack |
 | Zones ported between versions | `game_pak` (main_world + textures/models) | **Content pack** via launcher (delta over base client) |
 | 100% new assets (.cgf/.chr models) | CryEngine 3 toolchain | Content pack via launcher |
@@ -116,30 +116,42 @@ Rule: **anything that touches the client is a versioned content pack with a mani
 
 ```text
 ArcheaAge/
-├── server/            # AAEmu fork (submodule or subtree), branches 1.2 / 3.0
-├── sdk/               # ArcheaAge.Sdk (NuGet) — plugin API
+├── apps/
+│   ├── registry/      # metaserver (C# today → Go, Slice 0 of ADR-001)
+│   └── launcher/      # launcher app (Rust + Tauri — KEPT as-is)
+├── servers/
+│   ├── aaemu/         # AAEmu fork (submodule; reference + production during M1-M2)
+│   └── go/            # REWRITE in Go — login + game (replaces the fork, ADR-001)
+├── sdk/               # plugin API (Go model, see 7.4)
 ├── plugins/           # plugin catalog (each its own repo/dir + CI)
-├── registry/          # metaserver (ASP.NET Core)
-├── launcher/          # launcher app (stack TBD)
 ├── content/           # content packs (manifests + client deltas)
-├── tools/             # packer, opcode finder, navmesh, converters
+├── tools/             # packer, opcode finder, navmesh, converters, client-sourcing
+├── deploy/            # dev stack compose (MariaDB), future instance definitions
 └── docs/              # INVESTIGACION.md, this architecture, guides
 ```
+
+> Current layout is incremental: `registry/`, `launcher/`, `server/` still live at
+> the repo root and move into `apps/`+`servers/` when the Go rewrite lands.
 
 ---
 
 ## 6. Milestones
 
-1. **M0 (1-2 months)**: set up AAEmu locally (official skill), contribute fixes, decide launcher stack.
-2. **M1 (3-6 months)**: Registry + launcher v1 (one version, server browser with players, full client download) + our own fork with CI.
-3. **M2 (6-12 months)**: plugin layer (SDK + loader + compatibility CI) + golden packet tests + first boats/sync workstream.
-4. **M3 (12-24 months)**: second version line (3.0), content packs with delta patching, plugin catalog.
+> Server development track has moved to **Go** (see ADR-001). Milestones below keep the product milestones; the Go rewrite slices are detailed in ADR-001 §4.
+
+1. **M0 (1-2 months)**: set up AAEmu locally (official skill — as protocol/data reference), contribute fixes, decide remaining stack.
+2. **M1 (3-6 months)**: **Registry in Go** + launcher v1 (one version, server browser with players, full client download).
+3. **M2 (6-12 months)**: Login server in Go (packet protocol 1.2) + network core of Game + first gameplay slice end-to-end.
+4. **M3 (12-24 months)**: Game world-scope port (modules by feature slice), plugin layer, second version line (3.0), content packs.
 5. **M4 (24+)**: advanced custom content (new zones), anti-cheat, multi-server.
 
 ---
 
-## 7. Open decisions **[DECISION]**
+## 7. Decisions — **[DECISION]** (decision record in `docs/ADR/`)
 
-1. **Launcher stack**: C# (Avalonia/WPF — same language as the whole ecosystem) vs Tauri/Electron (web UI, Minecraft precedent, prettier, more moving parts).
-2. **Flagship version**: 1.2 (AAEmu's most maintained base, fix boats there) vs 3.0 (the "golden age", but an older, greener fork).
-3. **Next step**: write the detailed launcher+registry spec and start scaffolding, or set up AAEmu locally first and validate the flow.
+1. **Launcher stack**: **Tauri (Rust)** — chosen (see ADR-003).
+2. **Flagship version**: 1.2 (AAEmu's most maintained base) — priority, 3.0 later.
+3. **Server rewrite language**: **Go** for the new login + game servers (see ADR-001).
+4. **Plugin model**: Go plugin loading via dynamic `.so`; Lua kept for content scripts. Details tracked separately (SDK design doc) — **not blocking**, buses/events first.
+
+> Remaining open: launcher+registry detailed spec (start scaffolding), and local AAEmu setup as reference.

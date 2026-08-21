@@ -310,7 +310,19 @@ The project is **viable but it's not a sprint: it's a team marathon**. The good 
 3. **A "golden age" version line (3.0)** maintained as an open project, not as an admin's secret.
 4. **A custom content pipeline** (porting zones between versions already works; new assets are the long frontier).
 
-How to do it with AI: **protocol RE with IDA/Ghidra-MCP in loops with golden packet tests**, **data agents for SQLite/Lua**, **CI that compiles and tests every proposed plugin**, and **onboarding skills** so anyone can contribute. The first PR you should open isn't code: it's **joining AAEmu and helping them stabilize 1.2** — because every fix you land there is infrastructure for your project.
+How to do it with AI: **protocol RE with IDA/Ghidra-MCP in loops with golden packet tests**, **data agents for SQLite/Lua**, **CI that compiles and tests every proposed plugin**, and **onboarding skills** so anyone can contribute. The first PR you should open isn't code: it's **joining AAEmu and helping them stabilize 1.2** — because infrastructure for your project.
+
+---
+
+## 12. Stack decision (summary)
+
+Full rationale and decision record in `docs/ADR/`. Short version:
+
+- The game server fork (`server/`, C#/.NET, ~197k LOC) will be **rewritten from scratch in Go** — a learning/redesign goal, not a portability escape (.NET 10 is fully cross-platform, ADR-000).
+- Ported as-is: packet/opcode spec per version, Lua content scripts, client data. Redesigned: network core, tick simulation, concurrency, state sharing.
+- Launcher stays **Rust/Tauri**; registry migrates C# → **Go** (Slice 0).
+- Why Go over Rust: balance of learning curve, goroutines concurrency, and iteration per slice (ADR-001). Rust remains for the launcher and hot isolated critical paths.
+- Why not Node: JS GC degrades under a tick-driven world sim.
 
 ---
 

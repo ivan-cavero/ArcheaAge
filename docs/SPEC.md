@@ -17,6 +17,7 @@ Central service the launcher queries. It does **not** participate in the game pr
 | `GET` | `/versions` | Supported versions + summary (name, client, state) |
 | `GET` | `/versions/{version}/servers` | Servers for the version with **live online players** |
 | `GET` | `/versions/{version}/manifest` | Client manifest (files, hashes, chunks, patches, content packs) |
+| `GET` | `/news` | Launcher news feed (`content/news.json`) |
 | `POST` | `/heartbeat` | Game servers report state + players (token auth) |
 
 ### 1.2 Data model
@@ -32,6 +33,7 @@ Central service the launcher queries. It does **not** participate in the game pr
       "status": "live",                    // live | beta | maintenance | planned
       "servers": 2,
       "playersOnline": 137,
+      "downloadSize": 8941130695,          // total bytes to download (hero display)
       "manifestUrl": "/versions/1.2/manifest"
     }
   ]

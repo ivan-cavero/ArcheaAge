@@ -19,8 +19,11 @@ sdk/        # ArcheaAge.Sdk — plugin contract (NuGet, no AAEmu dependency)
 plugins/    # Plugin catalog (Example included)
 launcher/   # Tauri v2 (Rust + web): version selector + server browser + client manager
 content/    # Client manifests and content packs
-server/     # AAEmu fork — submodule, see below
-docs/       # Research, architecture, spec
+server/     # AAEmu fork — submodule (origin = ivan-cavero/AAEmu, upstream = AAEmu/AAEmu)
+tools/      # client-sourcing utilities (MEGA/Drive listing, re-archive)
+deploy/     # dev stack (compose: MariaDB + auto-migrations)
+scripts/    # dev ops (start-dev, stop-dev, upload-client, write-aelcf)
+docs/       # Research, architecture, spec, ADRs
 ```
 
 ## Quick start
