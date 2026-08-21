@@ -126,12 +126,13 @@ ArcheaAge/
 ├── plugins/           # plugin catalog (each its own repo/dir + CI)
 ├── content/           # content packs (manifests + client deltas)
 ├── tools/             # packer, opcode finder, navmesh, converters, client-sourcing
-├── deploy/            # dev stack compose (MariaDB), future instance definitions
+├── compose.yaml       # dev DB stack (MariaDB); instance definitions come later (M4)
+├── db/migrations/     # our own schema migrations
 └── docs/              # INVESTIGACION.md, this architecture, guides
 ```
 
-> Current layout is incremental: `registry/`, `launcher/`, `server/` still live at
-> the repo root and move into `apps/`+`servers/` when the Go rewrite lands.
+> This layout is now realized at the repo root: `apps/registry`, `apps/launcher`,
+> `servers/aaemu` (fork submodule) and `servers/go` (Slice 0 already building).
 
 ---
 

@@ -33,7 +33,22 @@ jobs:
             patchelf
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: launcher/src-tauri
+          workspaces: apps/launcher/src-tauri
       - name: Check
-        working-directory: launcher/src-tauri
+        working-directory: apps/launcher/src-tauri
         run: cargo check
+
+  go:
+    name: Go (servers/go)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
+      - name: Vet
+        working-directory: servers/go
+        run: go vet ./...
+      - name: Test
+        working-directory: servers/go
+        run: go test ./...

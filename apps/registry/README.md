@@ -26,7 +26,7 @@ Metaserver: version list, per-version servers with **live online players** (Game
 ## Dev
 
 ```bash
-dotnet run --project registry
+dotnet run --project apps/registry
 curl http://localhost:5080/versions
 ```
 

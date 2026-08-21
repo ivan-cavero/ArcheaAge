@@ -18,9 +18,9 @@ resolving before picking a new stack.
   goal.
 - Performance is **equivalent or better on Linux** (same AOT-compiled native
   binaries; less OS overhead in server roles).
-- The repository already ships Linux deployment: `server/docker-compose.yaml`
+- The repository already ships Linux deployment: `servers/aaemu/docker-compose.yaml`
   builds `AAEmu.Login` and `AAEmu.Game` via their `Dockerfile`s (Linux
-  containers), and `deploy/compose.yaml` already runs MariaDB via podman/docker.
+  containers), and the root `compose.yaml` already runs MariaDB via podman/docker.
 
 ## Consequence
 

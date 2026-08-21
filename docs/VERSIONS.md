@@ -41,7 +41,7 @@ so any HTTP server or S3 bucket works:
 2. Upload the folder to S3: `aws s3 sync <client> s3://<bucket>/archeaage/{version}/`.
 3. Generate the manifest: `scripts/upload-client.sh <version> <client-dir>` writes
    `content/manifests/{version}.json` with S3 URLs + SHA256 + verify entries.
-4. Register the version in `registry/appsettings.json` (`Versions` + `Tokens`).
+4. Register the version in `apps/registry/appsettings.json` (`Versions` + `Tokens`).
 5. The launcher shows it as a version chip and launches with the table above.
 
 Per-version verify entries (game_pak/bin32/exe) and the client structure differ —

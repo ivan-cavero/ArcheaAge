@@ -208,23 +208,28 @@ Rules:
 ```text
 ArcheaAge/
 ├── README.md
-├── .gitmodules            # server/ → AAEmu (submodule, not cloned yet)
+├── ArcheaAge.slnx         # .NET solution: apps/registry + sdk + plugins
+├── .gitmodules            # servers/aaemu → ivan-cavero/AAEmu (fork)
 ├── .github/workflows/ci.yml
-├── docs/                  # INVESTIGACION.md, ARQUITECTURA.md, SPEC.md
-├── registry/              # ArcheaAge.Registry (ASP.NET Core minimal API)
+├── docs/                  # INVESTIGACION.md, ARQUITECTURA.md, SPEC.md, ADR/, VERSIONS.md
+├── apps/
+│   ├── registry/          # ArcheaAge.Registry (ASP.NET Core minimal API)
+│   └── launcher/          # Tauri v2 (Rust + web): index.html, src/, src-tauri/
+├── servers/
+│   ├── aaemu/             # AAEmu fork — submodule (reference + production M1-M2)
+│   └── go/                # Go rewrite (ADR-001): registry/ (Slice 0), login/, game/
 ├── sdk/                   # ArcheaAge.Sdk (plugin contract, NuGet)
 ├── plugins/
 │   ├── README.md
 │   └── Example/           # ArcheaAge.Plugins.Example (references the SDK)
-├── launcher/              # Tauri v2 (Rust + web)
-│   ├── index.html, src/, vite.config.js, package.json
-│   └── src-tauri/         # Cargo.toml, tauri.conf.json, src/
-└── content/
-    ├── README.md
-    └── manifests/1.2.json # example manifest
+├── content/               # news.json + manifests/{version}.json
+├── tools/client-sourcing/ # MEGA/Drive listing, re-archive utilities
+├── compose.yaml           # MariaDB dev stack with auto-migrations
+├── db/migrations/         # our own schema migrations (forward-only)
+└── scripts/               # start-dev, stop-dev, upload-client, write-aelcf
 ```
 
-- `server/` is a **submodule** (`git submodule update --init`) — not cloned in the scaffold.
+- `servers/aaemu` is a **submodule** (`git submodule update --init servers/aaemu`).
 - CI: `dotnet build/test` (registry + sdk + plugins) and `cargo check` (launcher).
 
 ---

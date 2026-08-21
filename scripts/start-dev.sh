@@ -6,7 +6,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SERVER="$ROOT/server"
+SERVER="$ROOT/servers/aaemu"
 MDB_HOST=""
 
 say() { printf "\033[1;36m[dev]\033[0m %s\n" "$*"; }
@@ -51,7 +51,7 @@ elif podman ps -a --format "{{.Names}}" | grep -q "^archeaage-mariadb$"; then
   podman start archeaage-mariadb
 elif find_compose && podman compose version >/dev/null 2>&1; then
   say "Starting MariaDB with compose (migrations auto-run on a fresh volume)…"
-  (cd "$ROOT/deploy" && podman compose up -d)
+  (cd "$ROOT" && podman compose up -d)
 else
   say "Compose not available — falling back to podman run…"
   podman run -d --name archeaage-mariadb \
@@ -113,7 +113,7 @@ cp "$SERVER/AAEmu.Login/Config.Local.json" "$SERVER/AAEmu.Login/bin/Debug/net10.
 # --- 3. Registry --------------------------------------------------------------
 if ! curl -sf http://localhost:5080/health >/dev/null; then
   say "Starting registry…"
-  (cd "$ROOT/registry" && nohup dotnet run --no-build >/tmp/registry.log 2>&1 &)
+  (cd "$ROOT/apps/registry" && nohup dotnet run --no-build >/tmp/registry.log 2>&1 &)
   sleep 3
 fi
 

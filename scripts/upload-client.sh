@@ -13,7 +13,7 @@
 #      servidor HTTP cualquiera).
 #   2. Calcula SHA256 de cada archivo y genera content/manifests/<version>.json
 #      con URLs https:// (el launcher ya descarga vía https con resume).
-#   3. Imprime el bloque JSON para añadir la versión a registry/appsettings.json.
+#   3. Imprime el bloque JSON para añadir la versión a apps/registry/appsettings.json.
 #
 # Requisitos: aws cli configurado (o valores --bucket/--http-base), python3.
 set -euo pipefail
@@ -95,7 +95,7 @@ with open(manifest_path, "w") as f:
 print(f"[upload] manifest escrito: content/manifests/{version}.json")
 print(f"[upload] {len(files)} archivos · {sum(fs['size'] for fs in files)/1073741824:.2f} GB")
 print()
-print("Añade al registry/appsettings.json (Tokens + Versions):")
+print("Añade al apps/registry/appsettings.json (Tokens + Versions):")
 print(json.dumps({"Tokens": {version: "dev-secret"},
                   "Versions": [{"Id": version, "Name": f"ArcheAge {version}"}]}, indent=2))
 PY

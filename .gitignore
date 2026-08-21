@@ -4,17 +4,20 @@ obj/
 *.user
 
 # Rust / Tauri
-launcher/node_modules/
-launcher/dist/
-launcher/src-tauri/target/
-launcher/src-tauri/gen/
+apps/launcher/node_modules/
+apps/launcher/dist/
+apps/launcher/src-tauri/target/
+apps/launcher/src-tauri/gen/
 
 # Node
 node_modules/
 
 # Assets del juego (nunca al repo)
 # NOTA: git no soporta comentarios inline — cada regla va sola en su línea.
-.client_files/
+# .client_files/: extracted client install (game_pak, bin32, ...) used locally
+# by the server's ClientData and by tools. Never committed except its README.
+.client_files/*
+!.client_files/README.md
 .server_files/
 # Clientes descargados (.7z/.zip multi-volumen, ~158 GB). Suben a S3, no a git.
 .clients/

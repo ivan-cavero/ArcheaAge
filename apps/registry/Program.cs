@@ -84,8 +84,20 @@ public sealed class RegistryStore(IConfiguration config)
 {
     private readonly ConcurrentDictionary<string, ServerInfo> _servers = new();
 
-    public string ManifestDir { get; } =
-        Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "content", "manifests");
+    public string ManifestDir { get; } = FindContentDir();
+
+    // Walk up from the build output until we find the repo's content/ dir —
+    // survives moving this project (e.g. root → apps/registry) without edits.
+    private static string FindContentDir()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        for (var i = 0; i < 10 && dir is not null; i++, dir = dir.Parent!)
+        {
+            var candidate = Path.Combine(dir.FullName, "content", "manifests");
+            if (Directory.Exists(candidate)) return candidate;
+        }
+        return Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "content", "manifests");
+    }
 
     public IEnumerable<VersionSummary> Versions()
     {
