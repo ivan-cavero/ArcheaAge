@@ -4,7 +4,27 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<RegistryStore>();
+
+// The launcher's frontend runs from the Vite dev origin and from the Tauri
+// WebView2 origin (tauri://localhost, http/https://tauri.localhost). Allow
+// those — and localhost — so the renderer can query the registry.
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy
+            .SetIsOriginAllowed(origin =>
+                origin.StartsWith("http://localhost", StringComparison.OrdinalIgnoreCase) ||
+                origin.StartsWith("http://127.0.0.1", StringComparison.OrdinalIgnoreCase) ||
+                origin.EndsWith("://tauri.localhost", StringComparison.OrdinalIgnoreCase) ||
+                origin.Equals("tauri://localhost", StringComparison.OrdinalIgnoreCase))
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
+app.UseCors();
 
 // --- Public reads (the launcher queries these) ---
 
@@ -24,6 +44,8 @@ app.MapGet("/versions/{version}/manifest", (string version, RegistryStore store)
     var manifest = store.Manifest(version);
     return manifest is null ? Results.NotFound() : Results.Ok(manifest);
 });
+
+app.MapGet("/news", (RegistryStore store) => Results.Ok(store.News()));
 
 // --- Writes (Game servers report state) ---
 
@@ -67,21 +89,59 @@ public sealed class RegistryStore(IConfiguration config)
 
     public IEnumerable<VersionSummary> Versions()
     {
-        // Known versions: live in config (or default seed).
+        // Known versions: live in config (or default seed). Each entry may
+        // carry a display Name; the seed falls back to "ArcheAge {id}".
         var known = config.GetSection("Versions").GetChildren()
-            .Select(c => c["Id"]!)
-            .Concat(["1.2"]) // default seed for dev
-            .Distinct();
+            .Select(c => (Id: c["Id"]!, Name: c["Name"] ?? $"ArcheAge {c["Id"]}"))
+            .Concat([(Id: "1.2", Name: "ArcheAge 1.2 (launch era)")])
+            .DistinctBy(t => t.Id);
 
-        foreach (var id in known)
+        foreach (var (id, name) in known)
         {
             var servers = _servers.Values.Where(s => s.Version == id).ToList();
             yield return new VersionSummary(
                 id,
+                name,
+                ClientVersion(id),
                 servers.Count,
                 servers.Sum(s => s.Players),
-                Servers(id) is null ? "planned" : "live");
+                Servers(id) is null ? "planned" : "live",
+                DownloadSize(id));
         }
+    }
+
+    /// <summary>Display version of the client (from the manifest), e.g. "1.2.4.0 (r208022)".</summary>
+    public string ClientVersion(string version)
+    {
+        var path = Path.Combine(ManifestDir, $"{version}.json");
+        if (!File.Exists(path)) return "";
+        using var doc = JsonDocument.Parse(File.ReadAllText(path));
+        return doc.RootElement.TryGetProperty("client", out var c) && c.ValueKind == JsonValueKind.String
+            ? c.GetString()!
+            : "";
+    }
+
+    /// <summary>Total bytes to download for a version (sum of manifest file sizes).</summary>
+    public long DownloadSize(string version)
+    {
+        var path = Path.Combine(ManifestDir, $"{version}.json");
+        if (!File.Exists(path)) return 0;
+        using var doc = JsonDocument.Parse(File.ReadAllText(path));
+        if (!doc.RootElement.TryGetProperty("files", out var files)) return 0;
+        long total = 0;
+        foreach (var f in files.EnumerateArray())
+            if (f.TryGetProperty("size", out var size) && size.TryGetInt64(out var n))
+                total += n;
+        return total;
+    }
+
+    /// <summary>News feed for the launcher (falls back to an empty feed).</summary>
+    public object News()
+    {
+        var path = Path.Combine(ManifestDir, "..", "news.json");
+        if (!File.Exists(path)) return new { items = Array.Empty<object>() };
+        using var doc = JsonDocument.Parse(File.ReadAllText(path));
+        return doc.RootElement.Clone(); // expected shape: { "items": [...] }
     }
 
     public List<ServerInfo>? Servers(string version)
@@ -121,7 +181,14 @@ public sealed class RegistryStore(IConfiguration config)
     }
 }
 
-public sealed record VersionSummary(string Id, int Servers, int PlayersOnline, string Status);
+public sealed record VersionSummary(
+    string Id,
+    string Name,
+    string Client,
+    int Servers,
+    int PlayersOnline,
+    string Status,
+    long DownloadSize);
 
 public sealed record ServerInfo(
     string Id,

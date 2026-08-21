@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "id": "n1",
+      "date": "2026-08-19",
+      "tag": "launch",
+      "title": "¡Bienvenidos a ArcheaAge!",
+      "body": "Servidor privado de ArcheAge en fase beta, basado en el fork AAEmu.\n\nVersión estrella: 1.2 (era de lanzamiento) con el cliente 1.2.4.0. Descarga el cliente desde el launcher y únete a los servidores EU-1 / NA-1."
+    },
+    {
+      "id": "n2",
+      "date": "2026-08-18",
+      "tag": "announcement",
+      "title": "Estado de la descarga del cliente",
+      "body": "El cliente (~8.3 GB) se descarga por partes desde Google Drive con reanudación y verificación SHA256. Si la descarga se corta, no hace falta empezar de nuevo: vuelve a pulsar «Descargar» y continuará."
+    },
+    {
+      "id": "n3",
+      "date": "2026-08-15",
+      "tag": "dev",
+      "title": "Hoja de ruta",
+      "body": "Próximos hitos: merge de paks (aapatcher), línea 3.0, SDK de plugins y anti-cheat. El roadmap detallado está en docs/SPEC.md del repositorio."
+    }
+  ]
+}
