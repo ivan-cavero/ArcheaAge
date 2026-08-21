@@ -8,6 +8,11 @@ metaserver, community plugins and custom content — built on the
 [AAEmu](https://github.com/AAEmu/AAEmu) emulator (LGPL-3.0) and a clean-room
 Go rewrite in progress.
 
+**Why**: the official ArcheAge service was shut down by XLGAMES/Kakao on
+**June 27, 2024** — there is no official way to play the original game
+anymore. This project exists so the community can keep it alive: see
+[docs/LEGAL.md](docs/LEGAL.md) for the full context and legal analysis.
+
 > **Status**: M1 in progress — launcher client-manager works end to end,
 > registry ships in C# today and in Go (Slice 0 of ADR-001).
 > Docs: `docs/INVESTIGACION.md` (the why), `docs/ARQUITECTURA.md` (the what),
@@ -108,6 +113,13 @@ git submodule update --init servers/aaemu   # clones the fork
 PRs welcome! Read [CONTRIBUTING.md](CONTRIBUTING.md) first — conventional
 commits, tests required for plugins, no game assets ever.
 
+## Funding
+
+Infrastructure costs money. The project's posture is **transparent,
+cost-covering donations** — never pay-to-win. Any future monetization will
+follow the analysis and mitigations in [docs/LEGAL.md](docs/LEGAL.md §3)
+and be announced publicly before it exists.
+
 ## License
 
 All code in this repository is licensed under the **GNU LGPL-3.0** (see
@@ -125,3 +137,6 @@ the LGPL). The AAEmu fork in `servers/aaemu` keeps its upstream licensing.
 - This is a non-profit, educational/preservation effort around server
   emulation and interoperability. Use at your own risk; no warranty (see
   license sections 15–17).
+- Read [docs/LEGAL.md](docs/LEGAL.md) for the full legal context: game
+  status, risk analysis by activity (playing / coding / operating /
+  monetizing) and the project's funding stance.

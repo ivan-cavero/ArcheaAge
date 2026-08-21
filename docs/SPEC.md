@@ -158,6 +158,11 @@ Rules:
 
 ## 4. Plugin SDK (ArcheaAge.Sdk, .NET)
 
+> **2026 update**: the plugin model moves to **Go plugins + Lua content
+> scripts** per [ADR-001](ADR/ADR-001-server-language-go.md). This section
+> describes the fork-era C# contract — kept as the event-bus design
+> reference; no loader was ever built against it.
+
 Minimal contract so a plugin compiles **without cloning the server** (NuGet package `ArcheaAge.Sdk`).
 
 ```csharp
