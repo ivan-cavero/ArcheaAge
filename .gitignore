@@ -43,3 +43,7 @@ Config.Local.json
 
 # Read-only external references (third-party source kept for study)
 .reference/
+
+# tools/ui local toolchain & artifacts
+tools/ui/luac-build/*
+!tools/ui/luac-build/luac5f.exe
