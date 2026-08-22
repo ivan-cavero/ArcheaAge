@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Re-comprime los clientes descargados en 7z multi-volumen (partes).
-# Para cada *.7z/*.zip en .clients (no toca .exe):
-#   1. extrae a un staging temporal
-#   2. re-comprime en partes de 2 GB (mx=7, mejor ratio)
-#   3. solo entonces borra el original y el staging
-# Resume-safe: salta los que ya tienen <base>.7z.001.
+# Re-packs the downloaded clients into multi-volume (split) 7z archives.
+# For each *.7z/*.zip in .clients (.exe files untouched):
+#   1. extract to a temporary staging folder
+#   2. re-compress into 2 GB parts (mx=7, best ratio)
+#   3. only then delete the original and the staging folder
+# Resume-safe: skips the ones that already have <base>.7z.001.
 #
-# Uso: bash tools/client-sourcing/rearchive-clients.sh [substring-filtro]
-# PART_SIZE=4g bash tools/client-sourcing/rearchive-clients.sh   (tamaño de parte configurable)
+# Usage: bash tools/client-sourcing/rearchive-clients.sh [substring-filter]
+# PART_SIZE=4g bash tools/client-sourcing/rearchive-clients.sh   (configurable part size)
 set -uo pipefail
 
 SEVEN="C:/Program Files/7-Zip/7z.exe"
@@ -26,44 +26,44 @@ find "$CLIENTS" -type f \( -name '*.7z' -o -name '*.zip' \) -print0 |
     base="${ARC%.*}"
     [ -n "$ONLY" ] && ! printf '%s' "$ARC" | grep -q "$ONLY" && continue
     ls "$base".7z.001 >/dev/null 2>&1 && {
-      log "SKIP (ya en partes): $name"
+      log "SKIP (already split): $name"
       continue
     }
 
     STAGE="$dir/.stage_$(basename "$base")"
-    log "==> [1/3] extrayendo: $name"
+    log "==> [1/3] extracting: $name"
     rm -rf "$STAGE"
     mkdir -p "$STAGE"
     "$SEVEN" x "$ARC" -o"$STAGE" -y >>"$LOG" 2>&1 ||
       {
-        log "ERROR extrayendo $name (original conservado)"
+        log "ERROR extracting $name (original kept)"
         rm -rf "$STAGE"
         continue
       }
 
-    log "==> [2/3] recomprimiendo: $name -> partes de $PART"
-    TMPO="${base}.new" # nombre temporal: no colisiona con el original
+    log "==> [2/3] re-compressing: $name -> parts of $PART"
+    TMPO="${base}.new" # temp name: does not collide with the original
     (cd "$STAGE" && "$SEVEN" a -t7z -mx=7 -v"$PART" "$TMPO.7z" .) >>"$LOG" 2>&1 ||
       {
-        log "ERROR comprimiendo $name (original conservado)"
+        log "ERROR compressing $name (original kept)"
         rm -rf "$STAGE"
         continue
       }
     ls "$TMPO".7z.001 >/dev/null 2>&1 ||
       {
-        log "ERROR: sin partes para $name"
+        log "ERROR: no parts produced for $name"
         rm -rf "$STAGE"
         continue
       }
 
-    # renombra los .new.7z.XXX a la base original (para no dejar el .new colgando)
+    # rename the .new.7z.XXX parts back to the original base (no .new left hanging)
     for p in "$TMPO".7z.*; do mv "$p" "$(printf '%s' "$p" | sed 's/\.new\.7z/.7z/')"; done
 
-    log "==> [3/3] borrando original + staging: $name"
+    log "==> [3/3] deleting original + staging: $name"
     rm -f "$ARC"
     rm -rf "$STAGE"
     n=$(ls -d "$base".7z.* 2>/dev/null | wc -l)
-    log "OK  $name -> $(basename "$base").7z.001..$n ($n partes)"
+    log "OK  $name -> $(basename "$base").7z.001..$n ($n parts)"
     df -h "$CLIENTS" | tail -1 | tee -a "$LOG"
   done
-log "=== TERMINADO ==="
+log "=== DONE ==="

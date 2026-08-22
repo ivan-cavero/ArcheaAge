@@ -7,7 +7,7 @@
     <RootNamespace>ArcheaAge.Sdk</RootNamespace>
     <PackageId>ArcheaAge.Sdk</PackageId>
     <Version>0.1.0</Version>
-    <Description>Contrato de plugins para servidores ArcheaAge (fork de AAEmu). Sin dependencia de AAEmu.</Description>
+    <Description>Plugin contract for ArcheaAge servers (AAEmu fork). No AAEmu dependency.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 

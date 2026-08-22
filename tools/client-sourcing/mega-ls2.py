@@ -33,25 +33,25 @@ def get_nodes(root_folder):
 def main(url):
     root_share, share_key_b64 = parse_folder_url(url)
     if not root_share:
-        print("No se pudo parsear la URL")
+        print("Could not parse URL")
         return
     nodes = get_nodes(root_share)
     by_handle = {n["h"]: n for n in nodes}
 
-    # encuentra la raíz real: el nodo cuyo padre no está en el conjunto
+    # find the real root: the node whose parent is not in the set
     handles = set(by_handle)
     top = next((n for n in nodes if n.get("p") not in handles), None)
     if top is None:
-        print("Sin raíz"); return
+        print("No root"); return
 
-    # la share key de la URL descifra TODOS los nodos del árbol (verificado:
-    # AAFree, sus hijos y nietos descifran con la misma clave).
+    # the share key from the URL decrypts ALL nodes in the tree (verified:
+    # AAFree, its children and grandchildren all decrypt with the same key).
     share_key = base64_to_a32(share_key_b64)
     node_keys = {}
     for n in nodes:
         try:
             nk = decrypt_key(base64_to_a32(n["k"].split(":", 1)[1]), share_key)
-            if n["t"] == 0:  # archivo: clave de atributos
+            if n["t"] == 0:  # file: attribute key
                 nk = (nk[0] ^ nk[4], nk[1] ^ nk[5], nk[2] ^ nk[6], nk[3] ^ nk[7])
             node_keys[n["h"]] = nk
         except Exception:
@@ -59,12 +59,12 @@ def main(url):
 
     def name_of(n):
         if n["h"] not in node_keys or node_keys[n["h"]] is None or "a" not in n:
-            return "(sin nombre)"
+            return "(unnamed)"
         try:
             attrs = decrypt_attr(base64_url_decode(n["a"]), node_keys[n["h"]])
-            return attrs.get("n", "(sin nombre)") if isinstance(attrs, dict) else "(sin nombre)"
+            return attrs.get("n", "(unnamed)") if isinstance(attrs, dict) else "(unnamed)"
         except Exception:
-            return "(sin nombre)"
+            return "(unnamed)"
 
     def render(parent, depth):
         out = []
@@ -78,9 +78,9 @@ def main(url):
                 out.extend(render(n["h"], depth + 1))
         return out
 
-    print(f"Total nodos: {len(nodes)}\n")
+    print(f"Total nodes: {len(nodes)}\n")
     lines = render(top["h"], 0)
-    print("\n".join(lines) if lines else "(vacío)")
+    print("\n".join(lines) if lines else "(empty)")
 
 
 if __name__ == "__main__":

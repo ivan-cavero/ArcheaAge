@@ -100,9 +100,9 @@ if __name__ == "__main__":
     url = sys.argv[1]
     handle, key = parse_folder_link(url)
     if not key:
-        print("ERROR: el enlace no tiene clave (#key)")
+        print("ERROR: link has no key (#key)")
         sys.exit(1)
     nodes = list_tree(handle, key)
-    print(f"Total nodos: {len(nodes)}\n")
+    print(f"Total nodes: {len(nodes)}\n")
     for line in render(nodes, handle):
         print(line)

@@ -3,7 +3,7 @@ pub mod client;
 use serde::Serialize;
 use tauri::{Emitter, Manager};
 
-/// Registry base URL: override con ARCHEAAGE_REGISTRY.
+/// Registry base URL; override with ARCHEAAGE_REGISTRY.
 fn registry_url() -> String {
     std::env::var("ARCHEAAGE_REGISTRY").unwrap_or_else(|_| "http://localhost:5080".to_string())
 }
@@ -45,8 +45,8 @@ async fn client_status(version: String) -> Result<ClientStatusView, String> {
     Ok(view(&client::status(&version, &manifest)))
 }
 
-/// Descarga (temp) → verifica → extrae (7-Zip) → instala → limpia → valida.
-/// Emite `client-progress` (stage: download|verify|extract|done) a la UI.
+/// Download (temp) → verify → extract (7-Zip) → install → clean up → validate.
+/// Emits `client-progress` (stage: download|verify|extract|done) to the UI.
 #[tauri::command]
 async fn client_ensure(app: tauri::AppHandle, version: String) -> Result<ClientStatusView, String> {
     let manifest = fetch_manifest(&version).await?;
@@ -113,7 +113,7 @@ fn launch_config(login_type: &str) -> Option<LaunchConfig> {
 async fn client_launch(version: String, server_id: String) -> Result<String, String> {
     use std::process::Command;
 
-    // 1. host del server elegido (desde el registry)
+    // 1. host of the chosen server (from the registry)
     let servers_url = format!("{}/versions/{}/servers", registry_url(), version);
     let resp = reqwest::get(&servers_url)
         .await
@@ -125,22 +125,22 @@ async fn client_launch(version: String, server_id: String) -> Result<String, Str
         .ok_or_else(|| format!("server {server_id} no encontrado en version {version}"))?;
     let host = server["host"].as_str().unwrap_or("127.0.0.1").to_string();
 
-    // 2. launch config según el protocolo de login del manifest
+    // 2. launch config based on the manifest's login protocol
     let manifest = fetch_manifest(&version).await?;
     let cfg = launch_config(&manifest.login.protocol)
-        .ok_or_else(|| format!("loginType '{}' sin soporte de lanzamiento", manifest.login.protocol))?;
+        .ok_or_else(|| format!("loginType '{}' launch not supported", manifest.login.protocol))?;
     let login_port = manifest.login.port.unwrap_or(1237);
 
     let dir = client::install_dir(&version);
     let exe = dir.join(cfg.exe);
     if !exe.exists() {
         return Err(format!(
-            "client no instalado en {} — ejecuta client_ensure primero",
+            "client not installed in {} — run client_ensure first",
             exe.display()
         ));
     }
 
-    // 3. sustituye {ip}/{port}/{user}/{pass} y lanza
+    // 3. substitute {ip}/{port}/{user}/{pass} and launch
     let args_str = cfg
         .args
         .replace("{ip}", &host)
@@ -154,9 +154,9 @@ async fn client_launch(version: String, server_id: String) -> Result<String, Str
         .current_dir(&bin_dir)
         .args(&args)
         .spawn()
-        .map_err(|e| format!("no se pudo lanzar {}: {e}", exe.display()))?;
+        .map_err(|e| format!("failed to launch {}: {e}", exe.display()))?;
     Ok(format!(
-        "{} lanzado ({version}/{server_id}) · login {host}:{login_port} · {}",
+        "{} launched ({version}/{server_id}) · login {host}:{login_port} · {}",
         cfg.exe, manifest.login.protocol
     ))
 }
@@ -166,7 +166,7 @@ async fn client_launch(version: String, server_id: String) -> Result<String, Str
 async fn open_install_dir(version: String) -> Result<String, String> {
     let dir = client::install_dir(&version);
     if !dir.exists() {
-        return Err(format!("no instalado en {}", dir.display()));
+        return Err(format!("not installed in {}", dir.display()));
     }
     std::process::Command::new("explorer.exe")
         .arg(&dir)
