@@ -7,6 +7,9 @@
         <span class="cis" :class="{ ok: ready }">{{ statusText }}</span>
         <span v-if="progress.active" class="cisz">{{ downloadedGb }} / {{ totalGb }} GB</span>
         <div class="cic">
+          <button title="Choose install folder" @click="$emit('choose-dir')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/><path d="M12 10v6M9 13h6"/></svg>
+          </button>
           <button title="Open install folder" @click="$emit('open-dir')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
           </button>
@@ -41,7 +44,7 @@ export default {
     },
     busy: { type: Boolean, default: false },
   },
-  emits: ["open-dir"],
+  emits: ["open-dir", "choose-dir"],
   computed: {
     ready() {
       return this.status.installed && this.status.verified && !this.progress.active;

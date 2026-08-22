@@ -56,6 +56,10 @@ async fn client_ensure(app: tauri::AppHandle, version: String) -> Result<ClientS
         let _ = app.emit("client-progress", p);
     })
     .await?;
+    client::ensure_required_path(
+        &manifest.requires_path,
+        std::path::Path::new(&st.install_dir),
+    )?;
     Ok(view(&st))
 }
 
@@ -64,6 +68,7 @@ async fn client_ensure(app: tauri::AppHandle, version: String) -> Result<ClientS
 async fn client_set_install_dir(version: String, dir: String) -> Result<ClientStatusView, String> {
     client::set_install_dir(&version, &dir)?;
     let manifest = fetch_manifest(&version).await?;
+    client::ensure_required_path(&manifest.requires_path, std::path::Path::new(&dir))?;
     Ok(view(&client::status(&version, &manifest)))
 }
 
@@ -119,10 +124,13 @@ async fn client_launch(version: String, server_id: String) -> Result<String, Str
         .await
         .map_err(|e| format!("GET {servers_url}: {e}"))?;
     let body: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
-    let server = body["servers"]
-        .as_array()
-        .and_then(|arr| arr.iter().find(|s| s["id"] == server_id))
-        .ok_or_else(|| format!("server {server_id} no encontrado en version {version}"))?;
+    let servers = body["servers"].as_array().ok_or("invalid servers response")?;
+    // Empty selection = first available server (the common single-server case).
+    let server = servers
+        .iter()
+        .find(|s| s["id"] == server_id)
+        .or_else(|| servers.first())
+        .ok_or_else(|| format!("no servers registered for version {version}"))?;
     let host = server["host"].as_str().unwrap_or("127.0.0.1").to_string();
 
     // 2. launch config based on the manifest's login protocol
@@ -148,6 +156,9 @@ async fn client_launch(version: String, server_id: String) -> Result<String, Str
         .replace("{user}", "test")
         .replace("{pass}", "test");
     let args: Vec<&str> = args_str.split_whitespace().collect();
+
+    // 4. repacked clients ship baked-in absolute paths (e.g. C:\AAEMU)
+    client::ensure_required_path(&manifest.requires_path, &dir)?;
 
     let bin_dir = exe.parent().map(|p| p.to_path_buf()).unwrap_or(dir);
     let _child = Command::new(&exe)

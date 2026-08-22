@@ -43,6 +43,7 @@
         :progress="progress"
         :busy="busy"
         @open-dir="openDir"
+        @choose-dir="chooseDir"
       >
         <PlayButton :label="primaryLabel" :busy="busy" @press="primaryAction" />
       </ClientBar>
@@ -73,6 +74,7 @@ import {
   clientEnsure,
   clientLaunch,
   openInstallDir,
+  setInstallDir,
 } from "./services/backend.js";
 
 const SERVERS_POLL_MS = 10_000;
@@ -237,6 +239,7 @@ export default {
         }
       } catch (e) {
         console.error("primaryAction failed:", e);
+        alert(`Play failed:\n${e}`);
         this.progress = { ...this.progress, active: false };
       } finally {
         this.busy = false;
@@ -246,6 +249,36 @@ export default {
 
     openDir() {
       if (this.selectedVersionId) openInstallDir(this.selectedVersionId);
+    },
+
+    /** Lets the user point this version at an existing game install. */
+    async chooseDir() {
+      if (!this.selectedVersionId || this.busy || !IN_TAURI) return;
+      try {
+        const { open } = await import("@tauri-apps/plugin-dialog");
+        const picked = await open({
+          directory: true,
+          multiple: false,
+          title: "Select the ArcheAge install folder",
+        });
+        console.log("chooseDir picked:", picked);
+        const dir =
+          typeof picked === "string"
+            ? picked
+            : Array.isArray(picked)
+              ? picked[0]
+              : (picked && picked.path) || "";
+        if (!dir) return;
+        this.busy = true;
+        const st = await setInstallDir(this.selectedVersionId, dir);
+        this.clientStatus = st;
+      } catch (e) {
+        console.error("chooseDir failed:", e);
+        alert(`chooseDir failed:\n${e}`);
+      } finally {
+        this.busy = false;
+        this.refreshClient();
+      }
     },
   },
 };

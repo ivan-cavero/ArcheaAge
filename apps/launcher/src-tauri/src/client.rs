@@ -17,6 +17,11 @@ pub struct Manifest {
     pub extract: ExtractConfig,
     pub verify: Vec<VerifyEntry>,
     pub login: LoginManifest,
+    /// Optional absolute path this client build hard-requires (e.g. a repacked
+    /// client baked with `C:\AAEMU` paths). The launcher creates a directory
+    /// junction there pointing at the install dir.
+    #[serde(default)]
+    pub requires_path: String,
     #[serde(default)]
     pub patches: Vec<PatchedFile>,
 }
@@ -162,6 +167,37 @@ pub fn set_install_dir(version: &str, dir: &str) -> Result<(), String> {
         .or_default()
         .install_dir = dir.to_string();
     save_config(&cfg)
+}
+
+/// Some repacked clients ship with absolute paths baked into their packed UI
+/// data (e.g. `C:\AAEMU\bin32\kr`). A directory junction at that exact path
+/// pointing at the install dir satisfies them without moving any file.
+pub fn ensure_required_path(requires_path: &str, install_dir: &Path) -> Result<(), String> {
+    let target = Path::new(requires_path);
+    if target.is_empty() || target.exists() {
+        return Ok(());
+    }
+    let parent = target
+        .parent()
+        .filter(|p| !p.as_os_str().is_empty())
+        .unwrap_or_else(|| Path::new("C:\\"));
+    std::fs::create_dir_all(parent).map_err(|e| format!("create {}: {e}", parent.display()))?;
+    // Junctions need no admin rights (unlike symlinks); mklink /J is the
+    // portable way to create one from Rust without extra crates.
+    let out = std::process::Command::new("cmd")
+        .args(["/c", "mklink", "/J"])
+        .arg(target)
+        .arg(install_dir)
+        .output()
+        .map_err(|e| e.to_string())?;
+    if !out.status.success() || !target.exists() {
+        return Err(format!(
+            "failed to create junction {}: {}",
+            target.display(),
+            String::from_utf8_lossy(&out.stderr)
+        ));
+    }
+    Ok(())
 }
 
 // ---------------------------------------------------------------------------
@@ -967,6 +1003,8 @@ mod tests {
     #[ignore]
     async fn full_client_ensure_pipeline() {
         let manifest_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .unwrap()
             .parent()
             .unwrap()
             .parent()

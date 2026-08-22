@@ -57,13 +57,19 @@
     "tool": "7z"
   },
   "verify": [
-    { "path": "game_pak", "minSize": 8000000000 },
-    { "path": "bin32/archeage.exe", "minSize": 1000000 },
-    { "path": "compact.sqlite3", "minSize": 100000000 }
+    {
+      "path": "game_pak",
+      "minSize": 8000000000
+    },
+    {
+      "path": "bin32/archeage.exe",
+      "minSize": 1000000
+    }
   ],
   "login": {
     "protocol": "trino_1_2"
   },
   "patches": [],
-  "contentPacks": []
+  "contentPacks": [],
+  "requiresPath": "C:\\\\AAEMU"
 }

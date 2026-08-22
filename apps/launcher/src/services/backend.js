@@ -36,6 +36,11 @@ export function openInstallDir(version) {
   return invoke("open_install_dir", { version });
 }
 
+/** Points a version at an existing install folder; returns fresh status. */
+export function setInstallDir(version, dir) {
+  return invoke("client_set_install_dir", { version, dir });
+}
+
 // --- Browser-demo fallbacks -------------------------------------------------
 
 function demoFor(cmd, args) {
