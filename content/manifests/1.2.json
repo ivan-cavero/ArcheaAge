@@ -7,7 +7,7 @@
       "kind": "direct",
       "url": "drive:18Nm_Q7OgWOfdw_8Xl4TBXa1Z51uGHEIh",
       "size": 129956864,
-      "sha256": "e580b61b0956c6a664bc8f006f81b243e11a6f7663c6c51b9a4b463f6cd5b0bf"
+      "sha256": "c6707846cf2572c7de43acc269e9ffc639d55c9e35bbcd8f29bb2d62d9100941"
     },
     {
       "name": "aaemu client.z01",
@@ -71,5 +71,5 @@
   },
   "patches": [],
   "contentPacks": [],
-  "requiresPath": "C:\\\\AAEMU"
+  "requiresPath": ""
 }
