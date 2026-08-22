@@ -119,6 +119,9 @@ pub struct VersionConfig {
     pub install_dir: String,
     #[serde(default)]
     pub hashes: HashMap<String, String>,
+    /// Hash of the last applied manifest — drives the Update flag.
+    #[serde(default)]
+    pub manifest_hash: Option<String>,
 }
 
 fn app_base_dir() -> PathBuf {
@@ -140,7 +143,7 @@ pub fn load_config() -> LauncherConfig {
         .unwrap_or_default()
 }
 
-fn save_config(cfg: &LauncherConfig) -> Result<(), String> {
+pub fn save_config(cfg: &LauncherConfig) -> Result<(), String> {
     let path = config_path();
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;

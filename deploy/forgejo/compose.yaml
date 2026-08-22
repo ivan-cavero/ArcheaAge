@@ -1,0 +1,37 @@
+# Forgejo en la VPS — git privado (overlay, ops, mirrors de GitHub).
+# Elección: Forgejo > Gitea para instalación nueva en 2026 — mismo software,
+# gobernanza sin ánimo de lucro (Codeberg e.V.), migración Gitea→Forgejo
+# soportada (la inversa no). Acepta las env vars GITEA__* por compatibilidad.
+#
+# Dokploy: servicio tipo "Compose" > dominio -> http://forgejo:3000.
+# Primera vez:
+#   docker exec -it <ctr> gitea admin user create --admin --username ivan --email tu@mail --password XXX
+#   (después desactiva el registro público en la UI)
+#
+# .env junto a este archivo:
+#   FORGEJO_DOMAIN=git.tudominio.com
+name: forge
+
+services:
+  forgejo:
+    # Clava el major; los upgrades cruzan migraciones de esquema — hazlos despierto y con backup.
+    image: codeberg.org/forgejo/forgejo:14
+    restart: unless-stopped
+    environment:
+      USER_UID: "1000"
+      USER_GID: "1000"
+      FORGEJO__server__DOMAIN: ${FORGEJO_DOMAIN}
+      FORGEJO__server__ROOT_URL: https://${FORGEJO_DOMAIN}
+      FORGEJO__server__SSH_DOMAIN: ${FORGEJO_DOMAIN}
+      FORGEJO__server__SSH_PORT: "222" # puerto SSH anunciado a los clones git@
+      # SQLite embebido: correcto para 1-5 usuarios. Postgres solo si algún día duele.
+      FORGEJO__database__DB_TYPE: sqlite3
+      FORGEJO__lfs__ENABLED: "true" # binarios medianos editados (texturas, etc.); clientes enteros NUNCA aquí
+    volumes:
+      - forgejo-data:/data
+    ports:
+      - "127.0.0.1:3000:3000" # HTTP interno; TLS lo termina Traefik/Dokploy
+      - "222:22"              # SSH de git directo a la VPS
+
+volumes:
+  forgejo-data:

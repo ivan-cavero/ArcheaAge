@@ -9,7 +9,7 @@ fn registry_url() -> String {
     std::env::var("ARCHEAAGE_REGISTRY").unwrap_or_else(|_| "http://localhost:5080".to_string())
 }
 
-async fn fetch_manifest(version: &str) -> Result<client::Manifest, String> {
+async fn fetch_manifest(version: &str) -> Result<(client::Manifest, String), String> {
     let url = format!("{}/versions/{}/manifest", registry_url(), version);
     let resp = reqwest::get(&url)
         .await
@@ -17,9 +17,16 @@ async fn fetch_manifest(version: &str) -> Result<client::Manifest, String> {
     if !resp.status().is_success() {
         return Err(format!("GET {url}: HTTP {}", resp.status()));
     }
-    resp.json::<client::Manifest>()
-        .await
-        .map_err(|e| format!("invalid manifest: {e}"))
+    let raw = resp.text().await.map_err(|e| format!("read {url}: {e}"))?;
+    let m: client::Manifest =
+        serde_json::from_str(&raw).map_err(|e| format!("invalid manifest: {e}"))?;
+    Ok((m, raw))
+}
+
+fn sha256_hex(s: &str) -> String {
+    use sha2::{Digest, Sha256};
+    let d = Sha256::digest(s.as_bytes());
+    d.iter().map(|b| format!("{b:02x}")).collect()
 }
 
 #[derive(Serialize)]
@@ -28,29 +35,42 @@ struct ClientStatusView {
     verified: bool,
     files: usize,
     install_dir: String,
+    update_available: bool,
 }
 
-fn view(s: &client::InstallStatus) -> ClientStatusView {
+fn view(s: &client::InstallStatus, update_available: bool) -> ClientStatusView {
     ClientStatusView {
         installed: s.installed,
         verified: s.verified,
         files: s.files,
         install_dir: s.install_dir.clone(),
+        update_available,
     }
 }
 
 /// Local client state for a version (installed/verified).
 #[tauri::command]
 async fn client_status(version: String) -> Result<ClientStatusView, String> {
-    let manifest = fetch_manifest(&version).await?;
-    Ok(view(&client::status(&version, &manifest)))
+    let (manifest, raw) = fetch_manifest(&version).await?;
+    let current_hash = sha256_hex(&raw);
+
+    let mut cfg = client::load_config();
+    let entry = cfg.versions.entry(version.clone()).or_default();
+    let stored = entry.manifest_hash.clone();
+    let update_available = stored.is_some() && stored.as_deref() != Some(current_hash.as_str());
+    if stored.is_none() {
+        entry.manifest_hash = Some(current_hash); // baseline on first sight
+        client::save_config(&cfg)?;
+    }
+
+    Ok(view(&client::status(&version, &manifest), update_available))
 }
 
 /// Download (temp) → verify → extract (7-Zip) → install → clean up → validate.
 /// Emits `client-progress` (stage: download|verify|extract|done) to the UI.
 #[tauri::command]
 async fn client_ensure(app: tauri::AppHandle, version: String) -> Result<ClientStatusView, String> {
-    let manifest = fetch_manifest(&version).await?;
+    let (manifest, raw) = fetch_manifest(&version).await?;
     // Directory where the bundled 7-Zip lives (embedded via bundle.resources).
     let resource_dir = app.path().resource_dir().ok();
     let st = client::ensure(&version, &manifest, resource_dir.as_deref(), &|p| {
@@ -61,16 +81,28 @@ async fn client_ensure(app: tauri::AppHandle, version: String) -> Result<ClientS
         &manifest.requires_path,
         std::path::Path::new(&st.install_dir),
     )?;
-    Ok(view(&st))
+
+    // Mark this manifest as applied so the Update flag clears.
+    let mut cfg = client::load_config();
+    cfg.versions
+        .entry(version.clone())
+        .or_default()
+        .manifest_hash = Some(sha256_hex(&raw));
+    client::save_config(&cfg)?;
+
+    Ok(view(&st, false))
 }
 
 /// Changes the install folder for a version.
 #[tauri::command]
 async fn client_set_install_dir(version: String, dir: String) -> Result<ClientStatusView, String> {
     client::set_install_dir(&version, &dir)?;
-    let manifest = fetch_manifest(&version).await?;
+    let (manifest, _raw) = fetch_manifest(&version).await?;
     client::ensure_required_path(&manifest.requires_path, std::path::Path::new(&dir))?;
-    Ok(view(&client::status(&version, &manifest)))
+    Ok(view(
+        &client::status(&version, &manifest),
+        false, // just re-linked; update flag recomputed on next status
+    ))
 }
 
 /// Launch configuration per login protocol (see docs/VERSIONS.md).
@@ -138,7 +170,7 @@ async fn client_launch(version: String, server_id: String) -> Result<String, Str
     let host = server["host"].as_str().unwrap_or("127.0.0.1").to_string();
 
     // 2. launch config based on the manifest's login protocol
-    let manifest = fetch_manifest(&version).await?;
+    let (manifest, _raw) = fetch_manifest(&version).await?;
     let cfg = launch_config(&manifest.login.protocol)
         .ok_or_else(|| format!("loginType '{}' launch not supported", manifest.login.protocol))?;
     let login_port = manifest.login.port.unwrap_or(1237);
