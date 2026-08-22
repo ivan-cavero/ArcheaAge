@@ -59,10 +59,27 @@ try
         using var src = File.OpenRead(localFile);
         if (!pak.ReplaceFile(ref info, src, modified))
         {
-            Console.WriteLine("ERROR: ReplaceFile failed");
-            return 1;
+            // In-place overwrite only works when the new data fits in the old
+            // slot. When it grew, relocate: delete the entry and append at the
+            // end of the pak (autoSpareSpace manages padding).
+            Console.WriteLine("in-place failed (grew) - relocating to end");
+            var storedName = info.name;
+            if (!pak.DeleteFile(storedName))
+            {
+                Console.WriteLine("ERROR: DeleteFile failed during relocation");
+                return 1;
+            }
+            if (!pak.AddFileFromFile(localFile, asPath, autoSpareSpace: true))
+            {
+                Console.WriteLine("ERROR: AddFileFromFile failed during relocation");
+                return 1;
+            }
+            Console.WriteLine($"relocated: {asPath} ({new FileInfo(localFile).Length} bytes)");
         }
-        Console.WriteLine($"replaced: {info.name} ({info.size} bytes)");
+        else
+        {
+            Console.WriteLine($"replaced: {info.name} ({info.size} bytes)");
+        }
     }
     else
     {
