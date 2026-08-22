@@ -9,7 +9,7 @@ fn registry_url() -> String {
     std::env::var("ARCHEAAGE_REGISTRY").unwrap_or_else(|_| "http://localhost:5080".to_string())
 }
 
-async fn fetch_manifest(version: &str) -> Result<(client::Manifest, String), String> {
+async fn fetch_manifest(version: &str) -> Result<client::Manifest, String> {
     let url = format!("{}/versions/{}/manifest", registry_url(), version);
     let resp = reqwest::get(&url)
         .await
@@ -17,16 +17,9 @@ async fn fetch_manifest(version: &str) -> Result<(client::Manifest, String), Str
     if !resp.status().is_success() {
         return Err(format!("GET {url}: HTTP {}", resp.status()));
     }
-    let raw = resp.text().await.map_err(|e| format!("read {url}: {e}"))?;
-    let m: client::Manifest =
-        serde_json::from_str(&raw).map_err(|e| format!("invalid manifest: {e}"))?;
-    Ok((m, raw))
-}
-
-fn sha256_hex(s: &str) -> String {
-    use sha2::{Digest, Sha256};
-    let d = Sha256::digest(s.as_bytes());
-    d.iter().map(|b| format!("{b:02x}")).collect()
+    resp.json::<client::Manifest>()
+        .await
+        .map_err(|e| format!("invalid manifest: {e}"))
 }
 
 #[derive(Serialize)]
@@ -35,42 +28,29 @@ struct ClientStatusView {
     verified: bool,
     files: usize,
     install_dir: String,
-    update_available: bool,
 }
 
-fn view(s: &client::InstallStatus, update_available: bool) -> ClientStatusView {
+fn view(s: &client::InstallStatus) -> ClientStatusView {
     ClientStatusView {
         installed: s.installed,
         verified: s.verified,
         files: s.files,
         install_dir: s.install_dir.clone(),
-        update_available,
     }
 }
 
 /// Local client state for a version (installed/verified).
 #[tauri::command]
 async fn client_status(version: String) -> Result<ClientStatusView, String> {
-    let (manifest, raw) = fetch_manifest(&version).await?;
-    let current_hash = sha256_hex(&raw);
-
-    let mut cfg = client::load_config();
-    let entry = cfg.versions.entry(version.clone()).or_default();
-    let stored = entry.manifest_hash.clone();
-    let update_available = stored.is_some() && stored.as_deref() != Some(current_hash.as_str());
-    if stored.is_none() {
-        entry.manifest_hash = Some(current_hash); // baseline on first sight
-        client::save_config(&cfg)?;
-    }
-
-    Ok(view(&client::status(&version, &manifest), update_available))
+    let manifest = fetch_manifest(&version).await?;
+    Ok(view(&client::status(&version, &manifest)))
 }
 
 /// Download (temp) → verify → extract (7-Zip) → install → clean up → validate.
 /// Emits `client-progress` (stage: download|verify|extract|done) to the UI.
 #[tauri::command]
 async fn client_ensure(app: tauri::AppHandle, version: String) -> Result<ClientStatusView, String> {
-    let (manifest, raw) = fetch_manifest(&version).await?;
+    let manifest = fetch_manifest(&version).await?;
     // Directory where the bundled 7-Zip lives (embedded via bundle.resources).
     let resource_dir = app.path().resource_dir().ok();
     let st = client::ensure(&version, &manifest, resource_dir.as_deref(), &|p| {
@@ -81,28 +61,16 @@ async fn client_ensure(app: tauri::AppHandle, version: String) -> Result<ClientS
         &manifest.requires_path,
         std::path::Path::new(&st.install_dir),
     )?;
-
-    // Mark this manifest as applied so the Update flag clears.
-    let mut cfg = client::load_config();
-    cfg.versions
-        .entry(version.clone())
-        .or_default()
-        .manifest_hash = Some(sha256_hex(&raw));
-    client::save_config(&cfg)?;
-
-    Ok(view(&st, false))
+    Ok(view(&st))
 }
 
 /// Changes the install folder for a version.
 #[tauri::command]
 async fn client_set_install_dir(version: String, dir: String) -> Result<ClientStatusView, String> {
     client::set_install_dir(&version, &dir)?;
-    let (manifest, _raw) = fetch_manifest(&version).await?;
+    let manifest = fetch_manifest(&version).await?;
     client::ensure_required_path(&manifest.requires_path, std::path::Path::new(&dir))?;
-    Ok(view(
-        &client::status(&version, &manifest),
-        false, // just re-linked; update flag recomputed on next status
-    ))
+    Ok(view(&client::status(&version, &manifest)))
 }
 
 /// Launch configuration per login protocol (see docs/VERSIONS.md).
@@ -110,7 +78,7 @@ async fn client_set_install_dir(version: String, dir: String) -> Result<ClientSt
 struct LaunchConfig {
     /// executable path relative to the install dir
     exe: &'static str,
-    /// argument template — `{ip}`, `{port}`, `{user}`, `{pass}` get substituted
+    /// argument template - `{ip}`, `{port}`, `{user}`, `{pass}` get substituted
     args: &'static str,
 }
 
@@ -170,7 +138,7 @@ async fn client_launch(version: String, server_id: String) -> Result<String, Str
     let host = server["host"].as_str().unwrap_or("127.0.0.1").to_string();
 
     // 2. launch config based on the manifest's login protocol
-    let (manifest, _raw) = fetch_manifest(&version).await?;
+    let manifest = fetch_manifest(&version).await?;
     let cfg = launch_config(&manifest.login.protocol)
         .ok_or_else(|| format!("loginType '{}' launch not supported", manifest.login.protocol))?;
     let login_port = manifest.login.port.unwrap_or(1237);
@@ -179,13 +147,13 @@ async fn client_launch(version: String, server_id: String) -> Result<String, Str
     let exe = dir.join(cfg.exe);
     if !exe.exists() {
         return Err(format!(
-            "client not installed in {} — run client_ensure first",
+            "client not installed in {} - run client_ensure first",
             exe.display()
         ));
     }
 
     // 3. substitute per-protocol placeholders using saved credentials
-    let creds = client::login_get().ok_or("Not logged in — press Log In first")?;
+    let creds = client::login_get().ok_or("Not logged in - press Log In first")?;
     let mut args_str = cfg
         .args
         .replace("{ip}", &host)
@@ -207,7 +175,6 @@ async fn client_launch(version: String, server_id: String) -> Result<String, Str
             }
         };
     }
-
     let args: Vec<&str> = args_str.split_whitespace().collect();
 
     // 4. repacked clients ship baked-in absolute paths (e.g. C:\AAEMU)
@@ -252,14 +219,15 @@ async fn auth_logout() -> Result<(), String> {
 
 /// Opens the install folder of a version in Windows Explorer.
 #[tauri::command]
-async fn open_install_dir(version: String) -> Result<String, String> {    let dir = client::install_dir(&version);
+async fn open_install_dir(version: String) -> Result<String, String> {
+    let dir = client::install_dir(&version);
     if !dir.exists() {
         return Err(format!("not installed in {}", dir.display()));
     }
     std::process::Command::new("explorer.exe")
         .arg(&dir)
         .spawn()
-        .map_err(|e| format!("no se pudo abrir {}: {e}", dir.display()))?;
+        .map_err(|e| format!("failed to open {}: {e}", dir.display()))?;
     Ok(dir.to_string_lossy().into_owned())
 }
 

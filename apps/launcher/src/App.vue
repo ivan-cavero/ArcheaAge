@@ -179,7 +179,6 @@ export default {
       if (this.busy) return "Working";
       if (!this.clientStatus.installed) return "Download";
       if (!this.login) return "Log In";
-      if (this.clientStatus.update_available) return "Update";
       return "Play";
     },
     tabTitle() {
@@ -276,9 +275,7 @@ export default {
     async primaryAction() {
       if (!this.selectedVersionId || this.busy) return;
       this.lastError = "";
-      const needsInstall =
-        !this.clientStatus.installed || this.clientStatus.update_available;
-      if (needsInstall) {
+      if (!this.clientStatus.installed) {
         this.busy = true;
         try {
           this.progress = { active: true, stage: "starting", file: "", downloaded: 0, total: 0 };

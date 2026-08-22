@@ -119,9 +119,6 @@ pub struct VersionConfig {
     pub install_dir: String,
     #[serde(default)]
     pub hashes: HashMap<String, String>,
-    /// Hash of the last applied manifest — drives the Update flag.
-    #[serde(default)]
-    pub manifest_hash: Option<String>,
 }
 
 fn app_base_dir() -> PathBuf {
