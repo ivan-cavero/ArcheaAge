@@ -18,15 +18,15 @@ pub struct Manifest {
     pub verify: Vec<VerifyEntry>,
     pub login: LoginManifest,
     /// Optional absolute path this client build hard-requires (e.g. a repacked
-    /// client baked with `C:\AAEMU` paths). The launcher creates a directory
-    /// junction there pointing at the install dir.
+    /// client baked with `C:\AAEMU` paths). Empty = disabled: the ticket flow
+    /// (which skips the login UI that referenced those paths) works without it.
     #[serde(default)]
     pub requires_path: String,
     #[serde(default)]
     pub patches: Vec<PatchedFile>,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 pub struct ManifestFile {
     pub name: String,
     /// "direct" = installed as-is | "archive" = part of a compressed archive
@@ -41,7 +41,7 @@ pub struct ManifestFile {
     pub sha256: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Default, Deserialize)]
 pub struct ExtractConfig {
     /// Part that 7-Zip uses as input for the spanned archive
     pub archive: String,
@@ -58,7 +58,7 @@ pub struct VerifyEntry {
     pub min_size: u64,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Default, Deserialize)]
 pub struct LoginManifest {
     #[serde(default)]
     pub protocol: String,
@@ -148,6 +148,16 @@ pub fn save_config(cfg: &LauncherConfig) -> Result<(), String> {
     std::fs::write(&path, serde_json::to_string_pretty(cfg).unwrap()).map_err(|e| e.to_string())
 }
 
+/// Portable default root: the folder the launcher exe lives in, so installs
+/// travel with it (`<launcher>/instances/<version>`). Dev runs land in
+/// target/debug; override via config.json / the folder picker if needed.
+fn default_install_root() -> PathBuf {
+    std::env::current_exe()
+        .ok()
+        .and_then(|e| e.parent().map(|p| p.to_path_buf()))
+        .unwrap_or_else(app_base_dir)
+}
+
 /// Install folder for a version (user-configurable).
 pub fn install_dir(version: &str) -> PathBuf {
     let cfg = load_config();
@@ -160,7 +170,7 @@ pub fn install_dir(version: &str) -> PathBuf {
                 Some(PathBuf::from(&v.install_dir))
             }
         })
-        .unwrap_or_else(|| app_base_dir().join("clients").join(version))
+        .unwrap_or_else(|| default_install_root().join("instances").join(version))
 }
 
 pub fn set_install_dir(version: &str, dir: &str) -> Result<(), String> {
@@ -837,6 +847,9 @@ pub async fn ensure(
         // Some archives wrap the whole client in a single top-level folder
         // (e.g. "AAEmu Client/"). Move its contents up to the install root.
         normalize_client_root(&dir);
+        // Repacked distributions ship runtime junk from the packer's machine —
+        // bin32/debug.log references its old install path (e.g. C:\AAEMU).
+        let _ = std::fs::remove_file(dir.join("bin32").join("debug.log"));
     }
 
     // 3. Patches: deltas of our mods (pak/lua/sqlite). Downloaded and verified;
@@ -900,12 +913,158 @@ pub async fn ensure(
 }
 
 // ---------------------------------------------------------------------------
+// Integrity check
+// ---------------------------------------------------------------------------
+
+#[derive(Serialize, Clone)]
+pub struct VerifyReport {
+    pub ok: bool,
+    pub checked: usize,
+    /// Files compared by full SHA-256 (direct downloads carry the hash).
+    pub hashed: usize,
+    pub failed: Vec<String>,
+}
+
+/// Integrity check for an installed version: direct files with a known
+/// manifest sha256 are hashed in full; everything else (incl. the ~24 GB
+/// game_pak, whose source archives players don't keep) is presence + min-size.
+pub fn verify(version: &str, manifest: &Manifest) -> VerifyReport {
+    verify_in(&install_dir(version), manifest)
+}
+
+/// Same check against an explicit folder (testable; no config lookup).
+pub fn verify_in(dir: &Path, manifest: &Manifest) -> VerifyReport {
+    use sha2::{Digest, Sha256};
+    use std::io::Read;
+
+    let mut failed: Vec<String> = Vec::new();
+    let mut checked = 0usize;
+    let mut hashed = 0usize;
+
+    for f in &manifest.files {
+        let full = dir.join(&f.name);
+        if !full.exists() {
+            failed.push(format!("{}: missing", f.name));
+            checked += 1;
+            continue;
+        }
+        if f.kind == "direct" && !f.sha256.is_empty() && !f.sha256.starts_with("REPLACE_WITH") {
+            hashed += 1;
+            let hash_ok = std::fs::File::open(&full).map(|mut file| {
+                let mut hasher = Sha256::new();
+                let mut buf = [0u8; 65536];
+                loop {
+                    match file.read(&mut buf) {
+                        Ok(0) => break,
+                        Ok(n) => hasher.update(&buf[..n]),
+                        Err(_) => return false,
+                    }
+                }
+                format!("{:x}", hasher.finalize()) == f.sha256
+            });
+            if !hash_ok.unwrap_or(false) {
+                failed.push(format!("{}: sha256 mismatch", f.name));
+            }
+        } else if !file_ok(&full, f.size) {
+            failed.push(format!("{}: truncated", f.name));
+        }
+        checked += 1;
+    }
+
+    // Verify entries cover installed pieces without download entries
+    // (game_pak, bin32/…). Skip ones already covered above.
+    let seen: std::collections::HashSet<&str> =
+        manifest.files.iter().map(|f| f.name.as_str()).collect();
+    for v in &manifest.verify {
+        if seen.contains(v.path.as_str()) {
+            continue;
+        }
+        if !file_ok(&dir.join(&v.path), v.min_size) {
+            failed.push(format!("{}: missing or truncated", v.path));
+        }
+        checked += 1;
+    }
+
+    VerifyReport {
+        ok: failed.is_empty(),
+        checked,
+        hashed,
+        failed,
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn verify_hashes_direct_and_flags_missing() {
+        use std::fs;
+
+        let dir = std::env::temp_dir().join("archeaage-test-verify");
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&dir).unwrap();
+        // "hello" → known sha256
+        fs::write(dir.join("compact.sqlite3"), b"hello").unwrap();
+
+        let manifest = Manifest {
+            version: "1.2".into(),
+            client: "t".into(),
+            files: vec![
+                ManifestFile {
+                    name: "compact.sqlite3".into(),
+                    kind: "direct".into(),
+                    url: "drive:x".into(),
+                    size: 5,
+                    sha256:
+                        "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824".into(),
+                },
+                ManifestFile {
+                    name: "missing.bin".into(),
+                    kind: "direct".into(),
+                    url: "drive:y".into(),
+                    size: 0,
+                    sha256: String::new(),
+                },
+            ],
+            extract: ExtractConfig {
+                archive: String::new(),
+                tool: String::new(),
+            },
+            verify: vec![VerifyEntry {
+                path: "game_pak".into(),
+                min_size: 1,
+            }],
+            login: LoginManifest::default(),
+            requires_path: String::new(),
+            patches: Vec::new(),
+        };
+
+        let r = verify_in(&dir, &manifest);
+        assert!(!r.ok);
+        assert_eq!(r.hashed, 1);
+        assert_eq!(r.checked, 3);
+        assert!(r.failed.iter().any(|f| f.contains("missing.bin")));
+        assert!(r.failed.iter().any(|f| f.contains("game_pak")));
+
+        // Fix everything: pak present + no missing file.
+        fs::create_dir_all(dir.join("game_pak")).unwrap();
+        fs::write(dir.join("game_pak").join("a.pak"), b"x").unwrap();
+        let mut ok_manifest_files = manifest.files.clone();
+        ok_manifest_files.remove(1);
+        let m2 = Manifest {
+            files: ok_manifest_files,
+            ..manifest
+        };
+        let r = verify_in(&dir, &m2);
+        assert!(r.ok, "failed: {:?}", r.failed);
+
+        let _ = fs::remove_dir_all(&dir);
+    }
 
     #[test]
     fn file_ok_checks_size() {

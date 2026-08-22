@@ -64,6 +64,13 @@ async fn client_ensure(app: tauri::AppHandle, version: String) -> Result<ClientS
     Ok(view(&st))
 }
 
+/// Full integrity check of an installed version (SHA-256 where known).
+#[tauri::command]
+async fn client_verify(version: String) -> Result<client::VerifyReport, String> {
+    let manifest = fetch_manifest(&version).await?;
+    Ok(client::verify(&version, &manifest))
+}
+
 /// Changes the install folder for a version.
 #[tauri::command]
 async fn client_set_install_dir(version: String, dir: String) -> Result<ClientStatusView, String> {
@@ -238,6 +245,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             client_status,
             client_ensure,
+            client_verify,
             client_set_install_dir,
             client_launch,
             open_install_dir,

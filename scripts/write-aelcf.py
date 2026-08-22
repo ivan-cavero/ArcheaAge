@@ -1,7 +1,7 @@
 import json, os, sys
 
-launcher_dir = os.path.expandvars(r"%LOCALAPPDATA%\ArcheaAge\clients\1.2\Launcher\AAEmu.Launcher")
-game_exe = os.path.expandvars(r"%LOCALAPPDATA%\ArcheaAge\clients\1.2\bin32\archeage.exe")
+launcher_dir = os.path.expandvars(r"%LOCALAPPDATA%\ArcheaAge\instances\1.2\Launcher\AAEmu.Launcher")
+game_exe = os.path.expandvars(r"%LOCALAPPDATA%\ArcheaAge\instances\1.2\bin32\archeage.exe")
 path = os.path.join(launcher_dir, "settings.aelcf")
 
 cfg = json.load(open(path))

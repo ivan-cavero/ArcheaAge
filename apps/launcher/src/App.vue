@@ -45,6 +45,7 @@
         :error="lastError"
         @open-dir="openDir"
         @choose-dir="chooseDir"
+        @verify="verifyFiles"
         @dismiss-error="lastError = ''"
       >
         <PlayButton :label="primaryLabel" :busy="busy" @press="primaryAction" />
@@ -104,6 +105,7 @@ import {
   onClientProgress,
   clientStatus,
   clientEnsure,
+  clientVerify,
   clientLaunch,
   openInstallDir,
   setInstallDir,
@@ -304,6 +306,27 @@ export default {
       } finally {
         this.busy = false;
         this.refreshClient();
+      }
+    },
+
+    /** Full integrity check (SHA-256 where the manifest carries hashes). */
+    async verifyFiles() {
+      if (!this.selectedVersionId || this.busy) return;
+      this.lastError = "";
+      this.busy = true;
+      try {
+        const r = await clientVerify(this.selectedVersionId);
+        if (r.ok) {
+          this.clientStatus = { ...this.clientStatus, verified: true };
+        } else {
+          const shown = r.failed.slice(0, 3).join(" · ");
+          this.lastError = `Integrity: ${r.failed.length}/${r.checked} problems — ${shown}`;
+        }
+      } catch (e) {
+        console.error("verify failed:", e);
+        this.lastError = String(e);
+      } finally {
+        this.busy = false;
       }
     },
 

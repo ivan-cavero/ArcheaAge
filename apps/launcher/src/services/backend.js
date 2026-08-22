@@ -28,6 +28,11 @@ export function clientEnsure(version) {
   return invoke("client_ensure", { version });
 }
 
+/** Full integrity check: {ok, checked, hashed, failed:["path: reason"]} */
+export function clientVerify(version) {
+  return invoke("client_verify", { version });
+}
+
 export function clientLaunch(version, serverId) {
   return invoke("client_launch", { version, serverId });
 }
@@ -70,6 +75,8 @@ function demoFor(cmd, args) {
         files: 1284,
         install_dir: "C:\\demo",
       };
+    case "client_verify":
+      return { ok: true, checked: 0, hashed: 0, failed: [] };
     case "client_launch":
       return "launched";
     default:
