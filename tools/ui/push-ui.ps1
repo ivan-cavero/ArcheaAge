@@ -27,8 +27,17 @@ $alb   = Join-Path $PSScriptRoot "luac-build\addon_panel.alb"
 if (!(Test-Path $pak))  { throw "game_pak not found: $pak" }
 if (!(Test-Path $luac)) { throw "luac5f.exe not found ($luac) - see tools/ui/README.md build step" }
 
-# 1. compile
-& $luac -o $alb (Join-Path $PSScriptRoot "addon_panel.lua")
+# 1. compile (overrides.lua from the visual editor is prepended when present)
+$src = Join-Path $PSScriptRoot "addon_panel.lua"
+$ovr = Join-Path $PSScriptRoot "overrides.lua"
+$combined = Join-Path $env:TEMP "ivanpanel_combined.lua"
+if (Test-Path $ovr) {
+    Get-Content $ovr, $src -Raw | Set-Content $combined -Encoding UTF8
+    Write-Output "incluyendo overrides.lua"
+    & $luac -o $alb $combined
+} else {
+    & $luac -o $alb $src
+}
 if ($LASTEXITCODE -ne 0) { throw "compile failed" }
 Write-Output ("[1/2] compiled: {0} bytes" -f (Get-Item $alb).Length)
 
