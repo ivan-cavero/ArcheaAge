@@ -19,8 +19,11 @@
         <div class="pf" :style="{ width: pct + '%' }"></div>
       </div>
       <div class="pinf">
-        <span>{{ pct }}%</span>
-        <span v-if="progress.active">{{ stageText }}</span>
+        <span v-if="error" class="cerr" title="Dismiss" @click="$emit('dismiss-error')">⚠ {{ error }} ✕</span>
+        <template v-else>
+          <span>{{ pct }}%</span>
+          <span v-if="progress.active">{{ stageText }}</span>
+        </template>
       </div>
     </div>
     <div class="pa">
@@ -43,8 +46,9 @@ export default {
       default: () => ({ active: false, stage: "", file: "", downloaded: 0, total: 0 }),
     },
     busy: { type: Boolean, default: false },
+    error: { type: String, default: "" },
   },
-  emits: ["open-dir", "choose-dir"],
+  emits: ["open-dir", "choose-dir", "dismiss-error"],
   computed: {
     ready() {
       return this.status.installed && this.status.verified && !this.progress.active;
@@ -192,6 +196,14 @@ export default {
   font-size: 8.5px;
   color: var(--text-m);
   font-variant-numeric: tabular-nums;
+}
+.cerr {
+  color: #e08a8a;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 .pa {
   display: flex;

@@ -11,14 +11,6 @@
         Player driven.
       </p>
     </div>
-    <div class="hero-u">
-      <div class="u-badge">
-        <span class="u-dot"></span>
-        <span class="u-name">Adventurer</span>
-        <span class="u-st">Online</span>
-        <span class="u-ch">&#9662;</span>
-      </div>
-    </div>
   </section>
 </template>
 
@@ -32,7 +24,7 @@ export default { name: "HeroBanner" };
   height: 300px;
   flex-shrink: 0;
   display: grid;
-  grid-template-columns: 1fr 240px;
+  grid-template-columns: 1fr;
   overflow: hidden;
 }
 .hero-bg {
@@ -116,48 +108,5 @@ export default { name: "HeroBanner" };
   line-height: 1.7;
   margin-top: 8px;
   max-width: 380px;
-}
-.hero-u {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  justify-content: flex-end;
-  padding: 18px 20px 0 0;
-}
-.u-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  border-radius: 4px;
-  background: rgba(16, 26, 23, 0.85);
-  border: 1px solid var(--brd);
-  backdrop-filter: blur(4px);
-  cursor: pointer;
-  transition: border-color 0.12s;
-}
-.u-badge:hover {
-  border-color: var(--primary-d);
-}
-.u-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--on);
-  box-shadow: 0 0 4px var(--on);
-}
-.u-name {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text);
-}
-.u-st {
-  font-size: 10px;
-  color: var(--text-2);
-}
-.u-ch {
-  font-size: 8px;
-  color: var(--text-m);
-  margin-left: 2px;
 }
 </style>

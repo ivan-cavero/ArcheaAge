@@ -41,6 +41,17 @@ export function setInstallDir(version, dir) {
   return invoke("client_set_install_dir", { version, dir });
 }
 
+/** Saved-session helpers: password stored only as hash + raw for CLI args. */
+export function authLogin(username, password) {
+  return invoke("auth_login", { username, password });
+}
+export function authStatus() {
+  return invoke("auth_status");
+}
+export function authLogout() {
+  return invoke("auth_logout");
+}
+
 // --- Browser-demo fallbacks -------------------------------------------------
 
 function demoFor(cmd, args) {

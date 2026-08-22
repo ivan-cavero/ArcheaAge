@@ -108,6 +108,9 @@ pub struct Progress {
 pub struct LauncherConfig {
     #[serde(default)]
     pub versions: HashMap<String, VersionConfig>,
+    /// Saved launcher credentials (password kept only as SHA-256 hex).
+    #[serde(default)]
+    pub login: Option<LoginCredentials>,
 }
 
 #[derive(Serialize, Deserialize, Default)]
@@ -166,6 +169,48 @@ pub fn set_install_dir(version: &str, dir: &str) -> Result<(), String> {
         .entry(version.to_string())
         .or_default()
         .install_dir = dir.to_string();
+    save_config(&cfg)
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct LoginCredentials {
+    pub username: String,
+    /// Lowercase hex SHA-256 of the password (used by the Trion ticket).
+    pub password_hash: String,
+    /// Raw password — required by protocols that pass credentials on the
+    /// command line (mailru/xlworld). Stored because the user asked the
+    /// launcher to remember the session; never sent anywhere else.
+    #[serde(default)]
+    pub password: String,
+}
+
+pub fn login_get() -> Option<LoginCredentials> {
+    load_config().login
+}
+
+pub fn login_set(username: &str, password: &str) -> Result<LoginCredentials, String> {
+    use sha2::{Digest, Sha256};
+    if username.trim().is_empty() || password.is_empty() {
+        return Err("empty credentials".into());
+    }
+    let hash: String = Sha256::digest(password.as_bytes())
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect();
+    let mut cfg = load_config();
+    let creds = LoginCredentials {
+        username: username.trim().to_string(),
+        password_hash: hash,
+        password: password.to_string(),
+    };
+    cfg.login = Some(creds.clone());
+    save_config(&cfg)?;
+    Ok(creds)
+}
+
+pub fn login_clear() -> Result<(), String> {
+    let mut cfg = load_config();
+    cfg.login = None;
     save_config(&cfg)
 }
 

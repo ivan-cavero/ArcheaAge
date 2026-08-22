@@ -1,5 +1,14 @@
 <template>
   <div class="tb" data-tauri-drag-region>
+    <span
+      class="tb-user"
+      :class="{ anon: !user }"
+      :title="user ? 'Click to log out' : 'Not logged in'"
+      @click="user && $emit('logout')"
+    >
+      <span class="tb-dot" :class="{ on: !!user }"></span>
+      {{ user ? user + " · log out" : "Not logged in" }}
+    </span>
     <div class="tb-b">
       <button title="Minimize" @click.stop="win?.minimize()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 12h14"/></svg>
@@ -19,6 +28,8 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 
 export default {
   name: "TitleBar",
+  props: { user: { type: String, default: "" } },
+  emits: ["logout"],
   data() {
     return { win: null };
   },
@@ -37,10 +48,40 @@ export default {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  gap: 8px;
   height: 30px;
   flex-shrink: 0;
   background: rgba(7, 16, 13, 0.3);
   -webkit-app-region: drag;
+}
+.tb-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--text-2);
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+.tb-user.anon {
+  color: var(--text-m);
+}
+.tb-user:not(.anon) {
+  cursor: pointer;
+}
+.tb-user:not(.anon):hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+}
+.tb-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-m);
+}
+.tb-dot.on {
+  background: var(--on);
+  box-shadow: 0 0 4px var(--on);
 }
 .tb-b {
   display: flex;

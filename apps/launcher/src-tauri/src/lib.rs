@@ -1,3 +1,4 @@
+pub mod auth_ticket;
 pub mod client;
 
 use serde::Serialize;
@@ -85,7 +86,10 @@ fn launch_config(login_type: &str) -> Option<LaunchConfig> {
     let cfg = match login_type {
         "trino_1_2" | "trino_3_5" => LaunchConfig {
             exe: "bin32/archeage.exe",
-            args: "-t +auth_ip {ip} -auth_port {port} -handle 00000000:00000000 -lang en_us",
+            // -handle (auth ticket) is appended dynamically at launch time.
+            // -lang en_us is REQUIRED: without it the client falls back to the
+            // kr locale and pops "Failed to load commands!" at startup.
+            args: "-t +auth_ip {ip} -auth_port {port} -lang en_us",
         },
         "trino_6_0" => LaunchConfig {
             exe: "bin64/archeage.exe",
@@ -148,13 +152,30 @@ async fn client_launch(version: String, server_id: String) -> Result<String, Str
         ));
     }
 
-    // 3. substitute {ip}/{port}/{user}/{pass} and launch
-    let args_str = cfg
+    // 3. substitute per-protocol placeholders using saved credentials
+    let creds = client::login_get().ok_or("Not logged in — press Log In first")?;
+    let mut args_str = cfg
         .args
         .replace("{ip}", &host)
         .replace("{port}", &login_port.to_string())
-        .replace("{user}", "test")
-        .replace("{pass}", "test");
+        .replace("{user}", &creds.username)
+        .replace("{pass}", &creds.password);
+
+    // Trion 1.2/3.5: publish an auth ticket so the client skips its own
+    // (flaky) login screen — mirrors the official AAEmu-Launcher flow.
+    if matches!(manifest.login.protocol.as_str(), "trino_1_2" | "trino_3_5") {
+        args_str += &match auth_ticket::create_trino_ticket_hashed(
+            &creds.username,
+            &creds.password_hash,
+        ) {
+            Ok((hmap, hevt)) => format!(" -handle {:08X}:{:08X}", hmap, hevt),
+            Err(e) => {
+                eprintln!("auth ticket failed, falling back to manual login: {e}");
+                " -handle 00000000:00000000".to_string()
+            }
+        };
+    }
+
     let args: Vec<&str> = args_str.split_whitespace().collect();
 
     // 4. repacked clients ship baked-in absolute paths (e.g. C:\AAEMU)
@@ -172,10 +193,34 @@ async fn client_launch(version: String, server_id: String) -> Result<String, Str
     ))
 }
 
+/// Saved session (username shown in the title bar chip).
+#[derive(Serialize)]
+struct AuthView {
+    username: String,
+}
+
+#[tauri::command]
+async fn auth_login(username: String, password: String) -> Result<AuthView, String> {
+    client::login_set(&username, &password).map(|c| AuthView {
+        username: c.username,
+    })
+}
+
+#[tauri::command]
+async fn auth_status() -> Result<Option<AuthView>, String> {
+    Ok(client::login_get().map(|c| AuthView {
+        username: c.username,
+    }))
+}
+
+#[tauri::command]
+async fn auth_logout() -> Result<(), String> {
+    client::login_clear()
+}
+
 /// Opens the install folder of a version in Windows Explorer.
 #[tauri::command]
-async fn open_install_dir(version: String) -> Result<String, String> {
-    let dir = client::install_dir(&version);
+async fn open_install_dir(version: String) -> Result<String, String> {    let dir = client::install_dir(&version);
     if !dir.exists() {
         return Err(format!("not installed in {}", dir.display()));
     }
@@ -195,7 +240,10 @@ pub fn run() {
             client_ensure,
             client_set_install_dir,
             client_launch,
-            open_install_dir
+            open_install_dir,
+            auth_login,
+            auth_status,
+            auth_logout
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
