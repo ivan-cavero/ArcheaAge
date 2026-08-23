@@ -1,4 +1,4 @@
-# deploy/ — VPS deployment (Forgejo + Garage)
+# deploy/ — VPS deployment (Garage S3)
 
 Private infra on your VPS, deployed with **Dokploy** (or plain docker compose).
 
@@ -10,68 +10,60 @@ Private infra on your VPS, deployed with **Dokploy** (or plain docker compose).
 | 80 | TCP | HTTP (Traefik cert renewal) |
 | 443 | TCP+UDP | HTTPS (all app traffic) |
 
-That's it. Dokploy/Traefik reverse-proxies everything else internally; you
-never expose 3000, 3900, or the Forgejo port directly.
-
-## Forgejo (git)
-
-1. Create a **Compose** service in Dokploy, set a domain
-   (e.g. `git.yourdomain.com`) pointed at `http://forgejo:3000`.
-2. Paste `deploy/forgejo/compose.yaml`, upload `.env` with:
-
-   ```
-   FORGEJO_DOMAIN=git.yourdomain.com
-   ```
-
-3. First admin user:
-
-   ```
-   docker exec -it <ctr> gitea admin user create --admin \
-     --username ivan --email you@mail --password XXX
-   ```
-
-   Then disable public registration in the UI.
+That's it. Dokploy/Traefik reverse-proxies everything else internally.
 
 ## Garage (S3 for artifacts)
 
-1. Copy `garage.toml.example` → `garage.toml` next to the compose file.
-2. Create a **Compose** service in Dokploy. Paste `deploy/garage/compose.yaml`,
-   upload `garage.toml` and `.env` with:
+S3-compatible object storage for the heavy stuff: base client archives
+(~158 GB), paks, releases and backups (restic/rclone). NOT for git.
+
+- **Why Garage and not MinIO**: MinIO entered maintenance mode (Dec 2025)
+  and crippled the CE console; Garage is Rust, light, S3-compatible.
+- **Self-contained compose**: the garage image has no shell, so a tiny
+  alpine init container writes `/etc/garage/garage.toml` from env vars.
+  No external files to mount — paste the compose + a `.env` and it works
+  under Dokploy.
+
+### Deploy (Dokploy)
+
+1. Create a **Compose** service. Paste `deploy/garage/compose.yaml`.
+2. Set the env vars in the service (Environment tab):
 
    ```
    GARAGE_RPC_SECRET=openssl rand -hex 32
    GARAGE_ADMIN_TOKEN=openssl rand -hex 32
    ```
 
-   (Garage reads these env vars instead of secrets in the toml.)
-3. First run (layout + bucket + key):
+3. Add a domain, e.g. `s3.169.58.216.96.nip.io` → port `3900` → HTTPS.
+4. Deploy.
 
-   ```
-   alias gr="docker exec -it garage /garage"
-   gr layout show                       # copy the NODE ID
-   gr layout assign -z dc1 -c 1 <NODE_ID>
-   gr layout apply
-   gr bucket create archeaage-artifacts
-   gr key create archeaage
-   gr bucket allow --read --write archeaage-artifacts --key archeaage
-   ```
+### First run (layout + bucket + key)
+
+```bash
+alias gr="docker exec -it garage /garage -c /etc/garage/garage.toml"
+gr status                                  # copy the NODE ID
+gr layout assign -z dc1 -c 250GB <NODE_ID> # capacity = real disk size
+gr layout apply --version 1
+gr bucket create archeaage-artifacts
+gr key create archeaage                    # save Key ID + Secret Key!
+gr bucket allow --read --write archeaage-artifacts --key archeaage
+```
+
+### Upload with rclone
+
+```bash
+rclone config   # type s3, provider Other, endpoint https://s3.169.58.216.96.nip.io
+rclone copy .clients archeaage:archeaage-artifacts/clients --progress
+```
+
+## Persistent data (bind mounts in /var/lib)
+
+- Garage: `/var/lib/garage/meta` + `/var/lib/garage/data` (S3 objects)
+
+Back these up with restic/rclone — they are the only state that matters.
 
 ## What goes to Garage (never to git)
 
 - `.clients/` (~158 GB of client archives, multi-volume 7z)
 - `.client_files/`, `.server_files/` (extracted client, server data)
 - Releases and backups (restic/rclone)
-
-## Persistent data (bind mounts in /var/lib)
-
-- Forgejo: `/var/lib/forgejo` (git repos, LFS, SQLite)
-- Garage: `/var/lib/garage/meta` + `/var/lib/garage/data` (S3 objects)
-
-Back these up with restic/rclone — they are the only state that matters.
-
-## Git remote
-
-```bash
-git remote add forgejo https://git.yourdomain.com/ivan/ArcheaAge.git
-git push forgejo main
-```
