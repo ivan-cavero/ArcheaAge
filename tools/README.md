@@ -7,7 +7,7 @@ players; everything here must run without committing game assets.
 
 | Path | Status | Purpose |
 | --- | --- | --- |
-| `client-sourcing/` | **in use** | Obtain clients from official community sources: MEGA folder listing (`mega-ls*.py`), Google Drive listing (`parse-drive.js`), re-archive into multi-volume 7z (`rearchive-clients.sh`). |
+| `client-sourcing/` | **in use** | Obtain clients from official community sources: MEGA listing/downloading (`mega.py ls`/`get`), Google Drive listing (`parse-drive.js`), re-archive into multi-volume 7z (`rearchive-clients.sh`). |
 | `branding/` | **in use** | `apply-branding.ps1`: swaps the login-stage "made by" page inside a client `game_pak` with our own (pak-scan + pak-put). Re-run to change the text; apply before re-archiving for distribution. |
 | `ui/` | **in use** | Custom Lua UI for the client (info panel on login/server-select). `push-ui.ps1` = compile (Lua 5.1-float toolchain) + inject into game_pak. Full how-to and discoveries in `ui/README.md`. |
 | `db/` | **in use** | `dbtext.py`: search/edit the client's localized UI strings (`compact.sqlite3` → `localized_texts`) from the CLI, with manifest hash sync. |

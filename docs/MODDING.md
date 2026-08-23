@@ -23,11 +23,11 @@
 ## 2. Herramientas construidas (tools/)
 
 | Tool | Qué hace |
-|---|---|
+| --- | --- |
 | `pak-scan` | listar/extraer entradas (FAT descifrada OK: 218.066 entradas) |
 | `pak-put` | reemplazar/añadir fichero dentro del pak + verificación MD5. Requiere cliente cerrado (pak bloqueado en juego) |
 | `client-sync` | extraer todo lo editable (7.652 ficheros, 453 MB) a un árbol git-friendly |
-| `mega-get.py` | descargar ficheros públicos de MEGA (API v1; formato nuevo sin URL directa pendiente) |
+| `mega.py` | unified MEGA CLI: `ls` (folder tree) and `get` (file download) — stdlib + pycryptodome only |
 
 Flujo completo: `client-sync extract → editar (git diff visible) → pak-put / overlay → Play`.
 
