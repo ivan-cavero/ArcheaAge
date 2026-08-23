@@ -49,3 +49,5 @@ tools/ui/luac-build/*
 !tools/ui/luac-build/luac5f.exe
 
 tools/ui/console_capture.log
+
+apps/*/src-tauri/target/

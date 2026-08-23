@@ -56,6 +56,23 @@
   #panel .l { text-align:right; padding-right:14px; font-size:13px; line-height:25px; white-space:nowrap;
               text-shadow:0 1px 2px #000, 0 0 5px rgba(0,0,0,.85); }
   #panel .live { color:rgb(140,200,140); font-variant-numeric:tabular-nums; }
+
+  /* native tree boxes */
+  .nbox { position:absolute; border:1px dashed #4aa3ff88; background:#4aa3ff14; cursor:move;
+          font-size:10px; padding:1px 3px; color:#bfe0ff; overflow:hidden; white-space:nowrap; }
+  .nbox.sel { border:1px solid var(--primary); background:#8db33e22; z-index:6; }
+  .nbox.hidden-w { opacity:.3; border-style:dotted; }
+  select { background:var(--input); color:var(--text); border:1px solid var(--brd);
+           padding:5px 6px; border-radius:4px; width:100%; }
+  .tabs { display:flex; gap:6px; margin-bottom:10px; }
+  .tabs button { margin-top:0; }
+  .tabs button.on { background:var(--primary-d); border-color:var(--primary-d); }
+
+  /* themed scrollbars */
+  ::-webkit-scrollbar { width:10px; height:10px; }
+  ::-webkit-scrollbar-track { background:#0a1210; }
+  ::-webkit-scrollbar-thumb { background:#2e3b2f; border-radius:5px; border:2px solid #0a1210; }
+  ::-webkit-scrollbar-thumb:hover { background:#496d27; }
 </style>
 </head>
 <body>
@@ -92,6 +109,30 @@
     <button id="btnLoad">Reload from game folder</button>
     <button id="btnFolder">Open Documents\ArcheAge folder</button>
     <p class="status" id="status"></p>
+
+    <h3 id="h3native">Native widgets</h3>
+    <div class="tabs">
+      <button id="tabConfig" class="on">Panel config</button>
+      <button id="tabNative">Native tree</button>
+    </div>
+    <div id="nativePane" style="display:none">
+      <button id="btnTree">Import ivanpanel_tree.json</button>
+      <p class="note" style="font-size:10px;color:var(--textm)">
+        Drag boxes to reposition (TOPLEFT anchor). Select one to edit anchor
+        point, visibility and text. Then export.
+      </p>
+      <label>Anchor point</label>
+      <select id="n_anchor">
+        <option>TOPLEFT</option><option>TOPRIGHT</option>
+        <option>BOTTOMLEFT</option><option>BOTTOMRIGHT</option>
+        <option>CENTER</option>
+      </select>
+      <label>X offset</label><input type="number" id="n_x">
+      <label>Y offset</label><input type="number" id="n_y">
+      <label><input type="checkbox" id="n_show" checked> visible</label>
+      <button id="btnOvr" class="primary">Export overrides.lua (native)</button>
+    </div>
+    <p class="status" id="status2"></p>
   </div>
 
   <div id="previewWrap">
@@ -251,6 +292,119 @@ $("#btnShot").onclick = () => {
 // clock in preview
 setInterval(renderPreview, 1000);
 bindForm(); renderPreview();
+
+// ================= native tree =================
+const NATIVE = {};            // id -> {x,y,w,h,visible,anchor,x,y}
+let selN = null;
+
+$("#tabConfig").onclick = () => switchTab(true);
+$("#tabNative").onclick = () => switchTab(false);
+function switchTab(configMode) {
+  $("#tabConfig").classList.toggle("on", configMode);
+  $("#tabNative").classList.toggle("on", !configMode);
+  // toggle form sections except native pane/status
+  const form = $("#form");
+  [...form.children].forEach(el => {
+    if (el.id === "nativePane" || el.id === "status2" || el.id === "h3native") return;
+    if (el.tagName === "H3" || el.tagName === "LABEL" || el.tagName === "INPUT" ||
+        el.tagName === "BUTTON" || el.classList.contains("row")) {
+      el.style.display = configMode ? "" : "none";
+    }
+  });
+  $("#nativePane").style.display = configMode ? "none" : "block";
+}
+
+$("#btnTree").onclick = () => {
+  const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".json";
+  inp.onchange = async () => {
+    const j = JSON.parse(await inp.files[0].text());
+    (j.widgets || []).forEach((w, i) => {
+      NATIVE[w.id] = { x: 60 + (i % 5) * 200, y: 60 + Math.floor(i / 5) * 90,
+                       w: w.w || 150, h: w.h || 30,
+                       visible: w.visible !== false, offset: w.offset };
+    });
+    renderNative(); setStatus2("tree imported: " + Object.keys(NATIVE).length + " widgets");
+  };
+  inp.click();
+};
+
+function setStatus2(m, err) { const e = $("#status2"); e.textContent = m || ""; e.className = "status" + (err ? " err" : ""); }
+
+function renderNative() {
+  document.querySelectorAll(".nbox").forEach(n => n.remove());
+  for (const [id, o] of Object.entries(NATIVE)) {
+    const d = document.createElement("div");
+    d.className = "nbox" + (selN === id ? " sel" : "") + (!o.show ? " hidden-w" : "");
+    d.style.left = o.x + "px"; d.style.top = o.y + "px";
+    d.style.width = Math.max(30, o.w) + "px"; d.style.height = Math.max(14, o.h) + "px";
+    if (o.color) d.style.borderColor = o.color;
+    d.textContent = id;
+    d.onmousedown = ev => { ev.preventDefault(); selectN(id); dragN(d, id, ev); };
+    $("#previewWrap").appendChild(d);
+  }
+}
+
+function selectN(id) {
+  selN = id;
+  const o = NATIVE[id];
+  $("#n_anchor").value = o.anchor || "TOPLEFT";
+  $("#n_x").value = o.x; $("#n_y").value = o.y;
+  $("#n_show").checked = !!o.show;
+  renderNative();
+}
+
+["n_anchor","n_x","n_y","n_show"].forEach(id => {
+  $("#" + id).oninput = () => { if (!selN) return; applyN(); };
+  $("#" + id).onchange = () => { if (!selN) return; applyN(); };
+});
+function applyN() {
+  const o = NATIVE[selN]; if (!o) return;
+  o.anchor = $("#n_anchor").value;
+  o.x = +$("#n_x").value; o.y = +$("#n_y").value;
+  o.show = $("#n_show").checked;
+  renderNative(); selectN(selN);
+}
+
+function dragN(el, id, e) {
+  const sx = e.clientX, sy = e.clientY;
+  const o = NATIVE[id], ox = o.x, oy = o.y;
+  const mv = ev => {
+    o.x = Math.round(ox + ev.clientX - sx); o.y = Math.round(oy + ev.clientY - sy);
+    el.style.left = o.x + "px"; el.style.top = o.y + "px";
+  };
+  const up = () => { document.removeEventListener("mousemove", mv); document.removeEventListener("mouseup", up); selectN(id); };
+  document.addEventListener("mousemove", mv); document.addEventListener("mouseup", up);
+}
+
+$("#btnOvr").onclick = async () => {
+  const lines = [
+    "-- overrides.lua \u2014 generated by ArcheaAge UI Studio (native tree)",
+    "IVAN_OVERRIDES = {",
+  ];
+  for (const [id, o] of Object.entries(NATIVE)) {
+    if (o.show === false && !o.anchor && !o.x && !o.y) {
+      lines.push(`    { id = "${id}", action = "hide" },`);
+      continue;
+    }
+    const a = o.anchor || "TOPLEFT";
+    lines.push(`    { id = "${id}", action = "apply", show = ${!!o.show}, ` +
+               `anchor = { "${a}", "UIParent", ${o.x ?? 0}, ${o.y ?? 0} } },`);
+  }
+  lines.push("}");
+  const content = lines.join("\n");
+  if (!IN_TAURI_STUDIO()) { downloadFile("overrides.lua", content); return; }
+  try {
+    const path = await window.__TAURI__.core.invoke("overrides_save", { content });
+    setStatus2("saved: " + path + "  → now run tools\\ui\\push-ui.ps1");
+  } catch (e) { setStatus2(String(e), true); }
+};
+
+function IN_TAURI_STUDIO() { return !!window.__TAURI__; }
+function downloadFile(name, content) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([content], { type: "text/plain" }));
+  a.download = name; a.click();
+}
 setStatus(IN_TAURI ? "Ready. Save writes Documents\\ArcheAge\\ivanpanel_config.lua."
                    : "Browser mode (no backend).");
 </script>

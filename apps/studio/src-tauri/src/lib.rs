@@ -46,12 +46,46 @@ async fn open_game_documents() -> Result<String, String> {
     Ok(dir.to_string_lossy().into_owned())
 }
 
+/// Saves generated native-window overrides into tools/ui/overrides.lua so
+/// push-ui.ps1 picks them up. Resolves the repo layout relative to cwd/exe.
+#[tauri::command]
+async fn overrides_save(content: String) -> Result<String, String> {
+    let mut candidates: Vec<PathBuf> = Vec::new();
+    if let Ok(cwd) = std::env::current_dir() {
+        candidates.push(cwd.join("../tools/ui/overrides.lua"));
+    }
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(dir) = exe.parent() {
+            // dev: apps/studio/src-tauri/target/debug -> repo root is 4 up
+            let mut p = dir.to_path_buf();
+            for _ in 0..4 { p = p.parent().map(|x| x.to_path_buf()).unwrap_or(p); }
+            candidates.push(p.join("tools/ui/overrides.lua"));
+            // installed: exe beside repo root
+            if let Some(parent) = dir.parent() {
+                candidates.push(parent.join("tools/ui/overrides.lua"));
+            }
+        }
+    }
+    let mut errors = String::new();
+    for c in &candidates {
+        let Some(parent) = c.parent() else { continue };
+        if !parent.exists() { continue; }
+        return match std::fs::write(c, content.clone()) {
+            Ok(_) => Ok(c.to_string_lossy().into_owned()),
+            Err(e) => { errors.push_str(&format!("{}: {e}\n", c.display())); Err(errors) }
+        };
+    }
+    Err(format!("no tools/ui directory found near the app. Tried:\n{errors}\
+        \nFallback: save the file manually into tools\\ui\\overrides.lua"))
+}
+
 pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             panel_config_load,
             panel_config_save,
-            open_game_documents
+            open_game_documents,
+            overrides_save
         ])
         .run(tauri::generate_context!())
         .expect("error while running UI Studio");
