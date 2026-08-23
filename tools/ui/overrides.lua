@@ -1,0 +1,11 @@
+-- overrides.lua — declarative edits for NATIVE ui windows.
+-- ids resolve via _G (verified working: gameExitFrame, candidateListWnd).
+-- Format consumed by addon_panel.lua (push-ui.ps1 concatenates this file).
+--
+-- Example entries:
+-- IVAN_OVERRIDES = {
+--     { id = "gameExitFrame", action = "apply", show = true,
+--       anchor = { "CENTER", "UIParent", 0, -120 } },
+--     { id = "candidateListWnd", action = "hide" },
+-- }
+IVAN_OVERRIDES = {}

@@ -34,7 +34,8 @@ $probeSrc = Join-Path $PSScriptRoot "probe_dump.lua"
 $alb2 = Join-Path $PSScriptRoot "luac-build\probe_dump.alb"
 $combined = Join-Path $env:TEMP "ivanpanel_combined.lua"
 if (Test-Path $ovr) {
-    Get-Content $ovr, $src -Raw | Set-Content $combined -Encoding UTF8
+    $body = (Get-Content $ovr -Raw) + "`n" + (Get-Content $src -Raw)
+    [IO.File]::WriteAllText($combined, $body, [Text.UTF8Encoding]::new($false))
     Write-Output "incluyendo overrides.lua"
     & $luac -o $alb $combined
 } else {
