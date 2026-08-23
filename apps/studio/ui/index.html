@@ -209,7 +209,7 @@ function renderTree(){
     });
   }
   const imp=document.createElement("button");
-  imp.textContent="Import ivanpanel_tree.json…";
+  imp.textContent="Import game_ui_tree.json…";
   imp.onclick=importTree;
   tp.appendChild(imp);
 }
@@ -375,20 +375,24 @@ function doExport(){
 }
 
 /* ---------- import tree ---------- */
+function importTreeData(j){
+  const scr=j.screen||"world_select";
+  const s=ensureScreen(scr); s.native={};
+  (j.widgets||[]).forEach((w,i)=>{
+    s.native[w.id]={ nativeId:w.nativeId, w:w.w||150, h:w.h||30,
+                     visible:w.visible!==false,
+                     x:80+(i%4)*230, y:90+Math.floor(i/4)*120 };
+  });
+  SEL={screen:scr,kind:"screen"};
+  closeIntro(); render();
+}
 function importTree(){
   const inp=document.createElement("input"); inp.type="file"; inp.accept=".json";
   inp.onchange=async()=>{
-    const j=JSON.parse(await inp.files[0].text());
-    const scr=j.screen||"world_select";
-    const s=ensureScreen(scr); s.native={};
-    (j.widgets||[]).forEach((w,i)=>{
-      s.native[w.id]={ nativeId:w.nativeId, w:w.w||150, h:w.h||30,
-                       visible:w.visible!==false,
-                       x:80+(i%4)*230, y:90+Math.floor(i/4)*120 };
-    });
-    SEL={screen:scr,kind:"screen"};
-    closeIntro(); render();
-    setStatus(`Imported ${Object.keys(s.native).length} native windows.`);
+    try{
+      importTreeData(JSON.parse(await inp.files[0].text()));
+      setStatus(`Imported ${Object.keys(PROJECT.screens[SEL.screen].native).length} native windows.`);
+    }catch(e){ setStatus(String(e),true); }
   };
   inp.click();
 }
@@ -400,6 +404,9 @@ function setZoom(z){ zoom=Math.min(2,Math.max(.1,z));
 
 /* ---------- boot ---------- */
 function render(){ renderTree(); renderCanvas(); renderInspector(); }
+
+// auto-load tracked tree (repo mode)
+fetch('game_ui_tree.json').then(r=>r.ok?r.json():Promise.reject(0)).then(j=>{importTreeData(j);}).catch(()=>{ setStatus('No tree loaded yet - play once + sync-tree.ps1, or Import manually.'); });
 
 $("#btnStart").onclick=closeIntro;
 render();
