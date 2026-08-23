@@ -1,0 +1,572 @@
+{ "screen": "world_select", "widgets": [
+{"path":"backgroundWindow","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.downButton","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.downButton.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.downButton.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.downButton.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.downButton.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.downButton.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.vs","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 444A799C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.vs.thumb","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.vs.thumb.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.vs.thumb.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.vs.thumb.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.vs.thumb.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.vs.thumb.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.bg","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.upButton","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.upButton.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.upButton.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.upButton.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.upButton.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].scroll.upButton.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].AscendingSortMark","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44249D5C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].line","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[1].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[1].nameLabel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[1].nameLabel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[2].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[2].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[2].iconFrame.characerCountIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[2].iconFrame.characerCountIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[2].iconFrame.characerCountIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[2].iconFrame.characerCountIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[3].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[3].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[3].iconFrame.raceIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[3].iconFrame.raceIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[3].iconFrame.raceIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[3].iconFrame.raceIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[4].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[1].subItems[4].stateImage","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].line","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[1].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[1].nameLabel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[1].nameLabel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[2].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[2].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[2].iconFrame.characerCountIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[2].iconFrame.characerCountIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[2].iconFrame.characerCountIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[2].iconFrame.characerCountIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[3].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[3].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[3].iconFrame.raceIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[3].iconFrame.raceIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[3].iconFrame.raceIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[3].iconFrame.raceIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[4].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[2].subItems[4].stateImage","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].line","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[1].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[1].nameLabel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[1].nameLabel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[2].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[2].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[2].iconFrame.characerCountIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[2].iconFrame.characerCountIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[2].iconFrame.characerCountIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[2].iconFrame.characerCountIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[3].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[3].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[3].iconFrame.raceIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[3].iconFrame.raceIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[3].iconFrame.raceIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[3].iconFrame.raceIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[4].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[3].subItems[4].stateImage","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].line","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[1].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[1].nameLabel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[1].nameLabel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[2].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[2].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[2].iconFrame.characerCountIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[2].iconFrame.characerCountIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[2].iconFrame.characerCountIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[2].iconFrame.characerCountIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[3].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[3].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[3].iconFrame.raceIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[3].iconFrame.raceIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[3].iconFrame.raceIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[3].iconFrame.raceIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[4].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[4].subItems[4].stateImage","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].line","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[1].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[1].nameLabel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[1].nameLabel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[2].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[2].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[2].iconFrame.characerCountIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[2].iconFrame.characerCountIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[2].iconFrame.characerCountIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[2].iconFrame.characerCountIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[3].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[3].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[3].iconFrame.raceIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[3].iconFrame.raceIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[3].iconFrame.raceIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[3].iconFrame.raceIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[4].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[5].subItems[4].stateImage","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].line","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[1].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[1].nameLabel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[1].nameLabel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[2].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[2].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[2].iconFrame.characerCountIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[2].iconFrame.characerCountIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[2].iconFrame.characerCountIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[2].iconFrame.characerCountIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[3].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[3].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[3].iconFrame.raceIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[3].iconFrame.raceIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[3].iconFrame.raceIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[3].iconFrame.raceIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[4].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[6].subItems[4].stateImage","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].line","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[1].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[1].nameLabel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[1].nameLabel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[2].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[2].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[2].iconFrame.characerCountIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[2].iconFrame.characerCountIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[2].iconFrame.characerCountIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[2].iconFrame.characerCountIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[3].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[3].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[3].iconFrame.raceIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[3].iconFrame.raceIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[3].iconFrame.raceIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[3].iconFrame.raceIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[4].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[7].subItems[4].stateImage","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].line","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[1].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[1].nameLabel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[1].nameLabel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[2].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[2].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[2].iconFrame.characerCountIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[2].iconFrame.characerCountIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[2].iconFrame.characerCountIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[2].iconFrame.characerCountIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[3].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[3].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[3].iconFrame.raceIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[3].iconFrame.raceIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[3].iconFrame.raceIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[3].iconFrame.raceIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[4].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[8].subItems[4].stateImage","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].line","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[1].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[1].nameLabel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[1].nameLabel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[2].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[2].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[2].iconFrame.characerCountIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[2].iconFrame.characerCountIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[2].iconFrame.characerCountIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[2].iconFrame.characerCountIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[3].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[3].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[3].iconFrame.raceIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[3].iconFrame.raceIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[3].iconFrame.raceIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[3].iconFrame.raceIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[4].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[9].subItems[4].stateImage","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].line","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[1].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[1].nameLabel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[1].nameLabel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[2].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[2].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[2].iconFrame.characerCountIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[2].iconFrame.characerCountIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[2].iconFrame.characerCountIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[2].iconFrame.characerCountIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[3].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[3].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[3].iconFrame.raceIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[3].iconFrame.raceIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[3].iconFrame.raceIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[3].iconFrame.raceIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[4].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[10].subItems[4].stateImage","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].line","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[1].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[1].nameLabel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[1].nameLabel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[2].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[2].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[2].iconFrame.characerCountIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[2].iconFrame.characerCountIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[2].iconFrame.characerCountIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[2].iconFrame.characerCountIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[3].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[3].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[3].iconFrame.raceIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[3].iconFrame.raceIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[3].iconFrame.raceIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[3].iconFrame.raceIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[4].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[11].subItems[4].stateImage","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].line","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[1].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[1].nameLabel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[1].nameLabel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[2].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[2].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[2].iconFrame.characerCountIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[2].iconFrame.characerCountIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[2].iconFrame.characerCountIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[2].iconFrame.characerCountIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[3].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[3].iconFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[3].iconFrame.raceIcon[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[3].iconFrame.raceIcon[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[3].iconFrame.raceIcon[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[3].iconFrame.raceIcon[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[4].titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.items[12].subItems[4].stateImage","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.overedImage","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.selectedImage","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.column[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.column[1].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.column[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.column[2].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.column[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.column[3].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.column[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"backgroundWindow.mainWindow.worldList[1].listCtrl.column[4].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.mainWindow.worldList[1].DescendingSortMark","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.authMessage","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44239B3C"}
+,{"path":"backgroundWindow.authMessage.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.enterWorldBtn","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"backgroundWindow.enterWorldBtn.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.enterWorldBtn.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.enterWorldBtn.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.enterWorldBtn.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.enterWorldBtn.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.bgWindow","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.bgWindow.modalBackgroundWindow","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.bgWindow.titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.bgWindow.bg","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.queueWindow.normalLengthLabel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"backgroundWindow.queueWindow.normalLengthLabel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.cancel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"backgroundWindow.queueWindow.cancel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.cancel.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.cancel.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.cancel.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.cancel.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.timeLabel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"backgroundWindow.queueWindow.timeLabel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.guideText","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"backgroundWindow.queueWindow.guideText.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.exitBtn","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"backgroundWindow.queueWindow.exitBtn.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.exitBtn.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.exitBtn.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.exitBtn.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.exitBtn.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.waitingLabel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4444461C"}
+,{"path":"backgroundWindow.queueWindow.waitingLabel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.modalBackgroundWindow","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"backgroundWindow.queueWindow.titleBar","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.queueWindow.titleBar.closeButton","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"backgroundWindow.queueWindow.titleBar.closeButton.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.titleBar.closeButton.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.titleBar.closeButton.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.titleBar.closeButton.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.titleBar.closeButton.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.titleBar.titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.waitingQueueType","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"backgroundWindow.queueWindow.waitingQueueType.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.queueWindow.premiumLengthLabel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"backgroundWindow.queueWindow.premiumLengthLabel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.refreshButton","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"backgroundWindow.refreshButton.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.refreshButton.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.refreshButton.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.refreshButton.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.refreshButton.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.warningLabel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44239B3C"}
+,{"path":"backgroundWindow.warningLabel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.exitButton","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"backgroundWindow.exitButton.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.exitButton.add_bgs1[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.exitButton.add_bgs1[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.exitButton.add_bgs1[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.exitButton.add_bgs1[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.exitButton.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.exitButton.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.exitButton.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.exitButton.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.bottomPanel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"backgroundWindow.bottomPanel.titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"backgroundWindow.modalBackgroundWindow","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"candidateListWnd","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"candidateListWnd.modalBackgroundWindow","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"candidateListWnd.titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"candidateListWnd.idxLabel[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"candidateListWnd.idxLabel[1].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"candidateListWnd.idxLabel[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"candidateListWnd.idxLabel[2].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"candidateListWnd.idxLabel[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"candidateListWnd.idxLabel[3].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"candidateListWnd.idxLabel[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"candidateListWnd.idxLabel[4].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"candidateListWnd.idxLabel[5]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"candidateListWnd.idxLabel[5].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"candidateListWnd.idxLabel[6]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"candidateListWnd.idxLabel[6].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"candidateListWnd.idxLabel[7]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"candidateListWnd.idxLabel[7].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"candidateListWnd.idxLabel[8]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"candidateListWnd.idxLabel[8].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"candidateListWnd.idxLabel[9]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"candidateListWnd.idxLabel[9].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"candidateListWnd.candidateStringLabel[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"candidateListWnd.candidateStringLabel[1].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"candidateListWnd.candidateStringLabel[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"candidateListWnd.candidateStringLabel[2].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"candidateListWnd.candidateStringLabel[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"candidateListWnd.candidateStringLabel[3].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"candidateListWnd.candidateStringLabel[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"candidateListWnd.candidateStringLabel[4].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"candidateListWnd.candidateStringLabel[5]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"candidateListWnd.candidateStringLabel[5].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"candidateListWnd.candidateStringLabel[6]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"candidateListWnd.candidateStringLabel[6].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"candidateListWnd.candidateStringLabel[7]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"candidateListWnd.candidateStringLabel[7].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"candidateListWnd.candidateStringLabel[8]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"candidateListWnd.candidateStringLabel[8].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"candidateListWnd.candidateStringLabel[9]","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"candidateListWnd.candidateStringLabel[9].style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"commonDropdown.scroll","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"commonDropdown.scroll.downButton","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"commonDropdown.scroll.downButton.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.scroll.downButton.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.scroll.downButton.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.scroll.downButton.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.scroll.downButton.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.scroll.vs","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 444A799C"}
+,{"path":"commonDropdown.scroll.vs.thumb","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"commonDropdown.scroll.vs.thumb.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.scroll.vs.thumb.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.scroll.vs.thumb.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.scroll.vs.thumb.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.scroll.vs.thumb.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.scroll.bg","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.scroll.upButton","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"commonDropdown.scroll.upButton.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.scroll.upButton.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.scroll.upButton.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.scroll.upButton.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.scroll.upButton.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.list","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 444631BC"}
+,{"path":"commonDropdown.list.itemStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.list.bg","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"commonDropdown.modalBackgroundWindow","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"fixedTooltip","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4444461C"}
+,{"path":"fixedTooltip.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"fixedTooltip.bg","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"gameExitFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"gameExitFrame.centerMsg","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44239B3C"}
+,{"path":"gameExitFrame.centerMsg.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"gameExitFrame.cancelButton","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"gameExitFrame.cancelButton.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"gameExitFrame.cancelButton.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"gameExitFrame.cancelButton.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"gameExitFrame.cancelButton.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"gameExitFrame.cancelButton.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"gameExitFrame.okButton","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"gameExitFrame.okButton.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"gameExitFrame.okButton.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"gameExitFrame.okButton.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"gameExitFrame.okButton.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"gameExitFrame.okButton.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"gameExitFrame.modalBackgroundWindow","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"gameExitFrame.titleBar","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"gameExitFrame.titleBar.closeButton","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"gameExitFrame.titleBar.closeButton.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"gameExitFrame.titleBar.closeButton.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"gameExitFrame.titleBar.closeButton.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"gameExitFrame.titleBar.closeButton.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"gameExitFrame.titleBar.closeButton.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"gameExitFrame.titleBar.titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"gameExitFrame.titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"imageTooltip","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4444461C"}
+,{"path":"imageTooltip.icon","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"imageTooltip.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"imageTooltip.bg","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"loginStageBlackWnd","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"loginStageBlackWnd.modalBackgroundWindow","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"loginStageBlackWnd.titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"loginStageBlackWnd.bg","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"mapTooltip","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4444461C"}
+,{"path":"mapTooltip.hpBar","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"mapTooltip.hpBar.hpLabel","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44FB2E1C"}
+,{"path":"mapTooltip.hpBar.hpLabel.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"mapTooltip.hpBar.titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"mapTooltip.line","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"mapTooltip.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"mapTooltip.hp","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"mapTooltip.bg","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"mapTooltip.hpBarBg","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"premiumServiceToolTip","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4444461C"}
+,{"path":"premiumServiceToolTip.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"premiumServiceToolTip.titleLine","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"premiumServiceToolTip.bg","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"premiumServiceToolTip.infoLine","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"section","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"section.upLine","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"section.upLine.bg","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"staffWindow","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"staffWindow.returnButton","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"staffWindow.returnButton.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"staffWindow.returnButton.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"staffWindow.returnButton.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"staffWindow.returnButton.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"staffWindow.returnButton.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"staffWindow.modalBackgroundWindow","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"staffWindow.titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"staffWindow.browser","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4422E43C"}
+,{"path":"summaryTooltip","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4444461C"}
+,{"path":"summaryTooltip.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"summaryTooltip.bg","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"systemConfigFrame.exitGameButton","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"systemConfigFrame.exitGameButton.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.exitGameButton.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.exitGameButton.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.exitGameButton.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.exitGameButton.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.selectCharacterButton","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"systemConfigFrame.selectCharacterButton.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.selectCharacterButton.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.selectCharacterButton.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.selectCharacterButton.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.selectCharacterButton.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.modalBackgroundWindow","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4424F55C"}
+,{"path":"systemConfigFrame.titleBar","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44DFB4FC"}
+,{"path":"systemConfigFrame.titleBar.closeButton","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"systemConfigFrame.titleBar.closeButton.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.titleBar.closeButton.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.titleBar.closeButton.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.titleBar.closeButton.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.titleBar.closeButton.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.titleBar.titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.optionButton","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"systemConfigFrame.optionButton.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.optionButton.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.optionButton.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.optionButton.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.optionButton.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.exitClientDrivenButton","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4446221C"}
+,{"path":"systemConfigFrame.exitClientDrivenButton.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.exitClientDrivenButton.bgs[1]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.exitClientDrivenButton.bgs[2]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.exitClientDrivenButton.bgs[3]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.exitClientDrivenButton.bgs[4]","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"systemConfigFrame.titleStyle","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"textTooltip","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 4444461C"}
+,{"path":"textTooltip.titleLine","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"textTooltip.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"textTooltip.bg","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"unitFrameTooltip","nativeId":null,"w":null,"h":null,"visible":true,"text":"function: 44246B3C"}
+,{"path":"unitFrameTooltip.style","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+,{"path":"unitFrameTooltip.bg","nativeId":null,"w":null,"h":null,"visible":true,"text":""}
+
+] }

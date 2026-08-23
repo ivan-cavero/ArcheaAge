@@ -379,7 +379,8 @@ function importTreeData(j){
   const scr=j.screen||"world_select";
   const s=ensureScreen(scr); s.native={};
   (j.widgets||[]).forEach((w,i)=>{
-    s.native[w.id]={ nativeId:w.nativeId, w:w.w||150, h:w.h||30,
+    const id = w.path || w.id;
+    s.native[id]={ nativeId:w.nativeId, w:w.w||150, h:w.h||30,
                      visible:w.visible!==false,
                      x:80+(i%4)*230, y:90+Math.floor(i/4)*120 };
   });

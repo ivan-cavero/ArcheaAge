@@ -97,9 +97,25 @@ local function rgbArr(c)
     return c[1], c[2], c[3], c[4] or 1
 end
 
+local function resolvePath(path)
+    local obj = _G
+    for part in string.gmatch(path, "[^%.]+") do
+        local base, idx = part:match("^(.-)%[(%d+)%]$")
+        if base and idx then
+            obj = obj[base]
+            if type(obj) ~= "table" then return nil end
+            obj = obj[tonumber(idx)]
+        else
+            obj = obj[part]
+        end
+        if obj == nil then return nil end
+    end
+    return obj
+end
+
 local function tryApply(o)
     local id = o.id or ""
-    local w = _G[id]
+    local w = resolvePath(id)
     if type(w) ~= "table" then
         OL("pendiente (no existe aun): " .. id)
         return false

@@ -51,3 +51,7 @@ tools/ui/luac-build/*
 tools/ui/console_capture.log
 
 apps/*/src-tauri/target/
+
+# extracted game assets (never commit)
+game/
+tools/ui/unluac.jar
