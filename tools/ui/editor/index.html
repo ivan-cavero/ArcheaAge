@@ -2,191 +2,232 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>ArcheaAge UI Editor</title>
+<title>IvanPanel Studio</title>
 <style>
   :root { --bg:#14161a; --panel:#1d2127; --brd:#2c333c; --txt:#cfd6de; --acc:#e8b23a; }
   * { box-sizing:border-box; font-family:Segoe UI,system-ui,sans-serif; }
-  body { margin:0; background:var(--bg); color:var(--txt); display:flex; height:100vh; }
-  #tree { width:230px; background:var(--panel); border-right:1px solid var(--brd); overflow:auto; padding:8px; }
-  #canvasWrap { flex:1; position:relative; overflow:auto; background:#0b0d10; }
-  #stage { position:relative; width:1920px; height:1080px; transform-origin:0 0; background-size:100% 100%; }
-  .wbox { position:absolute; border:1px dashed #4aa3ff88; background:#4aa3ff14; cursor:move; font-size:10px;
-          padding:2px 4px; white-space:nowrap; overflow:hidden; }
-  .wbox.sel { border:1px solid var(--acc); background:#e8b23a22; z-index:5; }
-  .wbox.hidden-w { opacity:.25; border-style:dotted; }
-  #props { width:280px; background:var(--panel); border-left:1px solid var(--brd); padding:12px; display:flex; flex-direction:column; gap:8px; }
-  #props label { font-size:11px; color:#8b96a3; display:block; margin-top:6px; }
-  #props input[type=text],#props input[type=number] { width:100%; background:#11141a; color:var(--txt); border:1px solid var(--brd); padding:4px 6px; border-radius:4px; }
-  button { background:#2a313a; color:var(--txt); border:1px solid var(--brd); padding:6px 10px; border-radius:4px; cursor:pointer; width:100%; }
+  body { margin:0; background:var(--bg); color:var(--txt); }
+  header { padding:10px 18px; border-bottom:1px solid var(--brd); display:flex; gap:14px; align-items:center; }
+  header h1 { font-size:15px; margin:0; color:var(--acc); letter-spacing:2px; text-transform:uppercase; }
+  header .hint { font-size:11px; color:#7f8b98; }
+  main { display:grid; grid-template-columns: 340px 1fr; height:calc(100vh - 49px); }
+
+  /* ---- formulario ---- */
+  #form { background:var(--panel); border-right:1px solid var(--brd); padding:16px; overflow:auto; }
+  #form label { font-size:11px; color:#8b96a3; display:block; margin:10px 0 3px; }
+  #form input[type=text] { width:100%; background:#11141a; color:var(--txt); border:1px solid var(--brd);
+                           padding:5px 8px; border-radius:4px; }
+  #form input[type=color] { width:44px; height:26px; border:1px solid var(--brd); background:none;
+                            padding:0; cursor:pointer; vertical-align:middle; border-radius:4px; }
+  .row { display:flex; gap:10px; align-items:end; }
+  .row > div { flex:1; }
+  input[type=range] { width:100%; accent-color: var(--acc); }
+  .sec { margin-top:18px; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--acc);
+         border-top:1px solid var(--brd); padding-top:12px; }
+  button { background:#2a313a; color:var(--txt); border:1px solid var(--brd); padding:8px 12px;
+           border-radius:4px; cursor:pointer; width:100%; margin-top:6px; }
   button:hover { border-color:var(--acc); }
-  h3 { margin:4px 0 10px; font-size:13px; letter-spacing:1px; text-transform:uppercase; color:var(--acc); }
+  button.primary { background:var(--acc); color:#111; font-weight:600; border:none; }
+
+  /* ---- preview ---- */
+  #previewWrap { position:relative; overflow:hidden; background:
+      radial-gradient(1200px 500px at 70% 20%, #2b3550 0%, #10131a 60%); }
+  #shot { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.85; display:none; }
+  #panel { position:absolute; width:280px; background:rgba(10,12,16,.55); border:1px solid #ffffff22;
+           border-radius:4px; padding:6px 0 6px 0; box-shadow:0 4px 18px rgba(0,0,0,.5); }
+  #panel div { text-align:right; padding-right:12px; font-size:13px;
+               text-shadow:0 1px 2px #000, 0 0 4px rgba(0,0,0,.8); line-height:24px; }
+  #toolbar { position:absolute; top:10px; left:10px; z-index:9; display:flex; flex-direction:column; gap:6px; }
+  #toolbar button { width:auto; padding:4px 10px; font-size:11px; }
 </style>
 </head>
 <body>
-<div id="tree"><h3>Widgets</h3><div id="treeList">Importa tree.json…</div></div>
+<header>
+  <h1>IvanPanel Studio</h1>
+  <span class="hint">edita → guarda ivanpanel_config.lua junto al juego → reabre ArcheAge</span>
+</header>
 
-<div id="canvasWrap">
-  <div id="stage">
-    <input type="file" id="shotFile" accept="image/*" style="position:absolute;top:8px;left:8px;z-index:9">
-    <span style="position:absolute;top:40px;left:8px;color:#667;z-index:9;font-size:11px">fondo: captura de la pantalla del juego (opcional)</span>
+<main>
+  <div id="form">
+    <div class="sec">Textos</div>
+    <label>Título</label><input type="text" id="f_title">
+    <label>Firma</label><input type="text" id="f_byline">
+    <label>Servidor</label><input type="text" id="f_server">
+    <label>Línea inferior</label><input type="text" id="f_build">
+
+    <div class="sec">Colores</div>
+    <div class="row">
+      <div><label>Título</label><input type="color" id="c_title"></div>
+      <div><label>Texto</label><input type="color" id="c_text"></div>
+    </div>
+
+    <div class="sec">Posición (desde esquina sup. derecha)</div>
+    <label>Offset X <span id="v_x"></span></label>
+    <input type="range" id="f_x" min="-400" max="40" value="-18">
+    <label>Offset Y <span id="v_y"></span></label>
+    <input type="range" id="f_y" min="0" max="600" value="70">
+
+    <div class="sec">Fichero</div>
+    <button id="btnImport">Importar ivanpanel_config.lua actual</button>
+    <button id="btnExport" class="primary">Guardar como ivanpanel_config.lua</button>
+    <p class="hint" style="font-size:10px;color:#7f8b98;margin-top:10px">
+      Guarda el fichero en Documents\ArcheAge\ y reabre el juego para aplicarlo.
+      El navegador pedirá permiso para escribir en esa carpeta la primera vez.
+    </p>
   </div>
-</div>
 
-<div id="props">
-  <h3>IvanPanel Editor</h3>
-  <button id="btnTree">1 · Importar tree.json</button>
-  <button id="btnExport">2 · Exportar overrides.lua</button>
-  <hr style="border-color:var(--brd);width:100%">
-  <div id="insp"><i>Selecciona un widget…</i></div>
-  <hr style="border-color:var(--brd);width:100%">
-  <button id="btnLua">Probar overrides en el juego</button>
-  <pre style="font-size:10px;color:#7f8b98">push-ui.ps1 compila addon_panel.lua,
-que lee OVERRIDES al final del fichero.</pre>
-</div>
+  <div id="previewWrap">
+    <div id="toolbar"><button id="btnShot">Fondo: captura del juego…</button></div>
+    <img id="shot" alt="">
+    <div id="panel">
+      <div id="p_title"></div>
+      <div id="p_by"></div>
+      <div id="p_server"></div>
+      <div style="height:22px"></div>
+      <div id="p_live" style="color:rgb(153,199,153)"></div>
+      <div id="p_build"></div>
+    </div>
+  </div>
+</main>
 
 <script>
-let WIDGETS = [];          // {id,parent,x,y,w,h}
-let SELECTED = null;
-const OVR = {};            // id -> {x,y,w,h,hidden,text,color}
+// ---------- estado ----------
+const CFG = {
+  title: "ArcheaAge",
+  byline: "Edited by Ivan Cavero",
+  server: "Servidor \u00B7 EU-1",
+  build: "Build custom \u00B7 preview UI",
+  offset_x: -18,
+  offset_y: 70,
+  color_title: "#d9c773",
+  color_text: "#9eb8d9",
+};
 
 const $ = s => document.querySelector(s);
-const stage = $("#stage");
 
-$("#shotFile").onchange = e => {
-  const f = e.target.files[0]; if (!f) return;
-  stage.style.backgroundImage = `url(${URL.createObjectURL(f)})`;
-};
-
-function render() {
-  stage.querySelectorAll(".wbox").forEach(n => n.remove());
-  for (const w of WIDGETS) {
-    const o = OVR[w.id] || {};
-    const d = document.createElement("div");
-    d.className = "wbox" + (o.hidden ? " hidden-w" : "") + (SELECTED === w.id ? " sel" : "");
-    d.style.left = (o.x ?? w.x ?? 40) + "px";
-    d.style.top = (o.y ?? w.y ?? 40) + "px";
-    d.style.width = Math.max(30, o.w ?? w.w ?? 160) + "px";
-    d.style.height = Math.max(14, o.h ?? w.h ?? 24) + "px";
-    if (o.color) d.style.borderColor = o.color;
-    d.textContent = o.text || w.id;
-    d.dataset.id = w.id;
-    dragify(d);
-    d.onmousedown = () => select(w.id);
-    stage.appendChild(d);
-  }
-  renderTree();
+// ---------- helpers de color ----------
+function hexToRgb01(h) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(h || ""); if (!m) return [1, 1, 1];
+  const n = parseInt(m[1], 16);
+  const ch = b => +(b / 255).toFixed(3);
+  return [ch((n >> 16) & 255), ch((n >> 8) & 255), ch(n & 255)];
+}
+function rgbToCss(c) { return `rgb(${Math.round(c[0]*255)},${Math.round(c[1]*255)},${Math.round(c[2]*255)})`; }
+function rgb01ToHex(c) {
+  const h = x => Math.round(x * 255).toString(16).padStart(2, "0");
+  return "#" + h(c[0]) + h(c[1]) + h(c[2]);
 }
 
-function renderTree() {
-  $("#treeList").innerHTML = WIDGETS.map(w => {
-    const mod = OVR[w.id] ? " ✏️" : "";
-    return `<div style="padding:2px 4px;cursor:pointer;font-size:12px"
-      onclick="select('${w.id}')">${w.id}${mod}</div>`;
-  }).join("");
-}
-
-window.select = id => {
-  SELECTED = id;
-  const w = WIDGETS.find(x => x.id === id), o = OVR[id] || {};
-  $("#insp").innerHTML = `
-    <b style="color:var(--acc)">${id}</b>
-    <label>x <input type="number" id="px" value="${o.x ?? w?.x ?? 0}"></label>
-    <label>y <input type="number" id="py" value="${o.y ?? w?.y ?? 0}"></label>
-    <label>w <input type="number" id="pw" value="${o.w ?? w?.w ?? 160}"></label>
-    <label>h <input type="number" id="ph" value="${o.h ?? w?.h ?? 24}"></label>
-    <label>texto <input type="text" id="ptext" value="${o.text ?? ""}"></label>
-    <label>color css <input type="text" id="pcolor" value="${o.color ?? ""}" placeholder="#ff8800"></label>
-    <label><input type="checkbox" id="phide" ${o.hidden ? "checked" : ""}> ocultar</label>`;
-  ["px","py","pw","ph"].forEach(k => $("#" + k).oninput = apply);
-  $("#ptext").oninput = apply;
-  $("#pcolor").oninput = apply;
-  $("#phide").onchange = apply;
-  render();
-};
-
-function apply() {
-  if (!SELECTED) return;
-  OVR[SELECTED] = {
-    x:+$("#px").value, y:+$("#py").value,
-    w:+$("#pw").value, h:+$("#ph").value,
-    text:$("#ptext").value, color:$("#pcolor").value,
-    hidden:$("#phide").checked,
+// ---------- parser naive de nuestro formato conocido ----------
+function parseLua(text) {
+  const grab = key => {
+    // strings
+    let m = text.match(new RegExp(key + "\\s*=\\s*\"([^\"]*)\""));
+    if (m) return m[1].replace(/\\194\\183/g, "\u00B7");
+    return undefined;
   };
-  render(); select(SELECTED);
-}
+  const grabColor = key => {
+    const m = text.match(new RegExp(key + "\\s*=\\s*\\{\\s*([\\d.]+)\\s*,\\s*([\\d.]+)\\s*,\\s*([\\d.]+)"));
+    if (!m) return undefined;
+    return rgb01ToHex([+m[1], +m[2], +m[3]]);
+  };
+  const num = k => { const m = text.match(new RegExp(k + "\\s*=\\s*(-?[\\d.]+)")); return m ? +m[1] : undefined; };
 
-function dragify(el) {
-  el.onmousedown = e => {
-    e.preventDefault();
-    const id = el.dataset.id; select(id);
-    const sx = e.clientX, sy = e.clientY;
-    const w = WIDGETS.find(x => x.id === id), o = OVR[id] ||= {};
-    const ox = o.x ?? w?.x ?? parseInt(el.style.left), oy = o.y ?? w?.y ?? parseInt(el.style.top);
-    const mv = ev => {
-      o.x = Math.round(ox + (ev.clientX - sx) * stageScale());
-      o.y = Math.round(oy + (ev.clientY - sy) * stageScale());
-      el.style.left = o.x + "px"; el.style.top = o.y + "px";
-    };
-    const up = () => { document.removeEventListener("mousemove", mv); document.removeEventListener("mouseup", up); select(id); };
-    document.addEventListener("mousemove", mv); document.addEventListener("mouseup", up);
+  return {
+    title: grab("title"), byline: grab("byline"),
+    server: grab("server"), build: grab("build"),
+    offset_x: num("offset_x"), offset_y: num("offset_y"),
+    color_title: grabColor("color_title"), color_text: grabColor("color_text"),
   };
 }
 
-function stageScale() {
-  const r = stage.getBoundingClientRect();
-  return r.width / stage.offsetWidth;
+function genLua() {
+  const q = s => '"' + String(s).replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
+  const c = k => { const r = hexToRgb01(CFG[k]); return `{ ${r[0]}, ${r[1]}, ${r[2]} }`; };
+  return [
+    "-- ivanpanel_config.lua — generado por IvanPanel Studio",
+    "-- Edita a mano o vuelve a este editor. Se aplica al abrir el juego.",
+    "return {",
+`    title       = ${q(CFG.title)},`,
+`    byline      = ${q(CFG.byline)},`,
+`    server      = ${q(CFG.server)},`,
+`    build       = ${q(CFG.build)},`,
+    "",
+`    offset_x = ${CFG.offset_x},`,
+`    offset_y = ${CFG.offset_y},`,
+    "",
+`    color_title = ${c("color_title")},`,
+`    color_text  = ${c("color_text")},`,
+    "}",
+  ].join("\n");
 }
 
-$("#btnTree").onclick = () => {
-  const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".json";
+// ---------- preview ----------
+function renderPreview() {
+  $("#p_title").textContent = CFG.title;   $("#p_title").style.color = rgbToCss(hexToRgb01(CFG.color_title));
+  $("#p_by").textContent = CFG.byline;     $("#p_by").style.color = "rgb(235,235,245)";
+  $("#p_server").textContent = CFG.server; $("#p_server").style.color = rgbToCss(hexToRgb01(CFG.color_text));
+  $("#p_build").textContent = CFG.build;   $("#p_build").style.color = "rgb(140,166,166)";
+  const now = new Date();
+  $("#p_live").textContent =
+    `FPS 60 \u00B7 ${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}:${String(now.getSeconds()).padStart(2,"0")}`;
+  $("#panel").style.right = (18 - CFG.offset_x) + "px";
+  $("#panel").style.top = CFG.offset_y + "px";
+}
+
+function bindForm() {
+  [["f_title","title","text"],["f_byline","byline","text"],["f_server","server","text"],
+   ["f_build","build","text"]].forEach(([id, key]) => {
+    $("#" + id).value = CFG[key];
+    $("#" + id).oninput = e => { CFG[key] = e.target.value; renderPreview(); };
+  });
+  [["c_title","color_title"],["c_text","color_text"]].forEach(([id, key]) => {
+    $("#" + id).value = CFG[key];
+    $("#" + id).oninput = e => { CFG[key] = e.target.value; renderPreview(); };
+  });
+  [["f_x","offset_x","v_x"],["f_y","offset_y","v_y"]].forEach(([id, key, lab]) => {
+    $("#" + id).value = CFG[key]; $("#" + lab).textContent = CFG[key];
+    $("#" + id).oninput = e => { CFG[key] = +e.target.value; $("#" + lab).textContent = e.target.value; renderPreview(); };
+  });
+}
+
+// ---------- import / export ----------
+$("#btnImport").onclick = () => {
+  const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".lua";
   inp.onchange = async () => {
-    const j = JSON.parse(await inp.files[0].text());
-    WIDGETS = j.widgets || [];
-    render();
+    const parsed = parseLua(await inp.files[0].text());
+    Object.keys(parsed).forEach(k => { if (parsed[k] !== undefined) CFG[k] = parsed[k]; });
+    bindForm(); renderPreview();
   };
   inp.click();
 };
 
-$("#btnExport").onclick = () => {
-  const lines = [
-    "-- overrides.lua — generado por ArcheaAge UI Editor",
-    "-- lo consume addon_panel.lua (ivanpanel) al cargar la pantalla.",
-    "return {"
-  ];
-  for (const [id, o] of Object.entries(OVR)) {
-    if (o.hidden) lines.push(`  { id = "${id}", action = "hide" },`);
-    else {
-      const bits = [`anchor = { "TOPLEFT", "UIParent", ${o.x ?? 0}, ${o.y ?? 0} }`];
-      if (o.text) bits.push(`text = "${o.text.replace(/"/g, '\\"')}"`);
-      if (o.color) {
-        const c = hexToRgb01(o.color);
-        if (c) bits.push(`color = { ${c.join(", ")} }`);
-      }
-      lines.push(`  { id = "${id}", action = "apply", ${bits.join(", ")} },`);
-    }
+$("#btnExport").onclick = async () => {
+  const lua = genLua();
+  if (window.showSaveFilePicker) {
+    try {
+      const h = await showSaveFilePicker({ suggestedName: "ivanpanel_config.lua",
+        types: [{ descriptions: ["Lua"], accept: { "text/plain": [".lua"] } }] });
+      const w = await h.createWritable(); await w.write(lua); await w.close();
+      return;
+    } catch (e) { if (e.name === "AbortError") return; }
   }
-  lines.push("}");
-  download("overrides.lua", lines.join("\n"));
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([lua], { type: "text/plain" }));
+  a.download = "ivanpanel_config.lua"; a.click();
 };
 
-function hexToRgb01(h) {
-  const m = /^#?([0-9a-f]{6})$/i.exec(h.trim()); if (!m) return null;
-  const n = parseInt(m[1], 16);
-  return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255, 1].map(v => +v.toFixed(3));
-}
+$("#btnShot").onclick = () => {
+  const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*";
+  inp.onchange = () => { const f = inp.files[0]; if (!f) return;
+    const img = $("#shot"); img.src = URL.createObjectURL(f); img.style.display = "block"; };
+  inp.click();
+};
 
-function download(name, content) {
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([content], { type: "text/plain" }));
-  a.download = name; a.click();
-}
+// reloj falso en vivo
+setInterval(renderPreview, 1000);
 
-$("#btnLua").onclick = () => alert(
-  "Flujo:\n1) Copia overrides.lua junto a addon_panel.lua (tools/ui/)\n" +
-  "2) powershell tools\\ui\\push-ui.ps1\n3) Reabre el juego"
-);
-
-render();
+bindForm(); renderPreview();
 </script>
 </body>
 </html>
