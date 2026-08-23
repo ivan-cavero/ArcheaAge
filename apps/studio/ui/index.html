@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <title>ArcheaAge UI Studio</title>
+<script type="importmap">
+  { "imports": { "three": "./vendor/three.module.js" } }
+</script>
 <style>
   :root {
     --bg:#07100d; --bg2:#0b1512; --surface:#101a17; --surface-el:#141f1b; --input:#0a1210;
@@ -83,8 +86,10 @@
 <body>
 
 <div id="tb">
-  <span class="name">ArcheaAge · UI Studio</span>
+  <span class="name">ArcheaAge · Studio</span>
   <div class="btns">
+    <div title="UI editor" onclick="switchView('ui')" id="btnUI" style="color:var(--primary)">UI</div>
+    <div title="3D world" onclick="switchView('3d')" id="btn3D">3D</div>
     <div onclick="winAction('minimize')">—</div>
     <div onclick="winAction('toggleMaximize')">□</div>
     <div class="close" onclick="winAction('close')">✕</div>
@@ -95,6 +100,7 @@
   <div id="treePane"><h4>Screens</h4></div>
   <div id="canvasWrap">
     <div id="stage" style="width:1920px;height:1080px;position:relative;"></div>
+    <div id="worldWrap" style="display:none;position:absolute;inset:0;"></div>
   </div>
   <div id="inspector"></div>
 </main>
@@ -137,12 +143,15 @@ function ensureScreen(name){
 
 /* ================= tree sidebar ================= */
 function renderTree(){
-  const tp=$("#treePane"); tp.innerHTML="<h4>Screens</h4>";
+  const tp=$("#treePane"); tp.textContent="";
+  const h4=document.createElement("h4"); h4.textContent="Screens"; tp.appendChild(h4);
   for(const scr of SCREEN_ORDER){
     const s=SCREENS[scr];
     const head=document.createElement("div");
     head.className="tnode"+(ACTIVE_SCREEN===scr?" sel":"");
-    head.innerHTML=`<b>${scr}</b> <span class="k">${Object.keys(s.windows).length}w</span>`;
+    const b=document.createElement("b"); b.textContent=scr;
+    const k=document.createElement("span"); k.className="k"; k.textContent=Object.keys(s.windows).length+"w";
+    head.append(b,k);
     head.onclick=()=>{ ACTIVE_SCREEN=scr; render(); };
     tp.appendChild(head);
     const sub=document.createElement("div"); sub.style.paddingLeft="14px";
@@ -205,8 +214,11 @@ function renderScreen(){
     const d=document.createElement("div"); d.className="nw";
     d.style.left=c.x+"px"; d.style.top=c.y+"px";
     d.style.width=(c.w||200)+"px"; d.style.height=(c.h||40)+"px";
-    d.innerHTML=`<div style="color:${c.color};font-size:16px;font-weight:bold;text-align:center;
-                  padding-top:${(c.h||40)/4}px;text-shadow:0 1px 3px #000">${c.text}</div>`;
+    const inner=document.createElement("div");
+    inner.style.cssText=`color:${c.color};font-size:16px;font-weight:bold;text-align:center;
+                  padding-top:${(c.h||40)/4}px;text-shadow:0 1px 3px #000`;
+    inner.textContent=c.text;
+    d.appendChild(inner);
     d.onclick=(ev)=>{ ev.stopPropagation(); SEL_ID=c.id; renderScreen(); renderInspector(); };
     stage.appendChild(d);
   }
@@ -216,46 +228,54 @@ function renderScreen(){
 function esc(s){ return String(s??"").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
 
 function renderInspector(){
-  const ins=$("#inspector");
-  const exportBtn='<button onclick="doExport()" style="background:var(--primary-d);color:#fff;font-weight:600">⬇ Export overrides.lua</button>';
+  const ins=$("#inspector"); ins.textContent="";
+  const exportBtn=document.createElement("button");
+  exportBtn.textContent="⬇ Export overrides.lua";
+  exportBtn.style.cssText="background:var(--primary-d);color:#fff;font-weight:600";
+  exportBtn.onclick=doExport;
+
+  const field=(label,el)=>{ const l=document.createElement("label"); l.textContent=label; ins.append(l,el); };
+  const num=(id,val)=>{ const i=document.createElement("input"); i.type="number"; i.id=id; i.value=val; return i; };
+  const btn=(txt,fn,extra)=>{ const b=document.createElement("button"); b.textContent=txt; b.onclick=fn;
+    if(extra) b.style.cssText=extra; return b; };
 
   if(!SEL_ID || !ACTIVE_SCREEN){
-    ins.innerHTML=`<h3>Inspector</h3><p class="kv">Select a native window or custom widget.</p>${exportBtn}`;
+    const h=document.createElement("h3"); h.textContent="Inspector";
+    const p=document.createElement("p"); p.className="kv"; p.textContent="Select a native window or custom widget.";
+    ins.append(h,p,exportBtn);
     return;
   }
   const s=SCREENS[ACTIVE_SCREEN];
 
   if(s.custom.some(c=>c.id===SEL_ID)){
     const c=s.custom.find(x=>x.id===SEL_ID);
-    ins.innerHTML=`<h3>Custom Widget</h3>
-      <label>ID</label><input type="text" value="${esc(c.id)}" disabled>
-      <label>Text</label><textarea id="ci_text">${esc(c.text)}</textarea>
-      <label>Color</label><input type="color" id="ci_color" value="${esc(c.color)}">
-      <label>X</label><input type="number" id="ci_x" value="${c.x}">
-      <label>Y</label><input type="number" id="ci_y" value="${c.y}">
-      <label>W</label><input type="number" id="ci_w" value="${c.w||200}">
-      <label>H</label><input type="number" id="ci_h" value="${c.h||40}">
-      <button onclick="applyCustom('${esc(c.id)}')">Apply</button>
-      <button onclick="deleteCustom('${esc(c.id)}')" style="border-color:#e08a8a;color:#e08a8a">Delete</button>
-      ${exportBtn}`;
+    const h=document.createElement("h3"); h.textContent="Custom Widget"; ins.appendChild(h);
+    const id=document.createElement("input"); id.type="text"; id.value=c.id; id.disabled=true; field("ID",id);
+    const text=document.createElement("textarea"); text.id="ci_text"; text.textContent=c.text; field("Text",text);
+    const color=document.createElement("input"); color.type="color"; color.id="ci_color"; color.value=c.color; field("Color",color);
+    field("X",num("ci_x",c.x)); field("Y",num("ci_y",c.y));
+    field("W",num("ci_w",c.w||200)); field("H",num("ci_h",c.h||40));
+    ins.append(btn("Apply",()=>applyCustom(c.id)),
+               btn("Delete",()=>deleteCustom(c.id),"border-color:#e08a8a;color:#e08a8a"),
+               exportBtn);
     return;
   }
 
   const w=s.windows[SEL_ID];
   if(w){
-    ins.innerHTML=`<h3>Native Window</h3>
-      <p class="kv">ID: ${esc(SEL_ID)}</p>
-      <label>X offset</label><input type="number" id="ni_x" value="${w.x||0}">
-      <label>Y offset</label><input type="number" id="ni_y" value="${w.y||0}">
-      <label>Width</label><input type="number" id="ni_w" value="${w.w||200}">
-      <label>Height</label><input type="number" id="ni_h" value="${w.h||50}">
-      <label>Show</label><input type="checkbox" id="ni_show" ${(w.show!==false)?"checked":""}>
-      <button onclick="applyNative('${esc(SEL_ID)}')">Apply</button>
-      ${exportBtn}`;
+    const h=document.createElement("h3"); h.textContent="Native Window"; ins.appendChild(h);
+    const p=document.createElement("p"); p.className="kv"; p.textContent="ID: "+SEL_ID; ins.appendChild(p);
+    field("X offset",num("ni_x",w.x||0)); field("Y offset",num("ni_y",w.y||0));
+    field("Width",num("ni_w",w.w||200)); field("Height",num("ni_h",w.h||50));
+    const show=document.createElement("input"); show.type="checkbox"; show.id="ni_show"; show.checked=(w.show!==false);
+    field("Show",show);
+    ins.append(btn("Apply",()=>applyNative(SEL_ID)),exportBtn);
     return;
   }
 
-  ins.innerHTML=`<h3>Unknown</h3><p class="kv">${esc(SEL_ID)}</p>${exportBtn}`;
+  const h=document.createElement("h3"); h.textContent="Unknown";
+  const p=document.createElement("p"); p.className="kv"; p.textContent=SEL_ID;
+  ins.append(h,p,exportBtn);
 }
 
 function applyNative(id){
@@ -349,6 +369,59 @@ function importTreeDialog(){
 window.importTreeDialog=importTreeDialog;
 
 function render(){ renderTree(); renderScreen(); renderInspector(); }
+
+/* ================= 3D world viewport ================= */
+let worldBooted = false;
+function switchView(v){
+  const ui=$("#btnUI"), d3=$("#btn3D"), stage=$("#stage"), wrap=$("#worldWrap");
+  const is3d = v==="3d";
+  stage.style.display = is3d?"none":"";
+  wrap.style.display = is3d?"block":"none";
+  ui.style.color = is3d?"":"var(--primary)";
+  d3.style.color = is3d?"var(--primary)":"";
+  if(is3d && !worldBooted){ worldBooted=true; bootWorld(); }
+}
+window.switchView=switchView;
+
+function bootWorld(){
+  const wrap=$("#worldWrap");
+  WorldViewport.init(wrap);
+  WorldViewport.onSelect = (ent)=>{
+    const ins=$("#inspector");
+    ins.textContent="";
+    if(!ent){
+      const h=document.createElement("h3"); h.textContent="World";
+      const p=document.createElement("p"); p.className="kv"; p.textContent="Click an entity to select it.";
+      ins.append(h,p); return;
+    }
+    const mk=(tag,cls,txt)=>{ const el=document.createElement(tag); if(cls)el.className=cls; if(txt!==undefined)el.textContent=txt; return el; };
+    const lbl=(t)=>{ const l=document.createElement("label"); l.textContent=t; return l; };
+    const inp=(id,val)=>{ const i=document.createElement("input"); i.type="number"; i.id=id; i.value=val; return i; };
+    ins.append(mk("h3",null,"Entity"));
+    ins.append(mk("p","kv","Name: "+ent.name));
+    ins.append(mk("p","kv","Class: "+ent.class));
+    ins.append(mk("p","kv","Layer: "+(ent.layer||"")));
+    ins.append(lbl("X")); ins.append(inp("we_x",ent.pos[0]));
+    ins.append(lbl("Y")); ins.append(inp("we_y",ent.pos[1]));
+    ins.append(lbl("Z")); ins.append(inp("we_z",ent.pos[2]));
+    const m=document.createElement("input"); m.type="text"; m.value=ent.model||""; m.disabled=true;
+    const ml=document.createElement("label"); ml.textContent="Model";
+    ins.append(ml,m);
+    const b=mk("button",null,"Apply position"); b.onclick=applyEntityPos; ins.append(b);
+  };
+  fetch("cells/arche_mall_world_003_003.json")
+    .then(r=>r.ok?r.json():Promise.reject(0))
+    .then(j=>{ WorldViewport.loadCell(j); setStatus("world: "+j.cell+" · "+j.entities.length+" entities"); })
+    .catch(()=>setStatus("no cell JSON in ui/cells/", true));
+}
+window.applyEntityPos=function(){
+  const g=x=>document.getElementById(x);
+  const ent=WorldViewport.selEntity&&WorldViewport.selEntity.userData.entity;
+  if(!ent) return;
+  ent.pos=[+g("we_x").value, +g("we_y").value, +g("we_z").value];
+  WorldViewport.selEntity.position.set(ent.pos[0], ent.pos[2], ent.pos[1]);
+  setStatus("entity moved to "+ent.pos.join(", "));
+};
 
 /* auto-load tracked tree from repo */
 fetch("game_ui_tree.json")

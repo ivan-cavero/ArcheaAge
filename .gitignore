@@ -71,3 +71,6 @@ tools/ui/unluac.jar
 
 tools/ui/decompiled/
 tools/ui/src/game/
+
+# studio: generated world cell JSON (regenerate with tools/world/world_to_json.py)
+apps/studio/ui/cells/
