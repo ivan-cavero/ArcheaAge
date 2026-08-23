@@ -70,3 +70,4 @@ game/ui/login_stage/*
 tools/ui/unluac.jar
 
 tools/ui/decompiled/
+tools/ui/src/game/
