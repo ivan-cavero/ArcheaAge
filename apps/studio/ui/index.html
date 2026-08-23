@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ArcheaAge UI Studio</title>
+<style>
+  :root {
+    --bg:#07100d; --bg2:#0b1512; --surface:#101a17; --surface-el:#141f1b; --input:#0a1210;
+    --primary:#8dbb3e; --primary-d:#496d27; --gold:#b8a76a; --gold-l:#d3c58a; --text-gd:#c6b77b;
+    --text:#e7e5d9; --text2:#aaa99d; --textm:#777970; --on:#63b83e; --brd:rgba(150,180,100,.14);
+    --ff-d:"Cinzel",Georgia,serif; --ff-u:"Inter",system-ui,sans-serif;
+  }
+  * { box-sizing:border-box; font-family:var(--ff-u); }
+  body { margin:0; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+
+  /* title bar */
+  #tb { height:38px; display:flex; align-items:center; justify-content:space-between;
+        background:var(--bg2); border-bottom:1px solid var(--brd); user-select:none; }
+  #tb .name { font-family:var(--ff-d); font-size:12px; letter-spacing:3px; color:var(--text-gd);
+              padding-left:16px; text-transform:uppercase; }
+  #tb .btns { display:flex; height:100%; }
+  #tb .btns div { width:42px; display:grid; place-items:center; cursor:pointer; color:var(--text2); font-size:13px; }
+  #tb .btns div:hover { background:#ffffff10; color:var(--text); }
+  #tb .btns .close:hover { background:#8e4e4e; color:#fff; }
+
+  main { flex:1; display:grid; grid-template-columns:360px 1fr; overflow:hidden; }
+
+  /* form */
+  #form { background:var(--surface); border-right:1px solid var(--brd); padding:16px 20px; overflow:auto; }
+  h3 { font-family:var(--ff-d); font-size:11px; letter-spacing:2px; text-transform:uppercase;
+       color:var(--text-gd); margin:20px 0 6px; }
+  h3:first-child { margin-top:0; }
+  label { display:block; font-size:11px; color:var(--textm); margin:10px 0 4px; }
+  label b { color:var(--gold-l); }
+  input[type=text] { width:100%; background:var(--input); color:var(--text); border:1px solid var(--brd);
+                     padding:6px 9px; border-radius:4px; }
+  input[type=color] { width:48px; height:30px; padding:2px; background:var(--input);
+                      border:1px solid var(--brd); border-radius:4px; cursor:pointer; }
+  .row { display:flex; gap:14px; } .row > div { flex:1; }
+  input[type=range] { width:100%; accent-color:var(--primary); }
+  button { background:var(--surface-el); color:var(--text); border:1px solid var(--brd);
+           padding:8px 12px; border-radius:4px; cursor:pointer; width:100%; margin-top:8px; font-size:12px; }
+  button:hover { border-color:var(--primary); }
+  button.primary { background:var(--primary-d); border-color:var(--primary-d); font-weight:600; }
+  button.primary:hover { background:var(--primary); }
+  .status { font-size:11px; color:var(--on); margin-top:10px; word-break:break-all; min-height:15px; }
+  .status.err { color:#e08a8a; }
+
+  /* preview */
+  #previewWrap { position:relative; overflow:hidden;
+                 background:radial-gradient(1100px 480px at 68% 24%, #24301f 0%, var(--bg2) 62%); }
+  #shot { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.85; display:none; }
+  #panel { position:absolute; width:280px; top:90px; right:60px;
+           background:rgba(8,14,11,.55); border:1px solid rgba(255,255,255,.13); border-radius:4px;
+           padding:6px 0 8px; box-shadow:0 6px 22px rgba(0,0,0,.55); }
+  #panel .l { text-align:right; padding-right:14px; font-size:13px; line-height:25px; white-space:nowrap;
+              text-shadow:0 1px 2px #000, 0 0 5px rgba(0,0,0,.85); }
+  #panel .live { color:rgb(140,200,140); font-variant-numeric:tabular-nums; }
+</style>
+</head>
+<body>
+
+<div id="tb" data-tauri-drag-region>
+  <span class="name">ArcheaAge · UI Studio</span>
+  <div class="btns">
+    <div onclick="winAction('minimize')">&#x2500;</div>
+    <div onclick="winAction('toggleMaximize')">&#x25A1;</div>
+    <div class="close" onclick="winAction('close')">&#x2715;</div>
+  </div>
+</div>
+
+<main>
+  <div id="form">
+    <h3>Panel Texts</h3>
+    <label>Title</label><input type="text" id="f_title">
+    <label>Byline</label><input type="text" id="f_byline">
+    <label>Server</label><input type="text" id="f_server">
+    <label>Footer line</label><input type="text" id="f_build">
+
+    <h3>Colors</h3>
+    <div class="row">
+      <div><label>Title</label><input type="color" id="c_title"></div>
+      <div><label>Text</label><input type="color" id="c_text"></div>
+    </div>
+
+    <h3>Position <span style="color:var(--textm)">(offset from top-right)</span></h3>
+    <label>X <b id="v_x"></b></label><input type="range" id="f_x" min="-400" max="40" value="-18">
+    <label>Y <b id="v_y"></b></label><input type="range" id="f_y" min="0" max="600" value="70">
+
+    <h3>Persist</h3>
+    <button class="primary" id="btnSave">Save config to game folder</button>
+    <button id="btnLoad">Reload from game folder</button>
+    <button id="btnFolder">Open Documents\ArcheAge folder</button>
+    <p class="status" id="status"></p>
+  </div>
+
+  <div id="previewWrap">
+    <img id="shot" alt="">
+    <div style="position:absolute;top:10px;left:10px;">
+      <button style="width:auto;padding:4px 10px;font-size:11px" id="btnShot">Background screenshot…</button>
+    </div>
+    <div id="panel">
+      <div class="l" id="p_title"></div>
+      <div class="l" id="p_by"></div>
+      <div class="l" id="p_server"></div>
+      <div class="l" id="p_chars" style="height:25px"></div>
+      <div class="l live" id="p_live"></div>
+      <div class="l" id="p_build"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+const CFG = {
+  title: "ArcheaAge",
+  byline: "Edited by Ivan Cavero",
+  server: "Servidor \u00B7 EU-1",
+  build: "Build custom \u00B7 preview UI",
+  offset_x: -18,
+  offset_y: 70,
+  color_title: "#d9c773",
+  color_text: "#9eb8d9",
+};
+
+const $ = s => document.querySelector(s);
+const IN_TAURI = !!window.__TAURI__;
+const invoke = cmd => window.__TAURI__.core.invoke(cmd);
+
+function winAction(a) {
+  try { window.__TAURI__.window.getCurrentWindow()[a](); } catch (e) {}
+}
+
+// ---------- colors ----------
+function hexToRgb01(h) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(h || ""); if (!m) return [1, 1, 1];
+  const n = parseInt(m[1], 16), f = b => +(b / 255).toFixed(3);
+  return [f((n >> 16) & 255), f((n >> 8) & 255), f(n & 255)];
+}
+function rgb01ToHex(c) {
+  const h = b => Math.round(b * 255).toString(16).padStart(2, "0");
+  return "#" + h(c[0]) + h(c[1]) + h(c[2]);
+}
+function rgbCss(hexOrArr) {
+  if (Array.isArray(hexOrArr)) return `rgb(${hexOrArr.map(x=>Math.round(x*255)).join(",")})`;
+  const c = hexToRgb01(hexOrArr); return `rgb(${c.map(x=>Math.round(x*255)).join(",")})`;
+}
+
+// ---------- lua parse/gen ----------
+function parseLua(text) {
+  const grab = k => { const m = text.match(new RegExp(k + "\\s*=\\s*\"([^\"]*)\"")); return m && m[1]; };
+  const num = k => { const m = text.match(new RegExp(k + "\\s*=\\s*(-?\\d+)")); return m ? +m[1] : undefined; };
+  const col = k => {
+    const m = text.match(new RegExp(k + "\\s*=\\s*\\{\\s*([\\d.]+)\\s*,\\s*([\\d.]+)\\s*,\\s*([\\d.]+)"));
+    if (!m) return undefined;
+    const h = x => Math.round(+x * 255).toString(16).padStart(2, "0");
+    return "#" + h(+m[1]) + h(+m[2]) + h(+m[3]);
+  };
+  return { title: grab("title"), byline: grab("byline"), server: grab("server"),
+           build: grab("build"), offset_x: num("offset_x"), offset_y: num("offset_y"),
+           color_title: col("color_title"), color_text: col("color_text") };
+}
+
+function genLua() {
+  const q = s => '"' + String(s ?? "").replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
+  const col = k => {
+    const c = hexToRgb01(CFG[k]), f = b => +(b).toFixed ? b : b; // keep 0..1 values
+    return `{ ${c[0]}, ${c[1]}, ${c[2]} }`;
+  };
+  return [
+    "-- ivanpanel_config.lua \u2014 generated by ArcheaAge UI Studio",
+    "-- Applied every time the game opens. Edit freely or use UI Studio again.",
+    "return {",
+    `    title       = ${q(CFG.title)},`,
+    `    byline      = ${q(CFG.byline)},`,
+    `    server      = ${q(CFG.server)},`,
+    `    build       = ${q(CFG.build)},`,
+    "",
+    `    offset_x = ${CFG.offset_x},`,
+    `    offset_y = ${CFG.offset_y},`,
+    "",
+    `    color_title = ${col("color_title")},`,
+    `    color_text  = ${col("color_text")},`,
+    "}",
+  ].join("\n");
+}
+
+// ---------- render ----------
+function renderPreview() {
+  $("#p_title").textContent = CFG.title;     $("#p_title").style.color = rgbCss(CFG.color_title);
+  $("#p_by").textContent = CFG.byline;       $("#p_by").style.color = "rgb(235,235,245)";
+  $("#p_server").textContent = CFG.server;   $("#p_server").style.color = rgbCss(CFG.color_text);
+  $("#p_build").textContent = CFG.build;     $("#p_build").style.color = "rgb(140,166,166)";
+  const n = new Date();
+  $("#p_live").textContent =
+    `FPS 60 \u00B7 ${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")}:${String(n.getSeconds()).padStart(2,"0")}`;
+  $("#panel").style.right = Math.max(0, 18 - CFG.offset_x) + "px";
+  $("#panel").style.top = CFG.offset_y + "px";
+}
+
+function bindForm() {
+  [["f_title","title","text"],["f_byline","byline","text"],["f_server","server","text"],
+   ["f_build","build","text"]].forEach(([id,key]) => {
+    $("#" + id).value = CFG[key];
+    $("#" + id).oninput = e => { CFG[key] = e.target.value; renderPreview(); };
+  });
+  [["c_title","color_title"],["c_text","color_text"]].forEach(([id,key]) => {
+    $("#" + id).value = CFG[key];
+    $("#" + id).oninput = e => { CFG[key] = e.target.value; renderPreview(); };
+  });
+  [["f_x","offset_x","v_x"],["f_y","offset_y","v_y"]].forEach(([id,key,lab]) => {
+    $("#" + id).value = CFG[key]; $("#" + lab).textContent = CFG[key];
+    $("#" + id).oninput = e => { CFG[key] = +e.target.value; $("#" + lab).textContent = e.target.value; renderPreview(); };
+  });
+}
+
+function setStatus(msg, isErr) {
+  const el = $("#status"); el.textContent = msg || "";
+  el.className = "status" + (isErr ? " err" : "");
+}
+
+// ---------- persist ----------
+$("#btnSave").onclick = async () => {
+  if (!IN_TAURI) { setStatus("Browser mode: save disabled.", true); return; }
+  try { setStatus("Saved: " + await invoke("panel_config_save", { content: genLua() })); }
+  catch (e) { setStatus(String(e), true); }
+};
+
+$("#btnLoad").onclick = async () => {
+  if (!IN_TAURI) { setStatus("Browser mode: load disabled.", true); return; }
+  try {
+    const content = await invoke("panel_config_load");
+    if (!content) { setStatus("No config yet \u2014 defaults shown."); return; }
+    Object.assign(CFG, Object.fromEntries(Object.entries(parseLua(content))
+      .filter(([, v]) => v !== undefined)));
+    bindForm(); renderPreview();
+    setStatus("Config loaded.");
+  } catch (e) { setStatus(String(e), true); }
+};
+
+$("#btnFolder").onclick = () => {
+  if (IN_TAURI) invoke("open_game_documents").catch(e => setStatus(String(e), true));
+};
+
+$("#btnShot").onclick = () => {
+  const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*";
+  inp.onchange = () => { const f = inp.files[0]; if (!f) return;
+    const img = $("#shot"); img.src = URL.createObjectURL(f); img.style.display = "block"; };
+  inp.click();
+};
+
+// clock in preview
+setInterval(renderPreview, 1000);
+bindForm(); renderPreview();
+setStatus(IN_TAURI ? "Ready. Save writes Documents\\ArcheAge\\ivanpanel_config.lua."
+                   : "Browser mode (no backend).");
+</script>
+</body>
+</html>
