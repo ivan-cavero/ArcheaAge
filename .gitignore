@@ -55,3 +55,5 @@ apps/*/src-tauri/target/
 # extracted game assets (never commit)
 game/
 tools/ui/unluac.jar
+
+tools/ui/decompiled/

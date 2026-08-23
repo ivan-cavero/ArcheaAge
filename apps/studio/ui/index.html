@@ -284,6 +284,7 @@ function renderInspector(){
   const o=selObj();
 
   if(SEL.kind==="native"){
+    const moduleGuess = "world_select_view.lua";
     ins.innerHTML=`<h3>Native · ${esc(SEL.id)}</h3>
       <p class="kv">Native id: ${o.nativeId??"?"}</p>
       <label>Show</label><input type="checkbox" id="i_show" ${(o.show!==false)?"checked":""}>
@@ -292,7 +293,13 @@ function renderInspector(){
       <label>X offset</label><input type="number" id="i_x" value="${o.x??0}">
       <label>Y offset</label><input type="number" id="i_y" value="${o.y??0}">
       <button onclick="applyInspector()">Apply</button>
+      <button onclick="openSrc()">📜 View logic source (decompiled)</button>
       ${exportBtn}`;
+    window.openSrc = () => {
+      if(!IN_TAURI){ setStatus("Open in the Tauri app to use this.", true); return; }
+      invoke("open_decompiled_source",{module:moduleGuess})
+        .then(p=>setStatus("opened: "+p)).catch(e=>setStatus(String(e),true));
+    };
     return;
   }
 

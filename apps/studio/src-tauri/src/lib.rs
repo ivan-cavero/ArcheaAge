@@ -79,12 +79,42 @@ async fn overrides_save(content: String) -> Result<String, String> {
         \nFallback: save the file manually into tools\\ui\\overrides.lua"))
 }
 
+/// Opens the decompiled Lua source folder of a loginstage module in Explorer.
+#[tauri::command]
+async fn open_decompiled_source(module: String) -> Result<String, String> {
+    // resolve like overrides_save: repo root relative to cwd or exe depth
+    let mut candidates: Vec<PathBuf> = Vec::new();
+    if let Ok(cwd) = std::env::current_dir() {
+        candidates.push(cwd.join("../tools/ui/decompiled"));
+    }
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(dir) = exe.parent() {
+            let mut p = dir.to_path_buf();
+            for _ in 0..4 { p = p.parent().map(|x| x.to_path_buf()).unwrap_or(p); }
+            candidates.push(p.join("tools/ui/decompiled"));
+        }
+    }
+    for c in &candidates {
+        let target = c.join(format!("game/scriptsbin/x2ui/loginstage/{}", module));
+        if target.exists() {
+            let t = target.clone();
+            std::process::Command::new("explorer.exe")
+                .arg("/select,").arg(t.into_os_string())
+                .spawn().map_err(|e| e.to_string())?;
+            return Ok(target.to_string_lossy().into_owned());
+        }
+    }
+    Err("decompiled sources not found — run tools\\ui\\decompile.ps1 first".into())
+}
+
 pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             panel_config_load,
             panel_config_save,
             open_game_documents,
+            overrides_save,
+            open_decompiled_source,
             overrides_save
         ])
         .run(tauri::generate_context!())
