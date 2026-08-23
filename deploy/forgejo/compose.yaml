@@ -33,5 +33,6 @@ services:
     volumes:
       - /var/lib/forgejo:/data
     ports:
-      - "127.0.0.1:3000:3000" # internal HTTP; TLS by Traefik/Dokploy
-      - "222:22"              # git SSH direct to the VPS
+      - "222:22" # git SSH direct to the VPS
+# NOTE: no 3000 mapping — Dokploy already binds 3000 (its own web UI).
+# Traefik routes the domain -> forgejo:3000 over the internal network.

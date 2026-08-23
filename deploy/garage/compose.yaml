@@ -36,7 +36,6 @@ services:
       - ./garage.toml:/etc/garage.toml:ro
       - /var/lib/garage/meta:/var/lib/garage/meta
       - /var/lib/garage/data:/var/lib/garage/data
-    ports:
-      - "127.0.0.1:3900:3900" # S3 API (rclone/restic/launcher)
-      - "127.0.0.1:3902:3902" # optional public web (direct downloads)
-      - "127.0.0.1:3903:3903" # admin API
+# NOTE: no host port mappings — Dokploy routes the domain via Traefik to
+# garage:3900 (S3 API) over the internal network. Admin API (3903) and web
+# (3902) are only reachable inside the Dokploy network.
