@@ -1,0 +1,13 @@
+{
+  "name": "archeaage-studio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ArcheaAge UI Studio - visual editor for the ivanpanel client addon",
+  "scripts": {
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.4"
+  }
+}
