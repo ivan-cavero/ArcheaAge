@@ -862,7 +862,7 @@
         ent.pos = [+g("we_x").value, +g("we_y").value, +g("we_z").value];
         WorldViewport.selEntity.position.set(
           ent.pos[0],
-          ent.pos[2],
+          ent.pos[2] * 3,
           ent.pos[1],
         );
         setStatus("entity moved to " + ent.pos.join(", "));

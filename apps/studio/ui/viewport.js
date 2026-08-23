@@ -6,7 +6,6 @@
  * CryEngine uses Z-up. three.js uses Y-up. We map game (x, y, z) -> three (x, z, y).
  */
 
-
 import * as THREE from "./vendor/three.module.js";
 import { OrbitControls } from "./vendor/OrbitControls.js";
 
@@ -61,9 +60,15 @@ const WorldViewport = {
     this.resize(container);
 
     // picking + dragging
-    this.renderer.domElement.addEventListener("pointerdown", (e) => this.onPointerDown(e));
-    this.renderer.domElement.addEventListener("pointermove", (e) => this.onPointerMove(e));
-    this.renderer.domElement.addEventListener("pointerup", () => { this.dragging = null; });
+    this.renderer.domElement.addEventListener("pointerdown", (e) =>
+      this.onPointerDown(e),
+    );
+    this.renderer.domElement.addEventListener("pointermove", (e) =>
+      this.onPointerMove(e),
+    );
+    this.renderer.domElement.addEventListener("pointerup", () => {
+      this.dragging = null;
+    });
 
     this.animate();
   },
@@ -79,7 +84,9 @@ const WorldViewport = {
   /* ---------- data ---------- */
 
   loadCell(data) {
-    if (this.group) { this.scene.remove(this.group); }
+    if (this.group) {
+      this.scene.remove(this.group);
+    }
     this.group = new THREE.Group();
     this.entityMeshes = [];
     this.scene.add(this.group);
@@ -96,13 +103,23 @@ const WorldViewport = {
   },
 
   buildTerrain(hm) {
-    const n = hm.width;                 // 512
-    const unit = hm.unit_size || 2;     // meters per height sample
-    const heights = hm.heights;         // rows of n floats (meters)
-    const maxH = hm.max_height || 4096;
+    const n = hm.width; // 512
+    const unit = hm.unit_size || 2; // meters per height sample
+    const heights = hm.heights; // rows of n floats (meters)
+    const ZS = 3; // vertical exaggeration so relief is visible
+
+    // normalize color by the cell's REAL height range, not maxH
+    let lo = Infinity,
+      hi = -Infinity;
+    for (const row of heights)
+      for (const v of row) {
+        if (v < lo) lo = v;
+        if (v > hi) hi = v;
+      }
+    const span = Math.max(1, hi - lo);
 
     const geo = new THREE.PlaneGeometry(n * unit, n * unit, n - 1, n - 1);
-    geo.rotateX(-Math.PI / 2);          // XY plane -> XZ, +Y up
+    geo.rotateX(-Math.PI / 2); // XY plane -> XZ, +Y up
     const pos = geo.attributes.position;
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i);
@@ -111,26 +128,32 @@ const WorldViewport = {
       const col = Math.min(n - 1, Math.max(0, Math.round(x / unit)));
       const row = Math.min(n - 1, Math.max(0, Math.round(z / unit)));
       const h = heights[row][col];
-      pos.setY(i, Number.isFinite(h) ? h : 0);
+      pos.setY(i, (Number.isFinite(h) ? h : 0) * ZS);
     }
     geo.computeVertexNormals();
 
-    // color by height: deep -> shallow -> green -> rock
+    // color by height within the cell's real range: sand -> grass -> rock
     const colors = new Float32Array(pos.count * 3);
     const c = new THREE.Color();
     for (let i = 0; i < pos.count; i++) {
       const h = pos.getY(i);
-      const t = Math.min(1, Math.max(0, h / maxH));
-      if (h < 0) c.setRGB(0.16, 0.22, 0.30);
-      else if (t < 0.25) c.setRGB(0.35, 0.50, 0.28);
-      else if (t < 0.6) c.setRGB(0.42, 0.58, 0.30);
-      else if (t < 0.85) c.setRGB(0.50, 0.47, 0.36);
-      else c.setRGB(0.62, 0.60, 0.58);
-      colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
+      const t = Math.min(1, Math.max(0, (h / ZS - lo) / span));
+      if (h < 0) c.setRGB(0.16, 0.22, 0.3);
+      else if (t < 0.2) c.setRGB(0.55, 0.62, 0.4); // sand/shallow
+      else if (t < 0.55) c.setRGB(0.35, 0.5, 0.28); // grass
+      else if (t < 0.8) c.setRGB(0.5, 0.47, 0.36); // rock
+      else c.setRGB(0.62, 0.6, 0.58); // peak
+      colors[i * 3] = c.r;
+      colors[i * 3 + 1] = c.g;
+      colors[i * 3 + 2] = c.b;
     }
     geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
-    const mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 0 });
+    const mat = new THREE.MeshStandardMaterial({
+      vertexColors: true,
+      roughness: 1,
+      metalness: 0,
+    });
     return new THREE.Mesh(geo, mat);
   },
 
@@ -139,10 +162,13 @@ const WorldViewport = {
     const geo = new THREE.PlaneGeometry(n, n);
     geo.rotateX(-Math.PI / 2);
     const mat = new THREE.MeshStandardMaterial({
-      color: 0x1e5f8a, transparent: true, opacity: 0.45, roughness: 0.2,
+      color: 0x1e5f8a,
+      transparent: true,
+      opacity: 0.45,
+      roughness: 0.2,
     });
     const water = new THREE.Mesh(geo, mat);
-    water.position.y = hm.water_level || 0;
+    water.position.y = (hm.water_level || 0) * 3; // match terrain Z_SCALE
     return water;
   },
 
@@ -154,9 +180,11 @@ const WorldViewport = {
     // placeholder geometry by class
     let geo;
     if (cls.includes("light")) geo = new THREE.SphereGeometry(3, 8, 8);
-    else if (cls.includes("fish") || cls.includes("animal")) geo = new THREE.ConeGeometry(4, 10, 6);
+    else if (cls.includes("fish") || cls.includes("animal"))
+      geo = new THREE.ConeGeometry(4, 10, 6);
     else if (cls.includes("area")) geo = new THREE.BoxGeometry(20, 2, 20);
-    else if (cls.includes("npc") || cls.includes("character")) geo = new THREE.CylinderGeometry(4, 4, 18, 8);
+    else if (cls.includes("npc") || cls.includes("character"))
+      geo = new THREE.CylinderGeometry(4, 4, 18, 8);
     else geo = new THREE.BoxGeometry(6, 6, 6);
 
     const hue = this.classHue(cls);
@@ -166,22 +194,25 @@ const WorldViewport = {
       roughness: 0.6,
     });
     const mesh = new THREE.Mesh(geo, mat);
-    // game (x, y, z) -> three (x, z, y); scale applies per-axis
-    mesh.position.set(x, z, y);
+    // game (x, y, z) -> three (x, z*3, y); scale applies per-axis
+    mesh.position.set(x, z * 3, y);
     mesh.scale.set(sx, sz, sy);
     mesh.userData = { entity: ent };
 
     // name label
     if (ent.name) {
       const canvas = document.createElement("canvas");
-      canvas.width = 512; canvas.height = 64;
+      canvas.width = 512;
+      canvas.height = 64;
       const ctx = canvas.getContext("2d");
       ctx.font = "28px Inter, system-ui, sans-serif";
       ctx.fillStyle = "#e7e5d9";
       ctx.textBaseline = "middle";
       ctx.fillText(ent.name, 8, 32);
       const tex = new THREE.CanvasTexture(canvas);
-      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+      const sprite = new THREE.Sprite(
+        new THREE.SpriteMaterial({ map: tex, depthTest: false }),
+      );
       sprite.scale.set(80, 10, 1);
       sprite.position.y = 14;
       mesh.add(sprite);
@@ -192,12 +223,12 @@ const WorldViewport = {
   },
 
   classHue(cls) {
-    if (cls.includes("light")) return 0.12;      // yellow
-    if (cls.includes("fish")) return 0.55;       // cyan
-    if (cls.includes("area")) return 0.75;       // purple
+    if (cls.includes("light")) return 0.12; // yellow
+    if (cls.includes("fish")) return 0.55; // cyan
+    if (cls.includes("area")) return 0.75; // purple
     if (cls.includes("npc") || cls.includes("character")) return 0.0; // red
-    if (cls.includes("anim")) return 0.33;       // green
-    return 0.6;                                  // blue
+    if (cls.includes("anim")) return 0.33; // green
+    return 0.6; // blue
   },
 
   fitCamera(data) {
@@ -221,7 +252,9 @@ const WorldViewport = {
         this.selEntity = m;
         this.dragging = m;
         this.dragPlane.setFromNormalAndCoplanarPoint(
-          new THREE.Vector3(0, 1, 0), m.position);
+          new THREE.Vector3(0, 1, 0),
+          m.position,
+        );
         this.controls.enabled = false;
         if (this.onSelect) this.onSelect(m.userData.entity);
         return;
@@ -240,9 +273,13 @@ const WorldViewport = {
       if (pt) {
         this.dragging.position.x = pt.x;
         this.dragging.position.z = pt.z;
-        // keep height (game y = three z)
+        // keep height; undo the game->three mapping (three.y = game.z*3)
         if (this.dragging.userData.entity) {
-          this.dragging.userData.entity.pos = [pt.x, this.dragging.position.y, pt.z];
+          this.dragging.userData.entity.pos = [
+            pt.x,
+            pt.z,
+            this.dragging.position.y / 3,
+          ];
         }
       }
     }
