@@ -3,8 +3,9 @@
 # Why Garage and not MinIO: MinIO entered maintenance mode (Dec 2025) and
 # crippled the CE console; Garage is Rust, light, S3-compatible, no surprises.
 #
-# SELF-CONTAINED for Dokploy: the config file is generated at container start
-# from env vars — no external garage.toml to mount (Dokploy resolves relative
+# SELF-CONTAINED for Dokploy: the garage image has NO shell (/bin/sh missing),
+# so a tiny alpine init container writes /etc/garage/garage.toml from env vars
+# into a shared volume. No external files to mount (Dokploy resolves relative
 # paths against its own project dir, which breaks ./garage.toml).
 #
 # .env next to this file:
@@ -22,10 +23,9 @@
 name: garage
 
 services:
-  garage:
-    image: dxflrs/garage:v2.0.0
-    container_name: garage
-    restart: unless-stopped
+  garage-init:
+    image: alpine:3.20
+    restart: "no"
     environment:
       GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET}
       GARAGE_ADMIN_TOKEN: ${GARAGE_ADMIN_TOKEN}
@@ -33,7 +33,7 @@ services:
       - /bin/sh
       - -c
       - |
-        cat > /etc/garage.toml <<EOF
+        cat > /config/garage.toml <<EOF
         metadata_dir = "/var/lib/garage/meta"
         data_dir = "/var/lib/garage/data"
         replication_factor = 1
@@ -50,9 +50,23 @@ services:
         api_bind_addr = "[::]:3903"
         admin_token = "$GARAGE_ADMIN_TOKEN"
         EOF
-        exec /garage server -c /etc/garage.toml
     volumes:
+      - garage-config:/config
+
+  garage:
+    image: dxflrs/garage:v2.0.0
+    container_name: garage
+    restart: unless-stopped
+    depends_on:
+      garage-init:
+        condition: service_completed_successfully
+    command: ["/garage", "server", "-c", "/etc/garage/garage.toml"]
+    volumes:
+      - garage-config:/etc/garage
       - /var/lib/garage/meta:/var/lib/garage/meta
       - /var/lib/garage/data:/var/lib/garage/data
 # NOTE: no host port mappings — Dokploy routes the domain via Traefik to
 # garage:3900 (S3 API) over the internal network.
+
+volumes:
+  garage-config:
