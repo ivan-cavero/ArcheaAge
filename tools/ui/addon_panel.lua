@@ -149,3 +149,28 @@ if #pending > 0 then
 elseif OVLOG then
     OVLOG:close() OVLOG = nil
 end
+
+-- -------------------------------------------------------- custom widgets --
+-- Widgets designed in UI Studio (IVAN_CUSTOM) — created by this addon at load.
+-- Each entry: { id, type="label"|"window", anchor={pt,rel,x,y},
+--               extent={w,h}, text=?, color={r,g,b}, show=? }
+local CUSTOM = IVAN_CUSTOM or {}
+for _, c in ipairs(CUSTOM) do
+    pcall(function()
+        if c.show == false then return end
+        local w = CreateEmptyWindow(c.id, "UIParent")
+        w:Show(true)
+        local ext = c.extent or { 180, 26 }
+        w:SetExtent(ext[1], ext[2])
+        local a = c.anchor or { "TOPLEFT", "UIParent", 0, 0 }
+        w:AddAnchor(a[1], a[2], a[3], a[4])
+        if c.type ~= "window" and c.text then
+            local l = w:CreateChildWidget("label", c.id .. "_lbl", 0, true)
+            l:SetAutoResize(true)
+            l:SetText(c.text)
+            pcall(function() l.style:SetShadow(true) end)
+            if c.color then l.style:SetColor(rgbArr(c.color)) end
+            l:AddAnchor("CENTER", w, 0, 0)
+        end
+    end)
+end
