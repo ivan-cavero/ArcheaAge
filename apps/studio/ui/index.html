@@ -19,7 +19,6 @@
   ::-webkit-scrollbar-thumb { background:#2e3b2f; border-radius:5px; border:2px solid #0a1210; }
   ::-webkit-scrollbar-thumb:hover { background:var(--primary-d); }
 
-  /* title bar */
   #tb { height:38px; flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
         background:var(--bg2); border-bottom:1px solid var(--brd); user-select:none; }
   #tb .name { font-family:var(--ff-d); font-size:12px; letter-spacing:3px; color:var(--text-gd);
@@ -37,22 +36,23 @@
   .tnode { padding:3px 6px; border-radius:4px; cursor:pointer; font-size:12px; }
   .tnode:hover { background:#ffffff08; }
   .tnode.sel { background:var(--primary-d); color:#fff; }
-  .tnode .k { opacity:.55; font-size:10px; float:right; }
 
-  /* canvas */
-  #canvasWrap { position:relative; overflow:auto;
-                background:radial-gradient(1100px 480px at 68% 24%, #24301f 0%, var(--bg2) 62%); }
-  #stage { position:relative; width:1920px; height:1080px; transform-origin:0 0; transform:scale(.6); }
-  #shot { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.85; display:none; }
-  .box { position:absolute; border:1px dashed; font-size:11px; padding:1px 4px; white-space:nowrap;
-         overflow:hidden; cursor:move; user-select:none; }
-  .box.native { border-color:#4aa3ffaa; background:#4aa3ff14; color:#bfe0ff; }
-  .box.custom { border-color:#8dbb3eaa; background:#8db33e18; color:#d9ecc0; }
-  .box.off { opacity:.28; border-style:dotted; }
-  .box.sel { border-width:2px; z-index:6; filter:brightness(1.25); }
-  #zoomBar { position:absolute; bottom:10px; right:12px; display:flex; gap:6px; align-items:center;
-             background:#0008; padding:4px 8px; border-radius:6px; font-size:11px; z-index:9; }
-  #zoomBar b { color:var(--text); min-width:34px; text-align:center; }
+  /* canvas — renders the reconstructed game screen */
+  #canvasWrap { position:relative; overflow:hidden; background:#000; }
+  #renderer { position:absolute; width:1920px; height:1080px; transform-origin:0 0;
+              background-size:cover; background-position:center; }
+  #renderer img.bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; pointer-events:none; }
+
+  /* overlay widgets rendered on top of bg */
+  .ow { position:absolute; cursor:pointer; z-index:5; }
+  .ow:hover { outline:1px solid var(--primary); outline-offset:-1px; }
+  .ow.sel-out { outline:2px solid var(--acc,#e8b23a); outline-offset:-1px; z-index:7; }
+  .ow-label { white-space:nowrap; text-shadow:0 1px 3px #000c, 0 0 6px rgba(0,0,0,.5);
+              pointer-events:none; }
+
+  /* selection highlight */
+  .sel-ring { position:absolute; border:2px solid var(--primary); pointer-events:none; z-index:8;
+              box-shadow:0 0 0 9999px rgba(0,0,0,.06); }
 
   /* inspector */
   #inspector { background:var(--surface); border-left:1px solid var(--brd); padding:14px; overflow:auto; }
@@ -71,6 +71,12 @@
   #inspector button.primary { background:var(--primary-d); border-color:var(--primary-d); font-weight:600; }
   .kv { font-size:11px; color:var(--text2); margin:3px 0; word-break:break-all; }
   .status { min-height:16px; margin-top:12px; font-size:11px; color:var(--on); word-break:break-all; }
+
+  /* intro */
+  #intro { position:fixed; inset:0; background:rgba(5,10,8,.92); display:flex;
+           align-items:center; justify-content:center; z-index:50; }
+  #intro .card { width:520px; background:var(--surface); border:1px solid var(--brd); border-radius:8px; padding:28px 32px; }
+  #intro h2 { font-family:var(--ff-d); color:var(--gold-l); margin:0 0 6px; letter-spacing:2px; }
 </style>
 </head>
 <body>
@@ -87,12 +93,7 @@
 <main>
   <div id="treePane"></div>
   <div id="canvasWrap">
-    <img id="shot" alt="">
-    <div id="stage"></div>
-    <div id="zoomBar">Zoom
-      <button onclick="setZoom(zoom-0.1)">−</button><b id="zval">60%</b>
-      <button onclick="setZoom(zoom+0.1)">+</button>
-    </div>
+    <div id="renderer"></div>
   </div>
   <div id="inspector"></div>
 </main>
@@ -100,75 +101,50 @@
 <div id="intro" style="position:fixed;inset:0;background:rgba(5,10,8,.92);display:flex;align-items:center;justify-content:center;z-index:50;">
   <div style="width:520px;background:var(--surface);border:1px solid var(--brd);border-radius:8px;padding:28px 32px;">
     <h2 style="font-family:var(--ff-d);color:var(--gold-l);margin:0 0 6px;letter-spacing:2px;">ArcheaAge · UI Studio</h2>
-    <p style="color:var(--text2)">Design the in-game UI: inspect native windows, move them,
-       create your own widgets, export everything.</p>
+    <p style="color:var(--text2)">Reconstruct &amp; edit the in-game UI.</p>
     <ol style="line-height:1.9;padding-left:22px;margin:14px 0;">
-      <li>Play once until server-select (generates the native inventory).</li>
-      <li><code>Import tree.json</code> → Documents\ArcheAge\ivanpanel_tree.json</li>
-      <li>Navigate / drag / create widgets.</li>
+      <li>Import <code>game_ui_tree.json</code></li>
+      <li>Navigate the tree → select → edit properties</li>
+      <li>Create custom widgets</li>
       <li><code>Export overrides.lua</code></li>
-      <li>Run <code>tools\ui\push-ui.ps1</code>, reopen the game.</li>
+      <li><code>push-ui.ps1</code> → reopen the game</li>
     </ol>
-    <button class="primary" id="btnStart">Start</button>
+    <button id="btnStart" class="primary" style="width:auto;padding:8px 24px;">Start</button>
   </div>
 </div>
 
 <script>
 "use strict";
-/* ---------- tiny helpers ---------- */
 const $  = s => document.querySelector(s);
 const IN_TAURI = !!window.__TAURI__;
 const invoke = async (cmd, args) => window.__TAURI__.core.invoke(cmd, args);
 
 function winAction(a){ try{ window.__TAURI__.window.getCurrentWindow()[a](); }catch(e){} }
-const ANCHORS = ["TOPLEFT","TOPRIGHT","BOTTOMLEFT","BOTTOMRIGHT","CENTER"];
-function hexToRgb01(h){
-  const m=/^#?([0-9a-f]{6})$/i.exec(h||""); if(!m) return [1,1,1];
-  const n=parseInt(m[1],16), f=b=>+(b/255).toFixed(3);
-  return [f((n>>16)&255), f((n>>8)&255), f(n&255)];
-}
+function closeIntro(){ document.getElementById("intro").style.display = "none"; }
 function setStatus(msg, err){
-  const el=$("#status"); if(!el) return;
-  el.textContent=msg||""; el.style.color=err?"#e08a8a":"var(--on)";
+  const el = $("#status"); if(!el) return;
+  el.textContent = msg || ""; el.style.color = err ? "#e08a8a" : "var(--on)";
 }
-function closeIntro(){ document.getElementById("intro").style.display="none"; }
-function esc(s){ return String(s??"").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
 
 /* ---------- project model ---------- */
-const PROJECT = { screens:{} };     // screen -> { native:{}, custom:[], meta:{} }
 let SCREEN_ORDER = [];
-let SEL = null;                     // {screen, kind:"screen"|"native"|"custom", id}
-let zoom = 0.6;
+const PROJECT = { screens:{} };
+let SEL = null;
+let zoom = 1;
 
 function ensureScreen(name){
-  if(!PROJECT.screens[name]){ PROJECT.screens[name]={native:{},custom:[]}; SCREEN_ORDER.push(name); }
+  if(!PROJECT.screens[name]){ PROJECT.screens[name]={native:{},custom:[],layout:{}}; SCREEN_ORDER.push(name); }
   return PROJECT.screens[name];
 }
 function selObj(){
   if(!SEL) return null;
-  const s=PROJECT.screens[SEL.screen]; if(!s) return null;
+  const s = PROJECT.screens[SEL.screen]; if(!s) return null;
   return SEL.kind==="native" ? s.native[SEL.id]
        : SEL.kind==="custom" ? s.custom.find(c=>c.id===SEL.id)
        : null;
 }
-window.newWidget = function(scr){
-  const s=ensureScreen(scr);
-  let i=1; while(s.custom.some(c=>c.id==="custom_"+i)) i++;
-  const id="custom_"+i;
-  s.custom.push({ id, type:"label", x:900, y:380+i*26, w:180, h:26,
-                  text:"New widget", color:"#9eb8d9", show:true });
-  SEL={screen:scr,kind:"custom",id};
-  render();
-};
-window.deleteSel = function(){
-  if(!SEL||SEL.kind==="screen") return;
-  const s=PROJECT.screens[SEL.screen];
-  if(SEL.kind==="custom") s.custom=s.custom.filter(c=>c.id!==SEL.id);
-  else delete s.native[SEL.id];
-  SEL=null; render();
-};
 
-/* ---------- tree sidebar ---------- */
+/* ---------- tree ---------- */
 function renderTree(){
   const tp=$("#treePane"); tp.innerHTML="<h4>Screens</h4>";
   for(const scr of SCREEN_ORDER){
@@ -177,96 +153,95 @@ function renderTree(){
 
     const head=document.createElement("div");
     head.className="tnode"+(SEL&&SEL.screen===scr&&SEL.kind==="screen"?" sel":"");
-    head.innerHTML=`${scr} <span class="k">${nn}n · ${s.custom.length}c</span>`;
+    head.innerHTML=`${scr} <span style="opacity:.55;font-size:10px;float:right">${nn}n·${s.custom.length}c</span>`;
     head.onclick=()=>{ SEL={screen:scr,kind:"screen"}; render(); };
     tp.appendChild(head);
 
-    const gN=document.createElement("div");
-    gN.className="tnode"; gN.style.paddingLeft="18px"; gN.style.opacity=".8";
-    gN.textContent=`▸ native (${nn})`;
-    tp.appendChild(gN);
     Object.keys(s.native).forEach(id=>{
       const d=document.createElement("div");
       d.className="tnode"+(SEL&&SEL.screen===scr&&SEL.kind==="native"&&SEL.id===id?" sel":"");
-      d.style.paddingLeft="36px"; d.textContent=id;
+      d.style.paddingLeft="20px"; d.textContent=id;
       d.onclick=()=>{ SEL={screen:scr,kind:"native",id}; render(); };
       tp.appendChild(d);
     });
 
     const addC=document.createElement("div");
-    addC.className="tnode"; addC.style.paddingLeft="18px";
-    addC.innerHTML=`▸ my widgets (${s.custom.length})
-      <span class="k" style="cursor:pointer;color:var(--primary)"
-        onclick="event.stopPropagation();newWidget('${scr}')">＋ new</span>`;
+    addC.className="tnode"; addC.style.paddingLeft="14px";
+    addC.innerHTML=`+ new widget`;
+    addC.onclick=()=>{ newWidget(scr); };
     tp.appendChild(addC);
+
     s.custom.forEach(c=>{
       const d=document.createElement("div");
       d.className="tnode"+(SEL&&SEL.screen===scr&&SEL.kind==="custom"&&SEL.id===c.id?" sel":"");
-      d.style.paddingLeft="36px";
-      d.textContent=c.text?`${c.id} · ${c.text.slice(0,14)}`:c.id;
+      d.style.paddingLeft="26px"; d.textContent=c.text||c.id;
       d.onclick=()=>{ SEL={screen:scr,kind:"custom",id:c.id}; render(); };
       tp.appendChild(d);
     });
   }
-  const imp=document.createElement("button");
-  imp.textContent="Import game_ui_tree.json…";
-  imp.onclick=importTree;
-  tp.appendChild(imp);
 }
 
-/* ---------- canvas ---------- */
-function renderCanvas(){
-  const st=$("#stage"); st.innerHTML="";
-  if(!SEL){ return; }
-  const s=PROJECT.screens[SEL.screen]; if(!s) return;
+/* ================= RENDERER — reconstructs the screen ================= */
+function renderScreen(){
+  const rd=$("#renderer"); rd.innerHTML="";
+  if(!SCREEN_ORDER.length) return;
 
-  const draw=(o,cls,id)=>{
-    const d=document.createElement("div");
-    d.className=`box ${cls}`+(SEL.id===id&&SEL.screen===SEL.screen?" sel":"")+
-                ((o.show===false||o.visible===false)?" off":"");
-    d.style.left=(o.x??60)+"px"; d.style.top=(o.y??60)+"px";
-    d.style.width=Math.max(24,o.w??160)+"px"; d.style.height=Math.max(16,o.h??24)+"px";
-    d.textContent=o.text||id;
-    d.onmousedown=ev=>{
-      ev.preventDefault();
-      SEL={screen:SEL.screen,kind,id}; render();
-      const bx=d, sx=ev.clientX, sy=ev.clientY,
-            ox=parseInt(bx.style.left)||0, oy=parseInt(bx.style.top)||0;
-      const mv=e2=>{ bx.style.left=(ox+e2.clientX-sx)/zoom+"px";
-                     bx.style.top =(oy+e2.clientY-sy)/zoom+"px"; };
-      const up=()=>{ document.removeEventListener("mousemove",mv);
-        document.removeEventListener("mouseup",up);
-        o.x=Math.round((ox+ (lastDx)/zoom)); o.y=Math.round((oy+(lastDy)/zoom));
-        renderTree(); };
-      let lastDx=0,lastDy=0;
-      const mvv=e2=>{ lastDx=e2.clientX-sx; lastDy=e2.clientY-sy;
-        bx.style.left=(ox+lastDx/zoom)+"px"; bx.style.top=(oy+lastDy/zoom)+"px"; };
-      document.removeEventListener("mousemove",mv);
-      document.addEventListener("mousemove",mvv);
-      document.addEventListener("mouseup",()=>{document.removeEventListener("mousemove",mvv);},{once:true});
-    };
-    st.appendChild(d);
-  };
+  // fullscreen background texture
+  const bg=document.createElement("img");
+  bg.className="bg"; bg.src="textures/ch_select_bg.png";
+  rd.appendChild(bg);
 
-  for(const [id,w] of Object.entries(s.native)) draw(w,"native",id);
-  for(const c of s.custom) draw(c,"custom",c.id);
+  // overlay native widgets (from tree.json) as interactive outlines
+  const scr = SEL?.screen || SCREEN_ORDER[0];
+  const s = PROJECT.screens[scr]; if(!s) return;
+  for(const [id,w] of Object.entries(s.native)){
+    if(w.x===undefined || w.w===0) continue;
+    const d=document.createElement("div"); d.className="ow";
+    d.style.left=w.x+"px"; d.style.top=w.y+"px";
+    d.style.width=Math.max(30,w.w)+"px"; d.style.height=Math.max(16,w.h||30)+"px";
+    d.dataset.id=id;
+    d.onclick=()=>{ SEL={screen:scr,kind:"native",id}; renderScreenOverlays(); renderInspector(); };
+    rd.appendChild(d);
+  }
+
+  // custom widgets on top
+  for(const c of s.custom){
+    const d=document.createElement("div"); d.className="ow";
+    d.style.left=c.x+"px"; d.style.top=c.y+"px";
+    d.style.width=(c.w||180)+"px"; d.style.height=(c.h||30)+"px";
+    d.dataset.id=c.id;
+    const lbl=document.createElement("div"); lbl.className="ow-label";
+    lbl.style.color=c.color||"#9eb8d9"; lbl.style.fontSize="15px";
+    lbl.style.fontFamily="'Trebuchet MS',sans-serif"; lbl.style.textAlign="right";
+    lbl.textContent=c.text||c.id;
+    d.appendChild(lbl);
+    d.onclick=()=>{ SEL={screen:scr,kind:"custom",id:c.id}; renderScreenOverlays(); renderInspector(); };
+    rd.appendChild(d);
+  }
+
+  // selection ring
+  if(SEL && SEL.kind!=="screen"){
+    const o=selObj();
+    if(o && o.x!==undefined){
+      const ring=document.createElement("div"); ring.className="sel-ring";
+      ring.style.left=o.x+"px"; ring.style.top=o.y+"px";
+      ring.style.width=(o.w||180)+"px"; ring.style.height=(o.h||30)+"px";
+      rd.appendChild(ring);
+    }
+  }
 }
-function setZoom(z){ zoom=Math.min(2,Math.max(.1,z));
-  $("#stage").style.transform=`scale(${zoom})`; $("#zval").textContent=Math.round(zoom*100)+"%"; }
 
-/* ---------- inspector ---------- */
-function esc(s){ return String(s??"").replace(/"/g,"&quot;"); }
+function renderScreenOverlays(){ renderScreen(); renderInspector(); }
+
+/* ================= inspector ================= */
+function esc(s){ return String(s??"").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
 
 function renderInspector(){
   const ins=$("#inspector");
-
-  // persistent export button lives here too
-  const exportBtn='<button class="primary" onclick="doExport()">⬇ Export overrides.lua</button>';
+  const exportBtn='<button onclick="doExport()">⬇ Export overrides.lua</button>';
 
   if(!SEL){
-    ins.innerHTML=`<h3>Inspector</h3>
-      <p class="kv">Select a screen or widget in the tree.<br>
-      Import ivanpanel_tree.json to populate native windows.</p>${exportBtn}`;
+    ins.innerHTML=`<h3>Inspector</h3><p class="kv">Select an element.</p>${exportBtn}`;
     return;
   }
   const s=PROJECT.screens[SEL.screen];
@@ -274,41 +249,22 @@ function renderInspector(){
   if(SEL.kind==="screen"){
     ins.innerHTML=`<h3>Screen · ${esc(SEL.screen)}</h3>
       <p class="kv">Native windows: ${Object.keys(s.native).length}</p>
-      <p class="kv">Custom widgets: ${s.custom.length}</p>
-      <label>New widget type</label>
-      <select id="nw_type"><option>label</option><option>window</option></select>
-      <button onclick="newWidget('${esc(SEL.screen)}')">＋ Create widget</button>
-      ${exportBtn}`;
+      <p class="kv">Custom widgets: ${s.custom.length}</p>${exportBtn}`;
     return;
   }
   const o=selObj();
 
   if(SEL.kind==="native"){
-    const moduleGuess = "world_select_view.lua";
     ins.innerHTML=`<h3>Native · ${esc(SEL.id)}</h3>
-      <p class="kv">Native id: ${o.nativeId??"?"}</p>
-      <label>Show</label><input type="checkbox" id="i_show" ${(o.show!==false)?"checked":""}>
-      <label>Anchor point</label>
-      <select id="i_anchor">${ANCHORS.map(a=>`<option ${((o.anchor||"TOPLEFT")===a)?"selected":""}>${a}</option>`).join("")}</select>
-      <label>X offset</label><input type="number" id="i_x" value="${o.x??0}">
-      <label>Y offset</label><input type="number" id="i_y" value="${o.y??0}">
-      <button onclick="applyInspector()">Apply</button>
-      <button onclick="openSrc()">📜 View logic source (decompiled)</button>
+      <p class="kv">${o.w}×${o.h} · offset=${o.offset??"?"}</p>
       ${exportBtn}`;
-    window.openSrc = () => {
-      if(!IN_TAURI){ setStatus("Open in the Tauri app to use this.", true); return; }
-      invoke("open_decompiled_source",{module:moduleGuess})
-        .then(p=>setStatus("opened: "+p)).catch(e=>setStatus(String(e),true));
-    };
     return;
   }
 
-  ins.innerHTML=`<h3>My widget · ${esc(o.id)}</h3>
+  ins.innerHTML=`<h3>Widget · ${esc(o.id)}</h3>
     <label>Type</label>
-    <select id="i_type">
-      <option ${o.type==="label"?"selected":""}>label</option>
-      <option ${o.type==="window"?"selected":""}>window</option>
-    </select>
+    <select id="i_type"><option ${o.type==="label"?"selected":""}>label</option>
+    <option ${o.type==="window"?"selected":""}>window</option></select>
     <label>Text</label><textarea id="i_text">${esc(o.text)}</textarea>
     <label>Color</label><input type="color" id="i_color" value="${esc(o.color)}">
     <label>X</label><input type="number" id="i_x" value="${o.x}">
@@ -317,8 +273,17 @@ function renderInspector(){
     <label>H</label><input type="number" id="i_h" value="${o.h}">
     <label>Show</label><input type="checkbox" id="i_show" ${(o.show!==false)?"checked":""}>
     <button onclick="applyInspector()">Apply</button>
-    <button class="danger" onclick="deleteSel()">Delete widget</button>
+    <button style="border-color:#e08a8a;color:#e08a8a" onclick="deleteSel()">Delete</button>
     ${exportBtn}`;
+
+  ["i_type","i_text","i_color","i_x","i_y","i_w","i_h","i_show"].forEach(id=>{
+    const el=document.getElementById(id);
+    el.oninput=()=>{
+      const k=id.slice(2).toLowerCase();
+      o[k]=(["x","y","w","h"].includes(k))?+(el.value):(id==="i_show")?el.checked:el.value;
+      renderScreenOverlays();
+    };
+  });
 }
 
 function applyInspector(){
@@ -333,21 +298,35 @@ function applyInspector(){
   if(g("i_w")) o.w=+g("i_w").value;
   if(g("i_h")) o.h=+g("i_h").value;
   if(g("i_show")) o.show=g("i_show").checked;
-  render();
+  renderScreenOverlays();
 }
 
-/* ---------- export ---------- */
+function newWidget(scr){
+  const s=ensureScreen(scr);
+  let i=1; while(s.custom.some(c=>c.id==="custom_"+i)) i++;
+  const id="custom_"+i;
+  s.custom.push({ id,type:"label",x:960,y:500+i*35,w:220,h:30,
+                  text:"New widget",color:"#9eb8d9",show:true });
+  SEL={screen:scr,kind:"custom",id};
+  render();
+}
+function deleteSel(){
+  if(!SEL||SEL.kind==="screen") return;
+  const s=PROJECT.screens[SEL.screen];
+  if(SEL.kind==="custom") s.custom=s.custom.filter(c=>c.id!==SEL.id);
+  else delete s.native[SEL.id];
+  SEL=null; render();
+}
+
+/* ================= export ================= */
 function genLua(){
   const q=v=>'"'+String(v??"").replace(/\\/g,"\\\\").replace(/"/g,'\\"')+'"';
-  const col=c=>"{ "+c.map(x=>+(+x).toFixed(3)).join(", ")+" }";
   const out=["-- overrides.lua \u2014 generated by ArcheaAge UI Studio","",
              "IVAN_OVERRIDES = {"];
   for(const scr of SCREEN_ORDER){
-    const s=PROJECT.screens[scr];
-    for(const [id,w] of Object.entries(s.native)){
-      if(w.show===false && !w.anchor){ out.push(`    { id = "${id}", action = "hide" },`); continue; }
-      out.push(`    { id = "${id}", action = "apply", show = ${w.show!==false}, `+
-               `anchor = { "${w.anchor||"TOPLEFT"}", "UIParent", ${w.x??0}, ${w.y??0} } },`);
+    for(const [id,w] of Object.entries(PROJECT.screens[scr].native)){
+      if(w.x!==undefined)
+        out.push(`    { id = "${id}", action = "apply", anchor = { "TOPLEFT", "UIParent", ${w.x}, ${w.y ?? 0} } },`);
     }
   }
   out.push("}");
@@ -355,71 +334,66 @@ function genLua(){
   out.push("IVAN_CUSTOM = {");
   for(const scr of SCREEN_ORDER){
     for(const c of PROJECT.screens[scr].custom){
-      const bits=[`id = "${c.id}"`,`type = "${c.type||"label"}"`,
-                  `anchor = { "TOPLEFT", "UIParent", ${c.x??0}, ${c.y??0} }`,
-                  `extent = { ${c.w??160}, ${c.h??26} }`];
-      if(c.text) bits.push(`text = ${q(c.text)}`);
-      if(c.color) bits.push(`color = ${col(hexToRgb01(c.color))}`);
-      bits.push(`show = ${c.show!==false}`);
-      out.push(`    { ${bits.join(", ")} },`);
+      const col=c.color?`color = { ${hexToRgb01(c.color).join(", ")} },`:"";
+      out.push(`    { id = "${c.id}", anchor = { "TOPLEFT", "UIParent", ${c.x}, ${c.y} }, extent = { ${c.w||180}, ${c.h||30} }, text = ${q(c.text)}, ${col} show = true },`);
     }
   }
   out.push("}");
   return out.join("\n");
 }
-function doExport(){
+function hexToRgb01(h){
+  const m=/^#?([0-9a-f]{6})$/i.exec(h||""); if(!m) return [1,1,1];
+  const n=parseInt(m[1],16), f=b=>+(b/255).toFixed(3);
+  return [f((n>>16)&255), f((n>>8)&255), f(n&255)];
+}
+async function doExport(){
   const lua=genLua();
   if(IN_TAURI){
-    invoke("overrides_save",{content:lua})
-      .then(p=>setStatus("saved: "+p+" \u2192 now run tools\\ui\\push-ui.ps1"))
-      .catch(e=>setStatus(String(e),true));
+    try{ const p=await invoke("overrides_save",{content:lua});
+         setStatus("saved: "+p+" \u2192 run tools\\ui\\push-ui.ps1"); }
+    catch(e){ setStatus(String(e),true); }
   }else{
     const a=document.createElement("a");
     a.href=URL.createObjectURL(new Blob([lua],{type:"text/plain"}));
     a.download="overrides.lua"; a.click();
-    setStatus("browser mode: downloaded overrides.lua");
   }
 }
 
-/* ---------- import tree ---------- */
+/* ================= import ================= */
 function importTreeData(j){
   const scr=j.screen||"world_select";
   const s=ensureScreen(scr); s.native={};
   (j.widgets||[]).forEach((w,i)=>{
-    const id = w.path || w.id;
-    s.native[id]={ nativeId:w.nativeId, w:w.w||150, h:w.h||30,
-                     visible:w.visible!==false,
-                     x:80+(i%4)*230, y:90+Math.floor(i/4)*120 };
+    const id=w.path||w.id;
+    s.native[id]={ nativeId:w.nativeId,
+                   x:w.x??80+(i%5)*200, y:w.y??60+Math.floor(i/5)*90,
+                   w:w.w||160, h:w.h||30, visible:w.visible!==false };
   });
-  SEL={screen:scr,kind:"screen"};
   closeIntro(); render();
 }
-function importTree(){
+function importTreeDialog(){
   const inp=document.createElement("input"); inp.type="file"; inp.accept=".json";
   inp.onchange=async()=>{
-    try{
-      importTreeData(JSON.parse(await inp.files[0].text()));
-      setStatus(`Imported ${Object.keys(PROJECT.screens[SEL.screen].native).length} native windows.`);
-    }catch(e){ setStatus(String(e),true); }
-  };
-  inp.click();
+    try{ importTreeData(JSON.parse(await inp.files[0].text())); }
+    catch(e){ setStatus(String(e),true); }
+  }; inp.click();
 }
 
-/* ---------- zoom ---------- */
-function setZoom(z){ zoom=Math.min(2,Math.max(.1,z));
-  $("#stage").style.transform=`scale(${zoom})`;
-  $("#zval").textContent=Math.round(zoom*100)+"%"; }
-
-/* ---------- boot ---------- */
-function render(){ renderTree(); renderCanvas(); renderInspector(); }
-
-
-// auto-load background screenshot (repo mode)
-fetch('background.jpg').then(r=>{if(r.ok){const i=document.getElementById('shot');i.src='background.jpg';i.style.display='block';}}).catch(()=>{});
-// auto-load tracked tree (repo mode)
-fetch('game_ui_tree.json').then(r=>r.ok?r.json():Promise.reject(0)).then(j=>{importTreeData(j);}).catch(()=>{ setStatus('No tree loaded yet - play once + sync-tree.ps1, or Import manually.'); });
+/* ================= boot ================= */
+function render(){
+  renderTree();
+  renderScreen();
+  renderInspector();
+}
 
 $("#btnStart").onclick=closeIntro;
+
+// auto-load tracked tree
+fetch("game_ui_tree.json")
+  .then(r=>r.ok?r.json():Promise.reject(r.status))
+  .then(j=>importTreeData(j))
+  .catch(()=>setStatus("No tree loaded yet."));
+
 render();
 </script>
 </body>
