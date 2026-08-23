@@ -73,7 +73,7 @@ def main():
         print(f"extracted {entry} -> {out_png} ({size[0]}x{size[1]})")
 
     elif cmd == "brand":
-        text = sys.argv[4] if len(sys.argv) > 4 else "Edited by Ivan Cavero"
+        text = sys.argv[4] if len(sys.argv) > 4 else "ArcheaAge"
         tmp_dds = TMP / "brand_orig.dds"
         extract_dds(pak, entry, tmp_dds)
         img = Image.open(tmp_dds).convert("RGB")

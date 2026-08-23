@@ -73,7 +73,7 @@ def push(pak, luac):
     alb2 = UI_DIR / "luac-build" / "probe_dump.alb"
 
     if ovr.exists():
-        combined = Path(tempfile.gettempdir()) / "ivanpanel_combined.lua"
+        combined = Path(tempfile.gettempdir()) / "aa_ui_combined.lua"
         combined.write_text(
             ovr.read_text(encoding="utf-8") + "\n" + src.read_text(encoding="utf-8"),
             encoding="utf-8",

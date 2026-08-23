@@ -3,12 +3,10 @@ import shutil
 import sqlite3
 import sys
 
-sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-
 CLIENT = r".client_files\ArcheAge 1.2 (r208022) for AAEmu"
 DB = CLIENT + r"\compact.sqlite3"
 
-BRAND_LINE = "ArcheaAge \u00b7 Edited by Ivan Cavero"
+BRAND_LINE = "ArcheaAge"
 
 shutil.copy2(DB, DB + ".bak")
 print("backup ->", DB + ".bak")
@@ -30,5 +28,9 @@ for idx, old in targets:
 con.commit()
 con.close()
 
-h = hashlib.sha256(open(DB, "rb").read()).hexdigest()
+try:
+    with open(DB, "rb") as f:
+        h = hashlib.sha256(f.read()).hexdigest()
+except OSError as e:
+    sys.exit(f"cannot read {DB}: {e}")
 print("new sha256:", h)

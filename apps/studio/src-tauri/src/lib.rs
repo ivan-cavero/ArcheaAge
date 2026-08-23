@@ -1,4 +1,4 @@
-//! ArcheaAge UI Studio — visual editor for the ivanpanel client addon config.
+//! ArcheaAge UI Studio — visual editor for the aa_ui client addon config.
 
 use std::path::PathBuf;
 
@@ -7,10 +7,10 @@ fn panel_config_path() -> PathBuf {
     PathBuf::from(home)
         .join("Documents")
         .join("ArcheAge")
-        .join("ivanpanel_config.lua")
+        .join("aa_ui_config.lua")
 }
 
-/// Reads Documents\ArcheAge\ivanpanel_config.lua (None if not created yet).
+/// Reads Documents\ArcheAge\aa_ui_config.lua (None if not created yet).
 #[tauri::command]
 async fn panel_config_load() -> Result<Option<String>, String> {
     match std::fs::read_to_string(panel_config_path()) {

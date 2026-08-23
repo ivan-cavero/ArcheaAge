@@ -1,7 +1,7 @@
 # apps/studio — ArcheaAge UI Studio
 
-Standalone Tauri app: visual editor for the ivanpanel client addon config
-(`Documents\ArcheAge\ivanpanel_config.lua`).
+Standalone Tauri app: visual editor for the aa_ui client addon config
+(`Documents\ArcheAge\aa_ui_config.lua`).
 
 ## Run (dev)
 

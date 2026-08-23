@@ -1,7 +1,7 @@
 [package]
 name = "archeaage-studio"
 version = "0.1.0"
-description = "ArcheaAge UI Studio — visual editor for the ivanpanel client addon"
+description = "ArcheaAge UI Studio — visual editor for the aa_ui client addon"
 edition = "2021"
 
 [lib]

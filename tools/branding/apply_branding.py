@@ -6,7 +6,7 @@ distribution archives in .clients/).
 
 Usage:
   python tools/branding/apply_branding.py apply --client-dir "<dir with game_pak>" \
-      [--line1 "ArcheaAge"] [--line2 "Edited by Ivan Cavero"]
+      [--line1 "ArcheaAge"] [--line2 "ArcheaAge Community"]
 
 Re-run any time to change the text; re-apply to a fresh client copy before
 re-archiving it for distribution (tools/client-sourcing/rearchive-clients.sh).
@@ -92,7 +92,7 @@ def main() -> int:
     apply = sub.add_parser("apply", help="apply branding to a client game_pak")
     apply.add_argument("--client-dir", required=True, help="dir containing game_pak")
     apply.add_argument("--line1", default="ArcheaAge")
-    apply.add_argument("--line2", default="Edited by Ivan Cavero")
+    apply.add_argument("--line2", default="ArcheaAge Community")
     apply.set_defaults(func=cmd_apply)
 
     args = parser.parse_args()

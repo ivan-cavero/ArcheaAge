@@ -1,4 +1,4 @@
-# tools/ui — client UI modding (ivanpanel)
+# tools/ui — client UI modding (aa_ui addon)
 
 How we add **custom Lua UI** (panels, moved elements, new behavior) to the
 ArcheAge 1.2 client, and everything learned on the way. Status: **working** —
@@ -21,7 +21,7 @@ Debug channels after running the game:
 | Channel | Path | What you get |
 | --- | --- | --- |
 | Client log | `Documents\ArcheAge\ArcheAge.log` (+ `LogBackups\`) | **Lua errors, script load failures** — read this first |
-| Our io log | `<client>\ivanpanel_log.txt` | whatever the addon writes via `L()` (only if the `io` lib exists in that state) |
+| Our io log | `<client>\aa_ui_log.txt` | whatever the addon writes via `L()` (only if the `io` lib exists in that state) |
 
 ## One-time setup
 
@@ -82,7 +82,7 @@ Result: injecting UI never requires stopping the server; iteration is just
 
 | Thing | Location / mechanism |
 | --- | --- |
-| Credits page ("Edited by Ivan Cavero") | pak entry `game/ui/login_stage/html/made_en.html` — plain HTML rendered by Awesomium; whole-file swap via `tools/pak-put` (see `tools/branding/apply_branding.py`) |
+| Credits page ("ArcheaAge") | pak entry `game/ui/login_stage/html/made_en.html` — plain HTML rendered by Awesomium; whole-file swap via `tools/pak-put` (see `tools/branding/apply_branding.py`) |
 | Visible UI strings ("Select Server", hints…) | NOT in the pak — they live in **`compact.sqlite3`**, table `localized_texts` (`tbl_name='ui_texts'`). Edit with `tools/db/dbtext.py` |
 | Script loading mode | cvar `lua_use_binary` in cryscriptsystem.dll: `1` = `scriptsbin/*.alb`, `0` = `scripts/*.lua`. Only ~252 of 1035 modules have sources → binary mode is effectively mandatory |
 | Native addon system | crysystem.dll mounts `/game`, `/USER`, `/addon`; scans `addon/<name>/toc.g`; per-account enable list in `Documents\ArcheAge\USER\Data\account\addon_list.g` (Lua-source `.g` format). Not yet needed — our toc hook already runs earlier |

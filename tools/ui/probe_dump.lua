@@ -2,7 +2,8 @@
 -- Children hang as fields on each window table (verified via decompiled
 -- world_select.alb: backgroundWindow.mainWindow, .enterWorldBtn, ...).
 
-local LOGPATH = "C:/Users/ivang/Documents/ArcheAge/game_ui_tree.json"
+local home = os.getenv and os.getenv("USERPROFILE") or ""
+local LOGPATH = home .. "/Documents/ArcheAge/game_ui_tree.json"
 local LOG = io.open(LOGPATH, "w")
 local function W(s) if LOG then LOG:write(s); LOG:flush() end end
 

@@ -1,13 +1,13 @@
--- addon_panel.lua — "ivanpanel": info panel on the world/server-select screen.
+-- addon_panel.lua — ArcheaAge UI addon: info panel on the world/server-select screen.
 -- Hooked ONLY from loginstage/world_select/toc.g.
 --
--- CONFIG: reads C:/Users/ivang/Documents/ArcheAge/ivanpanel_config.lua at load
+-- CONFIG: reads <USERPROFILE>/Documents/ArcheAge/aa_ui_config.lua at load
 -- (plain text, editable with notepad). Missing file -> built-in defaults.
 
 -- ---- config loading -------------------------------------------------------
 local CFG = {
     title     = "ArcheaAge",
-    byline    = "Edited by Ivan Cavero",
+    byline    = "ArcheaAge",
     server    = "Servidor \194\183 EU-1",
     build     = "Build custom \194\183 preview UI",
     offset_x  = -18,
@@ -16,7 +16,8 @@ local CFG = {
     color_text  = { 0.62, 0.72, 0.85 },
 }
 pcall(function()
-    local f = io.open("C:/Users/ivang/Documents/ArcheAge/ivanpanel_config.lua", "r")
+    local home = os.getenv and os.getenv("USERPROFILE") or ""
+    local f = io.open(home .. "/Documents/ArcheAge/aa_ui_config.lua", "r")
     if f then
         local body = f:read("*a") f:close()
         local fn = loadstring(body)
@@ -32,7 +33,7 @@ end)
 local function rgb(c) return c[1], c[2], c[3], c[4] or 1 end
 
 -- ---- panel -----------------------------------------------------------------
-local win = CreateEmptyWindow("ivanPanelWin", "UIParent")
+local win = CreateEmptyWindow("aaUiWin", "UIParent")
 win:Show(true)
 win:SetExtent(280, 158)
 win:AddAnchor("TOPRIGHT", "UIParent", CFG.offset_x, CFG.offset_y)
@@ -89,7 +90,7 @@ end)
 -- module load and ship hidden — entries can set show=true to reveal them.
 local OVERRIDES = IVAN_OVERRIDES or {}
 
-local OVLOG = io.open("C:/Users/ivang/Documents/ArcheAge/ivanpanel_ovr.txt", "w")
+local OVLOG = io.open(home .. "/Documents/ArcheAge/aa_ui_ovr.txt", "w")
 local function OL(s) if OVLOG then OVLOG:write(tostring(s) .. "\n"); OVLOG:flush() end end
 
 local function rgbArr(c)

@@ -1,10 +1,10 @@
 local LOG
 pcall(function()
-  LOG = io.open("../addon_ivanel_log.txt", "w")
+  LOG = io.open("../addon_aa_ui_log.txt", "w")
 end)
 if not LOG then
   pcall(function()
-    LOG = io.open("addon_ivanel_log.txt", "w")
+    LOG = io.open("addon_aa_ui_log.txt", "w")
   end)
 end
 
@@ -15,24 +15,24 @@ local function L(s)
   end
 end
 
-L("=== ivanpanel ejecutado ===")
+L("=== aa_ui addon loaded ===")
 L("CreateEmptyWindow: " .. tostring(CreateEmptyWindow))
 L("UIParent: " .. tostring(UIParent))
 L("CHAT_SYSTEM: " .. tostring(CHAT_SYSTEM))
 L("X2LoginCharacter: " .. tostring(X2LoginCharacter))
 pcall(function()
-  CHAT_SYSTEM("ivanpanel LOADED")
+  CHAT_SYSTEM("aa_ui LOADED")
 end)
 local win
 if CreateEmptyWindow then
   pcall(function()
-    win = CreateEmptyWindow("ivanPanelWin", "UIParent")
+    win = CreateEmptyWindow("aaUiWin", "UIParent")
     L("ventana via CreateEmptyWindow: " .. tostring(win))
   end)
 end
 if not win and UIParent then
   pcall(function()
-    win = UIParent:CreateWidget("window", "ivanPanelWin", "UIParent")
+    win = UIParent:CreateWidget("window", "aaUiWin", "UIParent")
     L("ventana via UIParent:CreateWidget: " .. tostring(win))
   end)
 end
@@ -54,7 +54,7 @@ if win then
     end
     
     lbl("ipTitle", "ArcheaAge", 6, 0.8, 0.89, 1)
-    lbl("ipBy", "Edited by Ivan Cavero", 32, 0.62, 0.72, 0.85)
+    lbl("ipBy", "ArcheaAge Community", 32, 0.62, 0.72, 0.85)
     local total, limit = "?", "?"
     local ok1, v1 = pcall(function()
       return X2LoginCharacter:GetCurrentTotalCharactersCount()
