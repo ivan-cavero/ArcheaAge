@@ -60,7 +60,7 @@ services:
     depends_on:
       garage-init:
         condition: service_completed_successfully
-    command: ["/garage", "server", "-c", "/etc/garage/garage.toml"]
+    command: ["/garage", "-c", "/etc/garage/garage.toml", "server"]
     volumes:
       - garage-config:/etc/garage
       - /var/lib/garage/meta:/var/lib/garage/meta
