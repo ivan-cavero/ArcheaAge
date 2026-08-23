@@ -7,15 +7,20 @@
   :root {
     --bg:#07100d; --bg2:#0b1512; --surface:#101a17; --surface-el:#141f1b; --input:#0a1210;
     --primary:#8dbb3e; --primary-d:#496d27; --gold:#b8a76a; --gold-l:#d3c58a; --text-gd:#c6b77b;
-    --text:#e7e5d9; --text2:#aaa99d; --textm:#777970; --on:#63b83e; --brd:rgba(150,180,100,.14);
-    --ff-d:"Cinzel",Georgia,serif; --ff-u:"Inter",system-ui,sans-serif;
+    --text:#e7e5d9; --text2:#aaa99d; --textm:#777970; --on:#63b83e;
+    --brd:rgba(150,180,100,.14); --ff-d:"Cinzel",Georgia,serif; --ff-u:"Inter",system-ui,sans-serif;
   }
-  * { box-sizing:border-box; font-family:var(--ff-u); }
+  * { box-sizing:border-box; font-family:var(--ff-u); font-size:13px; }
   body { margin:0; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
 
-  /* title bar */
+  ::-webkit-scrollbar { width:10px; height:10px; }
+  ::-webkit-scrollbar-track { background:#0a1210; }
+  ::-webkit-scrollbar-thumb { background:#2e3b2f; border-radius:5px; border:2px solid #0a1210; }
+  ::-webkit-scrollbar-thumb:hover { background:var(--primary-d); }
+
+  /* ---------- title bar ---------- */
   #tb { height:38px; display:flex; align-items:center; justify-content:space-between;
-        background:var(--bg2); border-bottom:1px solid var(--brd); user-select:none; }
+        background:var(--bg2); border-bottom:1px solid var(--brd); user-select:none; flex-shrink:0; }
   #tb .name { font-family:var(--ff-d); font-size:12px; letter-spacing:3px; color:var(--text-gd);
               padding-left:16px; text-transform:uppercase; }
   #tb .btns { display:flex; height:100%; }
@@ -23,56 +28,56 @@
   #tb .btns div:hover { background:#ffffff10; color:var(--text); }
   #tb .btns .close:hover { background:#8e4e4e; color:#fff; }
 
-  main { flex:1; display:grid; grid-template-columns:360px 1fr; overflow:hidden; }
+  /* ---------- layout ---------- */
+  main { flex:1; display:grid; grid-template-columns:270px 1fr 300px; overflow:hidden; }
 
-  /* form */
-  #form { background:var(--surface); border-right:1px solid var(--brd); padding:16px 20px; overflow:auto; }
-  h3 { font-family:var(--ff-d); font-size:11px; letter-spacing:2px; text-transform:uppercase;
-       color:var(--text-gd); margin:20px 0 6px; }
-  h3:first-child { margin-top:0; }
-  label { display:block; font-size:11px; color:var(--textm); margin:10px 0 4px; }
-  label b { color:var(--gold-l); }
-  input[type=text] { width:100%; background:var(--input); color:var(--text); border:1px solid var(--brd);
-                     padding:6px 9px; border-radius:4px; }
-  input[type=color] { width:48px; height:30px; padding:2px; background:var(--input);
-                      border:1px solid var(--brd); border-radius:4px; cursor:pointer; }
-  .row { display:flex; gap:14px; } .row > div { flex:1; }
-  input[type=range] { width:100%; accent-color:var(--primary); }
-  button { background:var(--surface-el); color:var(--text); border:1px solid var(--brd);
-           padding:8px 12px; border-radius:4px; cursor:pointer; width:100%; margin-top:8px; font-size:12px; }
-  button:hover { border-color:var(--primary); }
-  button.primary { background:var(--primary-d); border-color:var(--primary-d); font-weight:600; }
-  button.primary:hover { background:var(--primary); }
-  .status { font-size:11px; color:var(--on); margin-top:10px; word-break:break-all; min-height:15px; }
-  .status.err { color:#e08a8a; }
+  #treePane { background:var(--bg2); border-right:1px solid var(--brd); overflow:auto; padding:10px 8px; }
+  #treePane h4 { margin:6px 0; font-size:11px; color:var(--textm); letter-spacing:1px; text-transform:uppercase; }
+  .tnode { padding:3px 6px; border-radius:4px; cursor:pointer; font-size:12px; display:flex; align-items:center; gap:6px; }
+  .tnode:hover { background:#ffffff08; }
+  .tnode.sel { background:var(--primary-d); color:#fff; }
+  .tnode .k { opacity:.55; font-size:10px; margin-left:auto; }
+  .caret { width:12px; display:inline-block; cursor:default; color:var(--textm); }
 
-  /* preview */
-  #previewWrap { position:relative; overflow:hidden;
-                 background:radial-gradient(1100px 480px at 68% 24%, #24301f 0%, var(--bg2) 62%); }
+  #canvasWrap { position:relative; overflow:auto; background:
+      radial-gradient(1100px 480px at 68% 24%, #24301f 0%, var(--bg2) 62%); }
+  #stage { position:relative; width:1920px; height:1080px; transform-origin:0 0; }
   #shot { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.85; display:none; }
-  #panel { position:absolute; width:280px; top:90px; right:60px;
-           background:rgba(8,14,11,.55); border:1px solid rgba(255,255,255,.13); border-radius:4px;
-           padding:6px 0 8px; box-shadow:0 6px 22px rgba(0,0,0,.55); }
-  #panel .l { text-align:right; padding-right:14px; font-size:13px; line-height:25px; white-space:nowrap;
-              text-shadow:0 1px 2px #000, 0 0 5px rgba(0,0,0,.85); }
-  #panel .live { color:rgb(140,200,140); font-variant-numeric:tabular-nums; }
+  .box { position:absolute; border:1px dashed; font-size:11px; padding:1px 4px; overflow:hidden;
+         white-space:nowrap; cursor:move; user-select:none; }
+  .box.native { border-color:#4aa3ffaa; background:#4aa3ff14; color:#bfe0ff; }
+  .box.custom { border-color:#8dbb3eaa; background:#8db33e18; color:#d9ecc0; }
+  .box.hidden-w { opacity:.28; border-style:dotted; }
+  .box.sel { border-width:2px; z-index:6; filter:brightness(1.25); }
+  .box.native.sel { border-color:#4aa3ff; } .box.custom.sel { border-color:var(--primary); }
+  #zoomBar { position:absolute; bottom:10px; right:12px; display:flex; gap:6px; align-items:center;
+             background:#0008; padding:4px 8px; border-radius:6px; font-size:11px; }
 
-  /* native tree boxes */
-  .nbox { position:absolute; border:1px dashed #4aa3ff88; background:#4aa3ff14; cursor:move;
-          font-size:10px; padding:1px 3px; color:#bfe0ff; overflow:hidden; white-space:nowrap; }
-  .nbox.sel { border:1px solid var(--primary); background:#8db33e22; z-index:6; }
-  .nbox.hidden-w { opacity:.3; border-style:dotted; }
-  select { background:var(--input); color:var(--text); border:1px solid var(--brd);
-           padding:5px 6px; border-radius:4px; width:100%; }
-  .tabs { display:flex; gap:6px; margin-bottom:10px; }
-  .tabs button { margin-top:0; }
-  .tabs button.on { background:var(--primary-d); border-color:var(--primary-d); }
+  #inspector { background:var(--surface); border-left:1px solid var(--brd); padding:14px; overflow:auto; }
+  #inspector h3 { font-family:var(--ff-d); font-size:11px; letter-spacing:2px; text-transform:uppercase;
+                  color:var(--text-gd); margin:0 0 12px; }
+  #inspector label { display:block; font-size:11px; color:var(--textm); margin:10px 0 3px; }
+  #inspector input[type=text], #inspector input[type=number], #inspector select,
+  #inspector textarea { width:100%; background:var(--input); color:var(--text); border:1px solid var(--brd);
+                        padding:5px 8px; border-radius:4px; font-size:12px; }
+  #inspector input[type=color] { width:48px; height:28px; padding:2px; background:var(--input);
+                                 border:1px solid var(--brd); border-radius:4px; cursor:pointer; }
+  #inspector textarea { height:70px; resize:vertical; }
+  #inspector button { background:var(--surface-el); color:var(--text); border:1px solid var(--brd);
+                      padding:7px 10px; border-radius:4px; cursor:pointer; width:100%; margin-top:8px; font-size:12px; }
+  #inspector button:hover:not(:disabled) { border-color:var(--primary); }
+  #inspector button.danger:hover { border-color:#e08a8a; color:#e08a8a; }
+  #inspector button.primary { background:var(--primary-d); border-color:var(--primary-d); font-weight:600; }
+  #status { min-height:30px; font-size:11px; color:var(--on); margin-top:12px; word-break:break-all; }
+  .kv { font-size:11px; color:var(--text2); margin:2px 0; word-break:break-all; }
 
-  /* themed scrollbars */
-  ::-webkit-scrollbar { width:10px; height:10px; }
-  ::-webkit-scrollbar-track { background:#0a1210; }
-  ::-webkit-scrollbar-thumb { background:#2e3b2f; border-radius:5px; border:2px solid #0a1210; }
-  ::-webkit-scrollbar-thumb:hover { background:#496d27; }
+  /* intro overlay */
+  #intro { position:fixed; inset:0; background:#050a08ee; display:flex; place-items:center; z-index:50; }
+  #intro .card { width:520px; background:var(--surface); border:1px solid var(--brd); border-radius:8px; padding:28px 32px; }
+  #intro h2 { font-family:var(--ff-d); color:var(--gold-l); margin:0 0 6px; letter-spacing:2px; }
+  #intro ol { line-height:1.9; padding-left:22px; margin:14px 0; }
+  #intro code { background:var(--input); padding:1px 6px; border-radius:3px; }
+  #intro button { margin-top:10px; }
 </style>
 </head>
 <body>
@@ -87,326 +92,306 @@
 </div>
 
 <main>
-  <div id="form">
-    <h3>Panel Texts</h3>
-    <label>Title</label><input type="text" id="f_title">
-    <label>Byline</label><input type="text" id="f_byline">
-    <label>Server</label><input type="text" id="f_server">
-    <label>Footer line</label><input type="text" id="f_build">
-
-    <h3>Colors</h3>
-    <div class="row">
-      <div><label>Title</label><input type="color" id="c_title"></div>
-      <div><label>Text</label><input type="color" id="c_text"></div>
-    </div>
-
-    <h3>Position <span style="color:var(--textm)">(offset from top-right)</span></h3>
-    <label>X <b id="v_x"></b></label><input type="range" id="f_x" min="-400" max="40" value="-18">
-    <label>Y <b id="v_y"></b></label><input type="range" id="f_y" min="0" max="600" value="70">
-
-    <h3>Persist</h3>
-    <button class="primary" id="btnSave">Save config to game folder</button>
-    <button id="btnLoad">Reload from game folder</button>
-    <button id="btnFolder">Open Documents\ArcheAge folder</button>
-    <p class="status" id="status"></p>
-
-    <h3 id="h3native">Native widgets</h3>
-    <div class="tabs">
-      <button id="tabConfig" class="on">Panel config</button>
-      <button id="tabNative">Native tree</button>
-    </div>
-    <div id="nativePane" style="display:none">
-      <button id="btnTree">Import ivanpanel_tree.json</button>
-      <p class="note" style="font-size:10px;color:var(--textm)">
-        Drag boxes to reposition (TOPLEFT anchor). Select one to edit anchor
-        point, visibility and text. Then export.
-      </p>
-      <label>Anchor point</label>
-      <select id="n_anchor">
-        <option>TOPLEFT</option><option>TOPRIGHT</option>
-        <option>BOTTOMLEFT</option><option>BOTTOMRIGHT</option>
-        <option>CENTER</option>
-      </select>
-      <label>X offset</label><input type="number" id="n_x">
-      <label>Y offset</label><input type="number" id="n_y">
-      <label><input type="checkbox" id="n_show" checked> visible</label>
-      <button id="btnOvr" class="primary">Export overrides.lua (native)</button>
-    </div>
-    <p class="status" id="status2"></p>
-  </div>
-
-  <div id="previewWrap">
+  <div id="treePane"></div>
+  <div id="canvasWrap">
     <img id="shot" alt="">
-    <div style="position:absolute;top:10px;left:10px;">
-      <button style="width:auto;padding:4px 10px;font-size:11px" id="btnShot">Background screenshot…</button>
-    </div>
-    <div id="panel">
-      <div class="l" id="p_title"></div>
-      <div class="l" id="p_by"></div>
-      <div class="l" id="p_server"></div>
-      <div class="l" id="p_chars" style="height:25px"></div>
-      <div class="l live" id="p_live"></div>
-      <div class="l" id="p_build"></div>
+    <div id="stage"></div>
+    <div id="zoomBar">
+      Zoom
+      <button style="width:auto;padding:2px 8px;margin:0" onclick="setZoom(zoom-0.1)">−</button>
+      <span id="zval">60%</span>
+      <button style="width:auto;padding:2px 8px;margin:0" onclick="setZoom(zoom+0.1)">+</button>
     </div>
   </div>
+  <div id="inspector"></div>
 </main>
 
-<script>
-const CFG = {
-  title: "ArcheaAge",
-  byline: "Edited by Ivan Cavero",
-  server: "Servidor \u00B7 EU-1",
-  build: "Build custom \u00B7 preview UI",
-  offset_x: -18,
-  offset_y: 70,
-  color_title: "#d9c773",
-  color_text: "#9eb8d9",
-};
+<div id="intro">
+  <div class="card">
+    <h2>ArcheaAge · UI Studio</h2>
+    <p style="color:var(--text2)">Design the in-game UI: inspect <b>native windows</b>, move them,
+       create your own widgets, and export everything the ivanpanel addon applies.</p>
+    <ol>
+      <li>Play ArcheAge once until the server-select screen (exports the native inventory).</li>
+      <li><code>Import tree.json</code> → pick <code>Documents\ArcheAge\ivanpanel_tree.json</code></li>
+      <li>Navigate the tree, drag elements, create new widgets.</li>
+      <li><code>Export</code> → writes <code>tools\ui\overrides.lua</code></li>
+      <li>Run <code>tools\ui\push-ui.ps1</code> → reopen the game.</li>
+    </ol>
+    <button onclick="closeIntro()">Start</button>
+  </div>
+</div>
 
+<script>
 const $ = s => document.querySelector(s);
 const IN_TAURI = !!window.__TAURI__;
-const invoke = cmd => window.__TAURI__.core.invoke(cmd);
+const invoke = async cmd => window.__TAURI__.core.invoke(cmd);
+const ANCHORS = ["TOPLEFT","TOPRIGHT","BOTTOMLEFT","BOTTOMRIGHT","CENTER"];
 
-function winAction(a) {
-  try { window.__TAURI__.window.getCurrentWindow()[a](); } catch (e) {}
+function winAction(a){ try{ window.__TAURI__.window.getCurrentWindow()[a](); }catch(e){} }
+function setStatus(m,err){ const e=$("#status"); e.textContent=m||""; e.style.color=err?"#e08a8a":"var(--on)"; }
+function closeIntro(){ $("#intro").style.display="none"; }
+function hexToRgb01(h){
+  const m=/^#?([0-9a-f]{6})$/i.exec(h||""); if(!m) return [1,1,1];
+  const n=parseInt(m[1],16), f=b=>+(b/255).toFixed(3);
+  return [f((n>>16)&255), f((n>>8)&255), f(n&255)];
+}
+function downloadFile(name,content){
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([content],{type:"text/plain"}));
+  a.download=name; a.click();
 }
 
-// ---------- colors ----------
-function hexToRgb01(h) {
-  const m = /^#?([0-9a-f]{6})$/i.exec(h || ""); if (!m) return [1, 1, 1];
-  const n = parseInt(m[1], 16), f = b => +(b / 255).toFixed(3);
-  return [f((n >> 16) & 255), f((n >> 8) & 255), f(n & 255)];
-}
-function rgb01ToHex(c) {
-  const h = b => Math.round(b * 255).toString(16).padStart(2, "0");
-  return "#" + h(c[0]) + h(c[1]) + h(c[2]);
-}
-function rgbCss(hexOrArr) {
-  if (Array.isArray(hexOrArr)) return `rgb(${hexOrArr.map(x=>Math.round(x*255)).join(",")})`;
-  const c = hexToRgb01(hexOrArr); return `rgb(${c.map(x=>Math.round(x*255)).join(",")})`;
-}
+/* ================= project model ================= */
+const PROJECT = { screens:{} };     // screen -> { native:{id:{...}}, custom:[...] }
+let SCREEN_ORDER = [];              // insertion order
+let SEL = null;                     // {screen, kind:"native"|"custom", id}
+let zoom = 0.6;
 
-// ---------- lua parse/gen ----------
-function parseLua(text) {
-  const grab = k => { const m = text.match(new RegExp(k + "\\s*=\\s*\"([^\"]*)\"")); return m && m[1]; };
-  const num = k => { const m = text.match(new RegExp(k + "\\s*=\\s*(-?\\d+)")); return m ? +m[1] : undefined; };
-  const col = k => {
-    const m = text.match(new RegExp(k + "\\s*=\\s*\\{\\s*([\\d.]+)\\s*,\\s*([\\d.]+)\\s*,\\s*([\\d.]+)"));
-    if (!m) return undefined;
-    const h = x => Math.round(+x * 255).toString(16).padStart(2, "0");
-    return "#" + h(+m[1]) + h(+m[2]) + h(+m[3]);
-  };
-  return { title: grab("title"), byline: grab("byline"), server: grab("server"),
-           build: grab("build"), offset_x: num("offset_x"), offset_y: num("offset_y"),
-           color_title: col("color_title"), color_text: col("color_text") };
+function ensureScreen(name){
+  if(!PROJECT.screens[name]){ PROJECT.screens[name]={native:{},custom:[]}; SCREEN_ORDER.push(name); }
+  return PROJECT.screens[name];
+}
+function selObj(){
+  if(!SEL) return null;
+  const s = PROJECT.screens[SEL.screen]; if(!s) return null;
+  return SEL.kind==="native" ? s.native[SEL.id] : s.custom.find(c=>c.id===SEL.id);
 }
 
-function genLua() {
-  const q = s => '"' + String(s ?? "").replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
-  const col = k => {
-    const c = hexToRgb01(CFG[k]), f = b => +(b).toFixed ? b : b; // keep 0..1 values
-    return `{ ${c[0]}, ${c[1]}, ${c[2]} }`;
-  };
-  return [
-    "-- ivanpanel_config.lua \u2014 generated by ArcheaAge UI Studio",
-    "-- Applied every time the game opens. Edit freely or use UI Studio again.",
-    "return {",
-    `    title       = ${q(CFG.title)},`,
-    `    byline      = ${q(CFG.byline)},`,
-    `    server      = ${q(CFG.server)},`,
-    `    build       = ${q(CFG.build)},`,
-    "",
-    `    offset_x = ${CFG.offset_x},`,
-    `    offset_y = ${CFG.offset_y},`,
-    "",
-    `    color_title = ${col("color_title")},`,
-    `    color_text  = ${col("color_text")},`,
-    "}",
-  ].join("\n");
-}
+/* ================= tree sidebar ================= */
+function renderTree(){
+  const tp = $("#treePane"); tp.innerHTML = "<h4>Screens</h4>";
+  for(const scr of SCREEN_ORDER){
+    const s = PROJECT.screens[scr];
+    const head = document.createElement("div");
+    head.className = "tnode";
+    head.innerHTML = `<span class="caret">▾</span> ${scr} <span class="k">${nNative(scr)}+${s.custom.length}</span>`;
+    head.onclick = () => { SEL={screen:scr,kind:"screen"}; render(); };
+    if(SEL && SEL.screen===scr && SEL.kind==="screen") head.classList.add("sel");
+    tp.appendChild(head);
 
-// ---------- render ----------
-function renderPreview() {
-  $("#p_title").textContent = CFG.title;     $("#p_title").style.color = rgbCss(CFG.color_title);
-  $("#p_by").textContent = CFG.byline;       $("#p_by").style.color = "rgb(235,235,245)";
-  $("#p_server").textContent = CFG.server;   $("#p_server").style.color = rgbCss(CFG.color_text);
-  $("#p_build").textContent = CFG.build;     $("#p_build").style.color = "rgb(140,166,166)";
-  const n = new Date();
-  $("#p_live").textContent =
-    `FPS 60 \u00B7 ${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")}:${String(n.getSeconds()).padStart(2,"0")}`;
-  $("#panel").style.right = Math.max(0, 18 - CFG.offset_x) + "px";
-  $("#panel").style.top = CFG.offset_y + "px";
-}
-
-function bindForm() {
-  [["f_title","title","text"],["f_byline","byline","text"],["f_server","server","text"],
-   ["f_build","build","text"]].forEach(([id,key]) => {
-    $("#" + id).value = CFG[key];
-    $("#" + id).oninput = e => { CFG[key] = e.target.value; renderPreview(); };
-  });
-  [["c_title","color_title"],["c_text","color_text"]].forEach(([id,key]) => {
-    $("#" + id).value = CFG[key];
-    $("#" + id).oninput = e => { CFG[key] = e.target.value; renderPreview(); };
-  });
-  [["f_x","offset_x","v_x"],["f_y","offset_y","v_y"]].forEach(([id,key,lab]) => {
-    $("#" + id).value = CFG[key]; $("#" + lab).textContent = CFG[key];
-    $("#" + id).oninput = e => { CFG[key] = +e.target.value; $("#" + lab).textContent = e.target.value; renderPreview(); };
-  });
-}
-
-function setStatus(msg, isErr) {
-  const el = $("#status"); el.textContent = msg || "";
-  el.className = "status" + (isErr ? " err" : "");
-}
-
-// ---------- persist ----------
-$("#btnSave").onclick = async () => {
-  if (!IN_TAURI) { setStatus("Browser mode: save disabled.", true); return; }
-  try { setStatus("Saved: " + await invoke("panel_config_save", { content: genLua() })); }
-  catch (e) { setStatus(String(e), true); }
-};
-
-$("#btnLoad").onclick = async () => {
-  if (!IN_TAURI) { setStatus("Browser mode: load disabled.", true); return; }
-  try {
-    const content = await invoke("panel_config_load");
-    if (!content) { setStatus("No config yet \u2014 defaults shown."); return; }
-    Object.assign(CFG, Object.fromEntries(Object.entries(parseLua(content))
-      .filter(([, v]) => v !== undefined)));
-    bindForm(); renderPreview();
-    setStatus("Config loaded.");
-  } catch (e) { setStatus(String(e), true); }
-};
-
-$("#btnFolder").onclick = () => {
-  if (IN_TAURI) invoke("open_game_documents").catch(e => setStatus(String(e), true));
-};
-
-$("#btnShot").onclick = () => {
-  const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*";
-  inp.onchange = () => { const f = inp.files[0]; if (!f) return;
-    const img = $("#shot"); img.src = URL.createObjectURL(f); img.style.display = "block"; };
-  inp.click();
-};
-
-// clock in preview
-setInterval(renderPreview, 1000);
-bindForm(); renderPreview();
-
-// ================= native tree =================
-const NATIVE = {};            // id -> {x,y,w,h,visible,anchor,x,y}
-let selN = null;
-
-$("#tabConfig").onclick = () => switchTab(true);
-$("#tabNative").onclick = () => switchTab(false);
-function switchTab(configMode) {
-  $("#tabConfig").classList.toggle("on", configMode);
-  $("#tabNative").classList.toggle("on", !configMode);
-  // toggle form sections except native pane/status
-  const form = $("#form");
-  [...form.children].forEach(el => {
-    if (el.id === "nativePane" || el.id === "status2" || el.id === "h3native") return;
-    if (el.tagName === "H3" || el.tagName === "LABEL" || el.tagName === "INPUT" ||
-        el.tagName === "BUTTON" || el.classList.contains("row")) {
-      el.style.display = configMode ? "" : "none";
-    }
-  });
-  $("#nativePane").style.display = configMode ? "none" : "block";
-}
-
-$("#btnTree").onclick = () => {
-  const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".json";
-  inp.onchange = async () => {
-    const j = JSON.parse(await inp.files[0].text());
-    (j.widgets || []).forEach((w, i) => {
-      NATIVE[w.id] = { x: 60 + (i % 5) * 200, y: 60 + Math.floor(i / 5) * 90,
-                       w: w.w || 150, h: w.h || 30,
-                       visible: w.visible !== false, offset: w.offset };
+    const grpN = document.createElement("div");
+    grpN.style.paddingLeft="14px";
+    grpN.innerHTML = `<div class="tnode" style="opacity:.75"><span class="caret">▸</span> native (${nNative(scr)})</div>`;
+    tp.appendChild(grpN);
+    const listN = document.createElement("div");
+    Object.keys(s.native).forEach(id=>{
+      const d=document.createElement("div");
+      d.className="tnode"+isSel(scr,"native",id);
+      d.style.paddingLeft="34px";
+      d.textContent=id;
+      d.onclick=()=>{ SEL={screen:scr,kind:"native",id}; render(); };
+      listN.appendChild(d);
     });
-    renderNative(); setStatus2("tree imported: " + Object.keys(NATIVE).length + " widgets");
+    tp.appendChild(listN);
+
+    const grpC = document.createElement("div");
+    grpC.style.paddingLeft="14px";
+    grpC.innerHTML = `<div class="tnode"><span class="caret">▾</span> my widgets (${s.custom.length})
+        <span class="k" style="cursor:pointer;color:var(--primary)"
+          onclick="event.stopPropagation();newWidget('${scr}')">＋ new</span></div>`;
+    tp.appendChild(grpC);
+    const listC = document.createElement("div");
+    s.custom.forEach(c=>{
+      const d=document.createElement("div");
+      d.className="tnode"+isSel(scr,"custom",c.id);
+      d.style.paddingLeft="34px";
+      d.textContent=c.text ? `${c.id} · "${c.text.slice(0,12)}"` : c.id;
+      d.onclick=()=>{ SEL={screen:scr,kind:"custom",id:c.id}; render(); };
+      listC.appendChild(d);
+    });
+    tp.appendChild(listC);
+  }
+}
+function nNative(scr){ return Object.keys(PROJECT.screens[scr].native).length; }
+function isSel(scr,kind,id){ return SEL&&SEL.screen===scr&&SEL.kind===kind&&SEL.id===id?" sel":""; }
+window.newWidget = scr => {
+  const s = ensureScreen(scr);
+  let i = 1; while(s.custom.some(c=>c.id==="custom_"+i)) i++;
+  const id = "custom_"+i;
+  s.custom.push({ id, type:"label", x:900, y:400+i*30, w:180, h:26,
+                  text:"New widget", color:"#9eb8d9", show:true, anchor:"TOPLEFT" });
+  SEL = {screen:scr, kind:"custom", id};
+  render();
+};
+
+/* ================= canvas ================= */
+const stage = () => $("#stage");
+
+function renderCanvas(){
+  const st = stage(); st.innerHTML = "";
+  if(!SEL) return;
+  const s = PROJECT.screens[SEL.screen]; if(!s) return;
+
+  // draw every box of THIS screen (so you see context), highlight selection
+  for(const [id,w] of Object.entries(s.native)) drawBox(w, "native", SEL.screen, "native", id);
+  for(const c of s.custom)                       drawBox(c, "custom", SEL.screen, "custom", c.id);
+}
+function drawBox(o, cls, screen, kind, id){
+  const d = document.createElement("div");
+  d.className = "box "+cls+(SEL&&SEL.screen===screen&&SEL.kind===kind&&SEL.id===id?" sel":"")+
+                ((o.show===false||o.visible===false)?" hidden-w":"");
+  d.style.left=(o.x??40)+"px"; d.style.top=(o.y??40)+"px";
+  d.style.width=Math.max(20,o.w??160)+"px"; d.style.height=Math.max(16,o.h??24)+"px";
+  d.textContent = o.text || id;
+  d.onmousedown = ev => { ev.preventDefault(); SEL={screen,kind,id}; render();
+    dragify(d, ()=>{ const o2=selObj(); o2.x=o.x=(parseInt(d.style.left)||0);
+                     o2.y=o.y=(parseInt(d.style.top)||0); }); };
+  stage().appendChild(d);
+}
+function dragify(el, onChange){
+  const sx=event.clientX, sy=event.clientY, ox=parseInt(el.style.left)||0, oy=parseInt(el.style.top)||0;
+  const mv=e=>{ el.style.left=(ox+e.clientX-sx)+"px"; el.style.top=(oy+e.clientY-sy)+"px"; };
+  const up=()=>{ document.removeEventListener("mousemove",mv); document.removeEventListener("mouseup",up); onChange(); renderTree(); };
+  document.addEventListener("mousemove",mv); document.addEventListener("mouseup",up);
+}
+function setZoom(z){ zoom=Math.min(2,Math.max(.1,z)); stage().style.transform=`scale(${zoom})`;
+  $("#zval").textContent=Math.round(zoom*100)+"%"; }
+$("#zval").textContent="60%";
+
+/* ================= inspector ================= */
+const ANCHORS=["TOPLEFT","TOPRIGHT","BOTTOMLEFT","BOTTOMRIGHT","CENTER"];
+
+function renderInspector(){
+  const ins=$("#inspector");
+  if(!SEL){ ins.innerHTML="<h3>Inspector</h3><p class='kv'>Select something in the tree.</p>"; return; }
+  const s=PROJECT.screens[SEL.screen];
+
+  if(SEL.kind==="screen"){
+    ins.innerHTML=`<h3>Screen · ${SEL.screen}</h3>
+      <p class="kv">Native windows: ${nNative(SEL.screen)}</p>
+      <p class="kv">Custom widgets: ${s.custom.length}</p>`;
+    return;
+  }
+  const o=selObj();
+
+  if(SEL.kind==="native"){
+    ins.innerHTML=`<h3>Native · ${SEL.id}</h3>
+      <p class="kv">Native id: ${o.nativeId ?? "?"}</p>
+      <label>Show</label><input type="checkbox" id="i_show" ${o.show!==false?"checked":""}>
+      <label>Anchor point</label>
+      <select id="i_anchor">${ANCHORS.map(a=>`<option ${((o.anchor||"TOPLEFT")===a)?"selected":""}>${a}</option>`).join("")}</select>
+      <label>X offset</label><input type="number" id="i_x" value="${o.x ?? 0}">
+      <label>Y offset</label><input type="number" id="i_y" value="${o.y ?? 0}">
+      <button onclick="render()">Apply</button>`;
+    wire(["i_show","i_anchor","i_x","i_y"], v => {
+      if(v==="i_show") o.show=document.getElementById("i_show").checked;
+      if(v==="i_anchor") o.anchor=document.getElementById("i_anchor").value;
+      if(v==="i_x") o.x=+document.getElementById("i_x").value;
+      if(v==="i_y") o.y=+document.getElementById("i_y").value;
+    }, true);
+    return;
+  }
+
+  // custom widget
+  ins.innerHTML=`<h3>My widget · ${o.id}</h3>
+    <label>Type</label>
+    <select id="i_type">
+      <option ${o.type==="label"?"selected":""}>label</option>
+      <option ${o.type==="window"?"selected":""}>window</option>
+    </select>
+    <label>Text</label><textarea id="i_text">${o.text||""}</textarea>
+    <label>Color</label><input type="color" id="i_color" value="${o.color||"#9eb8d9"}">
+    <label>X</label><input type="number" id="i_x" value="${o.x}">
+    <label>Y</label><input type="number" id="i_y" value="${o.y}">
+    <label>W</label><input type="number" id="i_w" value="${o.w}">
+    <label>H</label><input type="number" id="i_h" value="${o.h}">
+    <label>Show</label><input type="checkbox" id="i_show" ${o.show!==false?"checked":""}>
+    <button class="danger" onclick="deleteCustom('${SEL.screen}','${o.id}')">Delete widget</button>`;
+  ["i_type","i_text","i_color","i_x","i_y","i_w","i_h","i_show"].forEach(id=>{
+    document.getElementById(id).oninput = () => {
+      const k=id.slice(2).toLowerCase();
+      o[k] = (["x","y","w","h"].includes(k)) ? +document.getElementById(id).value
+           : (id==="i_show") ? document.getElementById(id).checked
+           : document.getElementById(id).value;
+      renderCanvas();
+    };
+});
+window.deleteCustom=(scr,id)=>{
+  const s=PROJECT.screens[scr]; s.custom=s.custom.filter(c=>c.id!==id);
+  if(SEL&&SEL.id===id) SEL=null; render();
+};
+window.newWidget=window.newWidget; // hoisted via window earlier
+
+/* ================= import / export ================= */
+$("#treePane").insertAdjacentHTML("beforeend",
+  `<button id="btnImportTree" style="margin-top:14px">Import tree.json…</button>`);
+
+$("#btnImportTree")?.addEventListener("click",()=>{
+  const inp=document.createElement("input"); inp.type="file"; inp.accept=".json";
+  inp.onchange=async()=>{
+    const j=JSON.parse(await inp.files[0].text());
+    const scr=j.screen||"world_select"; const s=ensureScreen(scr); s.native={};
+    (j.widgets||[]).forEach((w,i)=>{
+      s.native[w.id]={ nativeId:w.nativeId, offset:w.offset, w:w.w||150, h:w.h||30,
+                       visible:w.visible!==false, x:80+(i%4)*220, y:90+Math.floor(i/4)*110,
+                       anchor:"TOPLEFT", show:false };
+    });
+    closeIntro(); render();
+    setStatus(`imported ${Object.keys(s.native).length} native windows from ${scr}`);
   };
   inp.click();
-};
-
-function setStatus2(m, err) { const e = $("#status2"); e.textContent = m || ""; e.className = "status" + (err ? " err" : ""); }
-
-function renderNative() {
-  document.querySelectorAll(".nbox").forEach(n => n.remove());
-  for (const [id, o] of Object.entries(NATIVE)) {
-    const d = document.createElement("div");
-    d.className = "nbox" + (selN === id ? " sel" : "") + (!o.show ? " hidden-w" : "");
-    d.style.left = o.x + "px"; d.style.top = o.y + "px";
-    d.style.width = Math.max(30, o.w) + "px"; d.style.height = Math.max(14, o.h) + "px";
-    if (o.color) d.style.borderColor = o.color;
-    d.textContent = id;
-    d.onmousedown = ev => { ev.preventDefault(); selectN(id); dragN(d, id, ev); };
-    $("#previewWrap").appendChild(d);
-  }
-}
-
-function selectN(id) {
-  selN = id;
-  const o = NATIVE[id];
-  $("#n_anchor").value = o.anchor || "TOPLEFT";
-  $("#n_x").value = o.x; $("#n_y").value = o.y;
-  $("#n_show").checked = !!o.show;
-  renderNative();
-}
-
-["n_anchor","n_x","n_y","n_show"].forEach(id => {
-  $("#" + id).oninput = () => { if (!selN) return; applyN(); };
-  $("#" + id).onchange = () => { if (!selN) return; applyN(); };
 });
-function applyN() {
-  const o = NATIVE[selN]; if (!o) return;
-  o.anchor = $("#n_anchor").value;
-  o.x = +$("#n_x").value; o.y = +$("#n_y").value;
-  o.show = $("#n_show").checked;
-  renderNative(); selectN(selN);
-}
 
-function dragN(el, id, e) {
-  const sx = e.clientX, sy = e.clientY;
-  const o = NATIVE[id], ox = o.x, oy = o.y;
-  const mv = ev => {
-    o.x = Math.round(ox + ev.clientX - sx); o.y = Math.round(oy + ev.clientY - sy);
-    el.style.left = o.x + "px"; el.style.top = o.y + "px";
-  };
-  const up = () => { document.removeEventListener("mousemove", mv); document.removeEventListener("mouseup", up); selectN(id); };
-  document.addEventListener("mousemove", mv); document.addEventListener("mouseup", up);
-}
-
-$("#btnOvr").onclick = async () => {
-  const lines = [
-    "-- overrides.lua \u2014 generated by ArcheaAge UI Studio (native tree)",
-    "IVAN_OVERRIDES = {",
-  ];
-  for (const [id, o] of Object.entries(NATIVE)) {
-    if (o.show === false && !o.anchor && !o.x && !o.y) {
-      lines.push(`    { id = "${id}", action = "hide" },`);
-      continue;
+function genLua(){
+  const q=s=>'"'+String(s??"").replace(/\\/g,"\\\\").replace(/"/g,'\\"')+'"';
+  const col=c=>`{ ${c.map(x=>+x.toFixed(3)).join(", ")} }`;
+  const out=["-- overrides.lua \u2014 generated by ArcheaAge UI Studio",
+             "-- Applied by the ivanpanel addon (tools/ui/push-ui.ps1)","",
+             "IVAN_OVERRIDES = {"];
+  for(const scr of SCREEN_ORDER){
+    const s=PROJECT.screens[scr];
+    for(const [id,w] of Object.entries(s.native)){
+      if(w.show===false && !w.anchor){ out.push(`    { id = "${id}", action = "hide" },`); continue; }
+      if(w.show===false){ out.push(`    { id = "${id}", action = "apply", show = false },`); continue; }
+      if(w.anchor){
+        out.push(`    { id = "${id}", action = "apply", show = true, `+
+                 `anchor = { "${w.anchor}", "UIParent", ${w.x??0}, ${w.y??0} } },`);
+      }
     }
-    const a = o.anchor || "TOPLEFT";
-    lines.push(`    { id = "${id}", action = "apply", show = ${!!o.show}, ` +
-               `anchor = { "${a}", "UIParent", ${o.x ?? 0}, ${o.y ?? 0} } },`);
+    for(const c of s.custom){
+      const bits=[`id = ${q(c.id)}`,`type = "${c.type}"`,
+                  `anchor = { "TOPLEFT", "UIParent", ${c.x??0}, ${c.y??0} }`,
+                  `extent = { ${c.w??160}, ${c.h??26} }`];
+      if(c.text) bits.push(`text = ${q(c.text)}`);
+      if(c.color) bits.push(`color = ${col(hexToRgb01(c.color))}`);
+      bits.push(`show = ${c.show!==false}`);
+      out.push(`    { ${bits.join(", ")} },`);
+    }
   }
-  lines.push("}");
-  const content = lines.join("\n");
-  if (!IN_TAURI_STUDIO()) { downloadFile("overrides.lua", content); return; }
-  try {
-    const path = await window.__TAURI__.core.invoke("overrides_save", { content });
-    setStatus2("saved: " + path + "  → now run tools\\ui\\push-ui.ps1");
-  } catch (e) { setStatus2(String(e), true); }
-};
-
-function IN_TAURI_STUDIO() { return !!window.__TAURI__; }
-function downloadFile(name, content) {
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([content], { type: "text/plain" }));
-  a.download = name; a.click();
+  out.push("}");
+  return out.join("\n");
 }
-setStatus(IN_TAURI ? "Ready. Save writes Documents\\ArcheAge\\ivanpanel_config.lua."
-                   : "Browser mode (no backend).");
-</script>
-</body>
-</html>
+
+async function exportAll(){
+  const lua=genLua();
+  if(IN_TAURI()){
+    try{ const p=await invoke("overrides_save",{content:lua});
+         setStatus("saved: "+p+"  \u2192 run tools\\ui\\push-ui.ps1"); }
+    catch(e){ setStatus(String(e),true); }
+  } else downloadFile("overrides.lua",lua);
+}
+
+/* ================= boot ================= */
+function render(){ renderTree(); renderCanvas(); renderInspector(); }
+
+// persistent export button under the inspector
+$("#inspector").insertAdjacentHTML("beforeend",
+  `<button id="btnDoExport" class="primary" style="margin-top:18px">⬇ Export overrides.lua</button>`);
+$("#btnDoExport").onclick = doExport;
+
+render();
+
+/* ================= tauri bridge ================= */
+async function doExport(){
+  if(IN_TAURI()){
+    try{ const p=await invoke("overrides_save",{content:genLua()});
+         setStatus("saved: "+p+"  \u2192 run tools\\ui\\push-ui.ps1"); }
+    catch(e){ setStatus(String(e),true); }
+  } else {
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([genLua()],{type:"text/plain"}));
+    a.download="overrides.lua"; a.click();
+    setStatus("browser mode: downloaded overrides.lua");
+  }
+}
