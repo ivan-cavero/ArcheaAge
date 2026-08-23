@@ -59,7 +59,8 @@ apps/*/src-tauri/target/
 
 # extracted game assets (never commit) — EXCEPT the editable login UI:
 #   - game/ui/login_stage/background/: login screen backgrounds (branding)
-#   - tools/ui/decompiled/: decompiled Lua we edit (login stage)
+#   - tools/ui/decompiled/: NOT tracked — derived output from unluac.jar,
+#     poor quality (unreadable locals), regenerable via decompile.ps1
 game/*
 !game/ui/
 game/ui/*
@@ -68,11 +69,4 @@ game/ui/login_stage/*
 !game/ui/login_stage/background/
 tools/ui/unluac.jar
 
-tools/ui/decompiled/*
-!tools/ui/decompiled/game/
-tools/ui/decompiled/game/*
-!tools/ui/decompiled/game/scriptsbin/
-tools/ui/decompiled/game/scriptsbin/*
-!tools/ui/decompiled/game/scriptsbin/x2ui/
-tools/ui/decompiled/game/scriptsbin/x2ui/*
-!tools/ui/decompiled/game/scriptsbin/x2ui/loginstage/
+tools/ui/decompiled/
