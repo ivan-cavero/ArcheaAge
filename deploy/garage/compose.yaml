@@ -2,19 +2,17 @@
 # releases and backups (restic/rclone). NOT for the git repo.
 # Why Garage and not MinIO: MinIO entered maintenance mode (Dec 2025) and
 # crippled the CE console; Garage is Rust, light, S3-compatible, no surprises.
-# Known limits: no bucket versioning yet, subset of the S3 API.
-# For static file serving + rclone it is more than enough.
 #
-# Dokploy: "Compose" service; expose 3900 through Traefik only if you want
-# HTTPS on the API.
+# SELF-CONTAINED for Dokploy: the config file is generated at container start
+# from env vars — no external garage.toml to mount (Dokploy resolves relative
+# paths against its own project dir, which breaks ./garage.toml).
 #
 # .env next to this file:
 #   GARAGE_RPC_SECRET  = openssl rand -hex 32
 #   GARAGE_ADMIN_TOKEN = openssl rand -hex 32
 #
-# First run:
-#   docker compose up -d
-#   alias gr="docker exec -it garage /garage"
+# First run (layout + bucket + key):
+#   alias gr="docker exec -it <ctr> /garage"
 #   gr layout show                       # copy the NODE ID
 #   gr layout assign -z dc1 -c 1 <NODE_ID>
 #   gr layout apply
@@ -31,11 +29,30 @@ services:
     environment:
       GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET}
       GARAGE_ADMIN_TOKEN: ${GARAGE_ADMIN_TOKEN}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        cat > /etc/garage.toml <<EOF
+        metadata_dir = "/var/lib/garage/meta"
+        data_dir = "/var/lib/garage/data"
+        replication_factor = 1
+        rpc_bind_addr = "[::]:3901"
+        rpc_public_addr = "127.0.0.1:3901"
+        rpc_secret = "$GARAGE_RPC_SECRET"
+        [s3_api]
+        s3_region = "garage"
+        api_bind_addr = "[::]:3900"
+        [s3_web]
+        bind_addr = "[::]:3902"
+        index = "index.html"
+        [admin]
+        api_bind_addr = "[::]:3903"
+        admin_token = "$GARAGE_ADMIN_TOKEN"
+        EOF
+        exec /garage server -c /etc/garage.toml
     volumes:
-      # cp garage.toml.example garage.toml first
-      - ./garage.toml:/etc/garage.toml:ro
       - /var/lib/garage/meta:/var/lib/garage/meta
       - /var/lib/garage/data:/var/lib/garage/data
 # NOTE: no host port mappings — Dokploy routes the domain via Traefik to
-# garage:3900 (S3 API) over the internal network. Admin API (3903) and web
-# (3902) are only reachable inside the Dokploy network.
+# garage:3900 (S3 API) over the internal network.
