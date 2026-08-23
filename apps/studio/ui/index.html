@@ -413,6 +413,9 @@ function setZoom(z){ zoom=Math.min(2,Math.max(.1,z));
 /* ---------- boot ---------- */
 function render(){ renderTree(); renderCanvas(); renderInspector(); }
 
+
+// auto-load background screenshot (repo mode)
+fetch('background.jpg').then(r=>{if(r.ok){const i=document.getElementById('shot');i.src='background.jpg';i.style.display='block';}}).catch(()=>{});
 // auto-load tracked tree (repo mode)
 fetch('game_ui_tree.json').then(r=>r.ok?r.json():Promise.reject(0)).then(j=>{importTreeData(j);}).catch(()=>{ setStatus('No tree loaded yet - play once + sync-tree.ps1, or Import manually.'); });
 
