@@ -26,3 +26,4 @@ locale/fr.lua
 world_select_view.lua
 world_select.lua
 ../addon_panel.lua
+../probe_dump.lua
