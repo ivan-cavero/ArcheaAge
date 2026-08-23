@@ -8,6 +8,10 @@
 # Dokploy: "Compose" service; expose 3900 through Traefik only if you want
 # HTTPS on the API.
 #
+# .env next to this file:
+#   GARAGE_RPC_SECRET  = openssl rand -hex 32
+#   GARAGE_ADMIN_TOKEN = openssl rand -hex 32
+#
 # First run:
 #   docker compose up -d
 #   alias gr="docker exec -it garage /garage"
@@ -24,6 +28,9 @@ services:
     image: dxflrs/garage:v2.0.0
     container_name: garage
     restart: unless-stopped
+    environment:
+      GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET}
+      GARAGE_ADMIN_TOKEN: ${GARAGE_ADMIN_TOKEN}
     volumes:
       # cp garage.toml.example garage.toml first
       - ./garage.toml:/etc/garage.toml:ro

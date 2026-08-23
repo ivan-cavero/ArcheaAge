@@ -1,6 +1,8 @@
-# Copy to garage.toml next to compose.yaml and fill in the two secrets:
-#   rpc_secret  = openssl rand -hex 32
-#   admin_token = openssl rand -hex 32
+# Copy to garage.toml next to compose.yaml.
+# Secrets are NOT in this file — pass them via env vars in compose:
+#   GARAGE_RPC_SECRET   = openssl rand -hex 32
+#   GARAGE_ADMIN_TOKEN  = openssl rand -hex 32
+# (Garage reads these env vars instead of rpc_secret / admin_token.)
 metadata_dir = "/var/lib/garage/meta"
 data_dir = "/var/lib/garage/data"
 
@@ -8,7 +10,6 @@ replication_factor = 1 # single node; if you add another, >=2 and review the lay
 
 rpc_bind_addr = "[::]:3901"
 rpc_public_addr = "127.0.0.1:3901"
-rpc_secret = "CHANGE-ME"
 
 [s3_api]
 s3_region = "garage"
@@ -20,4 +21,3 @@ index = "index.html"
 
 [admin]
 api_bind_addr = "[::]:3903"
-admin_token = "CHANGE-ME"
