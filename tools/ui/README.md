@@ -7,10 +7,11 @@ ArcheAge 1.2 client, and everything learned on the way. Status: **working** —
 ## The pipeline at a glance
 
 ```text
+tools/ui/decompile.py all                 extract+decompile every .alb -> tools/ui/src/
 tools/ui/addon_panel.lua                    edit this (plain Lua 5.1)
         │  luac5f.exe -o addon_panel.alb    compile (Lua 5.1, LUA_NUMBER=float!)
         ▼
-tools/ui/push-ui.ps1                        inject into CLIENT game_pak (pak-put)
+tools/ui/push.py                          inject into CLIENT game_pak (pak-put)
         ▼
 reopen the game (~40 s)                     panel renders on login/server-select
 ```
@@ -52,7 +53,7 @@ debug/line-info payload).
 
 ### 2. Hook the module tocs (already injected; idempotent)
 
-`push-ui.ps1` installs these every run:
+`push.py` installs these every run:
 
 - `loginstage/login/toc.g` and `loginstage/world_select/toc.g`: original
   contents + one appended line `../addon_panel.lua`.
@@ -81,7 +82,7 @@ Result: injecting UI never requires stopping the server; iteration is just
 
 | Thing | Location / mechanism |
 | --- | --- |
-| Credits page ("Edited by Ivan Cavero") | pak entry `game/ui/login_stage/html/made_en.html` — plain HTML rendered by Awesomium; whole-file swap via `tools/pak-put` (see `tools/branding/apply-branding.ps1`) |
+| Credits page ("Edited by Ivan Cavero") | pak entry `game/ui/login_stage/html/made_en.html` — plain HTML rendered by Awesomium; whole-file swap via `tools/pak-put` (see `tools/branding/apply_branding.py`) |
 | Visible UI strings ("Select Server", hints…) | NOT in the pak — they live in **`compact.sqlite3`**, table `localized_texts` (`tbl_name='ui_texts'`). Edit with `tools/db/dbtext.py` |
 | Script loading mode | cvar `lua_use_binary` in cryscriptsystem.dll: `1` = `scriptsbin/*.alb`, `0` = `scripts/*.lua`. Only ~252 of 1035 modules have sources → binary mode is effectively mandatory |
 | Native addon system | crysystem.dll mounts `/game`, `/USER`, `/addon`; scans `addon/<name>/toc.g`; per-account enable list in `Documents\ArcheAge\USER\Data\account\addon_list.g` (Lua-source `.g` format). Not yet needed — our toc hook already runs earlier |

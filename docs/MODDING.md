@@ -27,6 +27,7 @@
 | `pak-scan` | listar/extraer entradas (FAT descifrada OK: 218.066 entradas) |
 | `pak-put` | reemplazar/añadir fichero dentro del pak + verificación MD5. Requiere cliente cerrado (pak bloqueado en juego) |
 | `client-sync` | extraer todo lo editable (7.652 ficheros, 453 MB) a un árbol git-friendly |
+| `decompile.py` | decompilar .alb del game_pak a Lua legible: `all` (todo → `tools/ui/src/`) o `module <name>` (subárbol → `tools/ui/decompiled/`); backend unluac.jar |
 | `mega.py` | unified MEGA CLI: `ls` (folder tree) and `get` (file download) — stdlib + pycryptodome only |
 
 Flujo completo: `client-sync extract → editar (git diff visible) → pak-put / overlay → Play`.
