@@ -160,16 +160,14 @@ function renderTree(){
 /* ================= RENDERER: reconstructs the screen ================= */
 function renderScreen(){
   const stage=$("#stage"); stage.innerHTML="";
+
+  // ALWAYS show the background texture, even without tree data
+  const bg=document.createElement("img");
+  bg.className="game-bg"; bg.src="textures/ch_select_bg.png";
+  stage.appendChild(bg);
+
   const scr=SCREENS[ACTIVE_SCREEN]; if(!scr) return;
 
-  // fullscreen game background texture
-  if(scr.bg){
-    const img=document.createElement("img");
-    img.className="game-bg"; img.src=scr.bg;
-    stage.appendChild(img);
-  }
-
-  // native window overlays at their parsed positions
   for(const [id,w] of Object.entries(scr.windows)){
     if(w.x===undefined && w.y===undefined && !w.w) continue;
     const d=document.createElement("div");
