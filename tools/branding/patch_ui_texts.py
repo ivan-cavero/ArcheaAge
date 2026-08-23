@@ -15,8 +15,14 @@ con = sqlite3.connect(DB)
 cur = con.cursor()
 
 targets = [
-    (1160, "You can create up to 4 characters on any one server and six characters across all servers."),
-    (5169, "You can create up to 4 characters on any one server and a total of 6 characters across all servers."),
+    (
+        1160,
+        "You can create up to 4 characters on any one server and six characters across all servers.",
+    ),
+    (
+        5169,
+        "You can create up to 4 characters on any one server and a total of 6 characters across all servers.",
+    ),
 ]
 for idx, old in targets:
     cur.execute(
