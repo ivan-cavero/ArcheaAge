@@ -1,20 +1,22 @@
-# Forgejo en la VPS — git privado (overlay, ops, mirrors de GitHub).
-# Elección: Forgejo > Gitea para instalación nueva en 2026 — mismo software,
-# gobernanza sin ánimo de lucro (Codeberg e.V.), migración Gitea→Forgejo
-# soportada (la inversa no). Acepta las env vars GITEA__* por compatibilidad.
+# Forgejo on the VPS — private git (overlays, ops, GitHub mirrors).
+# Choice: Forgejo > Gitea for a new install in 2026 — same software, non-profit
+# governance (Codeberg e.V.), Gitea→Forgejo migration supported (not the
+# reverse). Accepts GITEA__* env vars for compatibility.
 #
-# Dokploy: servicio tipo "Compose" > dominio -> http://forgejo:3000.
-# Primera vez:
-#   docker exec -it <ctr> gitea admin user create --admin --username ivan --email tu@mail --password XXX
-#   (después desactiva el registro público en la UI)
+# Dokploy: "Compose" service > domain -> http://forgejo:3000.
+# First run:
+#   docker exec -it <ctr> gitea admin user create --admin \
+#     --username ivan --email you@mail --password XXX
+#   (then disable public registration in the UI)
 #
-# .env junto a este archivo:
-#   FORGEJO_DOMAIN=git.tudominio.com
+# .env next to this file:
+#   FORGEJO_DOMAIN=git.yourdomain.com
 name: forge
 
 services:
   forgejo:
-    # Clava el major; los upgrades cruzan migraciones de esquema — hazlos despierto y con backup.
+    # Pin the major; upgrades cross schema migrations — do them
+    # awake and with a backup.
     image: codeberg.org/forgejo/forgejo:14
     restart: unless-stopped
     environment:
@@ -23,15 +25,16 @@ services:
       FORGEJO__server__DOMAIN: ${FORGEJO_DOMAIN}
       FORGEJO__server__ROOT_URL: https://${FORGEJO_DOMAIN}
       FORGEJO__server__SSH_DOMAIN: ${FORGEJO_DOMAIN}
-      FORGEJO__server__SSH_PORT: "222" # puerto SSH anunciado a los clones git@
-      # SQLite embebido: correcto para 1-5 usuarios. Postgres solo si algún día duele.
+      FORGEJO__server__SSH_PORT: "222"
+      # Embedded SQLite: correct for 1-5 users. Postgres only if it hurts.
       FORGEJO__database__DB_TYPE: sqlite3
-      FORGEJO__lfs__ENABLED: "true" # binarios medianos editados (texturas, etc.); clientes enteros NUNCA aquí
+      # Medium binaries we edit (textures, etc.); full clients NEVER here.
+      FORGEJO__lfs__ENABLED: "true"
     volumes:
       - forgejo-data:/data
     ports:
-      - "127.0.0.1:3000:3000" # HTTP interno; TLS lo termina Traefik/Dokploy
-      - "222:22"              # SSH de git directo a la VPS
+      - "127.0.0.1:3000:3000" # internal HTTP; TLS by Traefik/Dokploy
+      - "222:22"              # git SSH direct to the VPS
 
 volumes:
   forgejo-data:

@@ -1,16 +1,17 @@
-# Garage en la VPS — S3 para artefactos: clientes base inmutables, paks,
-# releases y backups (restic/rclone). NO para el repo git.
-# Por qué Garage y no MinIO: MinIO entró en modo mantenimiento (dic 2025) y
-# capó la consola de la CE; Garage es Rust, ligero, S3-compatible, sin sorpresas.
-# Límites a conocer: sin versionado de buckets aún, subconjunto de la API S3.
-# Para servir ficheros estáticos + rclone sobra de sobra.
+# Garage on the VPS — S3 for artifacts: immutable base clients, paks,
+# releases and backups (restic/rclone). NOT for the git repo.
+# Why Garage and not MinIO: MinIO entered maintenance mode (Dec 2025) and
+# crippled the CE console; Garage is Rust, light, S3-compatible, no surprises.
+# Known limits: no bucket versioning yet, subset of the S3 API.
+# For static file serving + rclone it is more than enough.
 #
-# Dokploy: servicio "Compose"; expón 3900 solo por Traefik si quieres HTTPS en el API.
+# Dokploy: "Compose" service; expose 3900 through Traefik only if you want
+# HTTPS on the API.
 #
-# Primera vez:
+# First run:
 #   docker compose up -d
 #   alias gr="docker exec -it garage /garage"
-#   gr layout show                       # copia el NODE ID
+#   gr layout show                       # copy the NODE ID
 #   gr layout assign -z dc1 -c 1 <NODE_ID>
 #   gr layout apply
 #   gr bucket create archeaage-artifacts
@@ -24,12 +25,13 @@ services:
     container_name: garage
     restart: unless-stopped
     volumes:
-      - ./garage.toml:/etc/garage.toml:ro # cp garage.toml.example garage.toml primero
+      # cp garage.toml.example garage.toml first
+      - ./garage.toml:/etc/garage.toml:ro
       - garage-meta:/var/lib/garage/meta
       - garage-data:/var/lib/garage/data
     ports:
       - "127.0.0.1:3900:3900" # S3 API (rclone/restic/launcher)
-      - "127.0.0.1:3902:3902" # web pública opcional (descargas directas)
+      - "127.0.0.1:3902:3902" # optional public web (direct downloads)
       - "127.0.0.1:3903:3903" # admin API
 
 volumes:

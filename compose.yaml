@@ -23,7 +23,10 @@ services:
       - ./servers/aaemu/SQL:/sql-src:ro
       - ./scripts/docker-initdb/01-init-archeaage.sh:/docker-entrypoint-initdb.d/01-init-archeaage.sh:ro
     healthcheck:
-      test: ["CMD-SHELL", "healthcheck.sh --connect --innodb_initialized || exit 1"]
+      # shell=True so the healthcheck.sh PATH from the image is used
+      test:
+        - CMD-SHELL
+        - healthcheck.sh --connect --innodb_initialized || exit 1
       interval: 5s
       timeout: 5s
       retries: 15
