@@ -34,13 +34,9 @@ services:
     volumes:
       # cp garage.toml.example garage.toml first
       - ./garage.toml:/etc/garage.toml:ro
-      - garage-meta:/var/lib/garage/meta
-      - garage-data:/var/lib/garage/data
+      - /var/lib/garage/meta:/var/lib/garage/meta
+      - /var/lib/garage/data:/var/lib/garage/data
     ports:
       - "127.0.0.1:3900:3900" # S3 API (rclone/restic/launcher)
       - "127.0.0.1:3902:3902" # optional public web (direct downloads)
       - "127.0.0.1:3903:3903" # admin API
-
-volumes:
-  garage-meta:
-  garage-data:

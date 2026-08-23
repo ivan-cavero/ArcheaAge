@@ -62,6 +62,13 @@ never expose 3000, 3900, or the Forgejo port directly.
 - `.client_files/`, `.server_files/` (extracted client, server data)
 - Releases and backups (restic/rclone)
 
+## Persistent data (bind mounts in /var/lib)
+
+- Forgejo: `/var/lib/forgejo` (git repos, LFS, SQLite)
+- Garage: `/var/lib/garage/meta` + `/var/lib/garage/data` (S3 objects)
+
+Back these up with restic/rclone — they are the only state that matters.
+
 ## Git remote
 
 ```bash

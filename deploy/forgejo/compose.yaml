@@ -31,10 +31,7 @@ services:
       # Medium binaries we edit (textures, etc.); full clients NEVER here.
       FORGEJO__lfs__ENABLED: "true"
     volumes:
-      - forgejo-data:/data
+      - /var/lib/forgejo:/data
     ports:
       - "127.0.0.1:3000:3000" # internal HTTP; TLS by Traefik/Dokploy
-      - "222:22" # git SSH direct to the VPS
-
-volumes:
-  forgejo-data:
+      - "222:22"              # git SSH direct to the VPS
