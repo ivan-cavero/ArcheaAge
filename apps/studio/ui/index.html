@@ -350,6 +350,8 @@ function importTreeDialog(){
 }
 window.importTreeDialog=importTreeDialog;
 
+function render(){ renderTree(); renderScreen(); renderInspector(); }
+
 /* auto-load tracked tree from repo */
 fetch("game_ui_tree.json")
   .then(r=>r.ok?r.json():Promise.reject(0))
