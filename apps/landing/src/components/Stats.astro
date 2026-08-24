@@ -1,0 +1,22 @@
+---
+import type { Dict } from "../i18n/es";
+
+interface Props {
+  t: Dict;
+}
+
+const { t } = Astro.props;
+---
+
+<section class="stats" aria-label="Arcadia en números">
+  <div class="container stats-grid">
+    {
+      t.stats.items.map((s) => (
+        <div class="stat">
+          <b>{s.v}</b>
+          <span>{s.l}</span>
+        </div>
+      ))
+    }
+  </div>
+</section>

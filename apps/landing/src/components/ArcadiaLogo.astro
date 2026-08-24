@@ -1,0 +1,28 @@
+---
+// ArcadiaLogo — SVG mark: an arch (Arcadia = arc) shaped like an "A" with a gold bar.
+interface Props {
+  class?: string;
+  size?: number;
+}
+const { class: cls, size = 28 } = Astro.props;
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width={size}
+  height={size}
+  viewBox="0 0 48 48"
+  fill="none"
+  class={cls}
+  aria-hidden="true"
+>
+  <rect x="2" y="2" width="44" height="44" rx="11" fill="#0b1512" stroke="rgba(150,180,100,0.22)" />
+  <path
+    d="M11 37 C14 17 20 10 24 10 C28 10 34 17 37 37"
+    stroke="#8dbb3e"
+    stroke-width="4"
+    stroke-linecap="round"
+    fill="none"
+  />
+  <path d="M17 33h14" stroke="#d3c58a" stroke-width="4" stroke-linecap="round" />
+</svg>

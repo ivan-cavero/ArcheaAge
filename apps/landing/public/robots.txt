@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://arcadia.archeaage.dev/sitemap-index.xml

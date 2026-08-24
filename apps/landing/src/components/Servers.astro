@@ -1,0 +1,60 @@
+---
+import type { Dict } from "../i18n/es";
+
+interface Props {
+  t: Dict;
+}
+
+const { t } = Astro.props;
+const statuses: Record<string, string> = {
+  dev: "bd-p",
+  soon: "bd-mt",
+  planned: "bd-f",
+};
+---
+
+<section class="servers" id="servers">
+  <div class="container">
+    <div class="sec-lb">{t.servers.sec}</div>
+    <h2 class="sec-h" set:html={t.servers.title} />
+    <p class="sec-sub">{t.servers.sub}</p>
+
+    <!-- Progression of versions by phase -->
+    <div class="era">
+      <span class="era-tag">{t.servers.eraTag}</span>
+      <div class="era-track">
+        {
+          t.servers.eras.map((e, i) => (
+            <>
+              {i > 0 && <span class="era-arrow">→</span>}
+              <span class:list={["era-chip", { cur: i === t.servers.currentEra }]}>
+                {e.version}
+              </span>
+            </>
+          ))
+        }
+      </div>
+    </div>
+    <p class="era-meta">{t.servers.phase}</p>
+
+    <div class="srv-list">
+      {
+        t.servers.rows.map((r) => (
+          <div class="srv-row cd">
+            <span class="srv-region">{r.region}</span>
+            <div class="srv-main">
+              <b class="srv-name">{r.name}</b>
+              <span class="srv-note">{r.note}</span>
+            </div>
+            <span class:list={["bd", statuses[r.status] ?? "bd-f"]}>
+              <span class="dot"></span>
+              {t.servers.status[r.status]}
+            </span>
+          </div>
+        ))
+      }
+    </div>
+
+    <p class="srv-foot">{t.servers.note}</p>
+  </div>
+</section>

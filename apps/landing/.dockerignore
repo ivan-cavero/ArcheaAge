@@ -1,0 +1,25 @@
+# Node / Bun
+node_modules/
+dist/
+.astro/
+
+# Git
+.git/
+.gitignore
+.gitmodules
+
+# Artefacts
+*.log
+bun.lockb
+
+# Local config
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

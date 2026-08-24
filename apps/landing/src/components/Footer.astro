@@ -1,0 +1,52 @@
+---
+import type { Dict } from "../i18n/es";
+import ArcadiaLogo from "./ArcadiaLogo.astro";
+
+interface Props {
+  t: Dict;
+}
+
+const { t } = Astro.props;
+---
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brnd">
+          <ArcadiaLogo size={24} />
+          <b>ARCADIA</b>
+        </div>
+        <p class="foot-tag">{t.footer.tagline}</p>
+      </div>
+      <div class="foot-col">
+        <h4>{t.footer.col1}</h4>
+        <ul>
+          {
+            t.footer.links1.map((l) => (
+              <li>
+                <a href={l.u} target="_blank" rel="noopener noreferrer">{l.t}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>{t.footer.col2}</h4>
+        <ul>
+          {
+            t.footer.links2.map((l) => (
+              <li>
+                <a href={l.u}>{l.t}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+    <div class="foot-legal">
+      <p>{t.footer.legal}</p>
+      <p class="tiny">{t.footer.rights}</p>
+    </div>
+  </div>
+</footer>

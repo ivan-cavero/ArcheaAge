@@ -1,0 +1,34 @@
+---
+import type { Dict } from "../i18n/es";
+
+interface Props {
+  t: Dict;
+}
+
+const { t } = Astro.props;
+---
+
+<section class="bench" id="bench">
+  <div class="container">
+    <div class="sec-lb">{t.benchmarks.sec}</div>
+    <h2 class="sec-h" set:html={t.benchmarks.title} />
+    <p class="sec-sub">{t.benchmarks.sub}</p>
+    <div class="bench-grid">
+      {
+        t.benchmarks.items.map((b) => (
+          <div class="bench cd">
+            <div class="v">
+              {b.v}
+              <span class="u">{b.u}</span>
+            </div>
+            <div class="k">{b.k}</div>
+          </div>
+        ))
+      }
+    </div>
+    <p class="bench-note">
+      <span class="soon-pill">Próximamente</span>
+      {t.benchmarks.note}
+    </p>
+  </div>
+</section>

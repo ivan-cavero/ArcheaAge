@@ -1,0 +1,77 @@
+---
+import type { Dict } from "../i18n/es";
+
+interface Props {
+  t: Dict;
+}
+
+const { t } = Astro.props;
+
+const icons = {
+  market: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l1 3a3.5 3.5 0 0 1-7 0 3.5 3.5 0 0 1-7 0L4 7h2z"/><path d="M9 20V10M15 20V10"/><path d="M3 20h18"/></svg>`,
+  route: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/><path d="M20 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/><path d="M6 17h6a4 4 0 0 0 0-8H11"/></svg>`,
+  sword: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m13 19 6-6"/><path d="m16 16 4 4"/><path d="m19 21 2-2"/><path d="m6 8 4 4"/></svg>`,
+  chat: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h6"/></svg>`,
+  core: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>`,
+};
+const nodeIcons = ["market", "route", "sword", "chat"];
+---
+
+<section class="world" id="world">
+  <div class="container world-in">
+    <div class="world-dia cd" role="img" aria-label="Diagrama del motor de población simulada">
+      <div class="wd-top">
+        <span class="wd-t">{t.world.diaTitle}</span>
+        <span class="bd bd-on"><span class="dot"></span>{t.world.diaBadge}</span>
+      </div>
+
+      <div class="wd-core">
+        <span class="wd-cic" set:html={icons.core}></span>
+        <div class="wd-m">
+          <b>{t.world.diaCore}</b>
+          <span>{t.world.diaCoreSub}</span>
+        </div>
+      </div>
+
+      <div class="wd-nodes">
+        {
+          t.world.nodes.map((n, i) => (
+            <div class:list={["wd-node", { two: i % 2 === 1 }]}>
+              <span class="wd-ic" set:html={icons[nodeIcons[i]]}></span>
+              <div class="wd-m">
+                <b>{n.n}</b>
+                <span>{n.d}</span>
+              </div>
+              <span class="wd-v">{n.v}</span>
+            </div>
+          ))
+        }
+      </div>
+
+      <div class="wd-foot">
+        <span class="soon-pill">Simulación</span>
+        {t.world.diaNote}
+      </div>
+    </div>
+
+    <div>
+      <div class="sec-lb">{t.world.sec}</div>
+      <h2 class="sec-h" set:html={t.world.title} />
+      <p class="sec-sub">{t.world.sub}</p>
+      <ul class="world-points">
+        {
+          t.world.points.map((p) => (
+            <li>
+              <div class="k">
+                <span>{p.t}</span>
+                <span class="tag">{p.tag}</span>
+              </div>
+              <p>{p.d}</p>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="portal-note">{t.world.statNote}</p>
+    </div>
+  </div>
+</section>

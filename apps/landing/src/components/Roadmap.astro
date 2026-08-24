@@ -1,0 +1,29 @@
+---
+import type { Dict } from "../i18n/es";
+
+interface Props {
+  t: Dict;
+}
+
+const { t } = Astro.props;
+---
+
+<section class="roadmap" id="roadmap">
+  <div class="container">
+    <div class="sec-lb">{t.roadmap.sec}</div>
+    <h2 class="sec-h" set:html={t.roadmap.title} />
+    <p class="sec-sub">{t.roadmap.sub}</p>
+    <div class="rm-list">
+      {
+        t.roadmap.milestones.map((m) => (
+          <article class:list={["rm-item", "cd", { todo: !m.done }]}>
+            <div class="dot"></div>
+            <div class="when">{m.when}</div>
+            <h3>{m.t}</h3>
+            <p>{m.d}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>

@@ -1,0 +1,57 @@
+---
+import { Image } from "astro:assets";
+import heroNight from "../assets/hero-night.jpg";
+import type { Dict } from "../i18n/es";
+
+interface Props {
+  t: Dict;
+}
+
+const { t } = Astro.props;
+---
+
+<section class="hero" id="top">
+  <div class="hero-bg">
+    <Image
+      src={heroNight}
+      alt=""
+      class="hero-img"
+      width={1920}
+      height={1080}
+      format="webp"
+      quality={80}
+      priority
+    />
+    <div class="scrim"></div>
+  </div>
+  <div class="container hero-inner">
+    <div class="hero-copy">
+      <div class="hero-kick">
+        {t.hero.kicker}
+        <span class="sep">◆</span>
+        ArcheAge
+      </div>
+      <h1>{t.hero.title}</h1>
+      <p class="hero-sub" set:html={t.hero.sub} />
+      <div class="hero-cta">
+        <a class="btn btn-pri" href="#cta">{t.hero.ctaDownload}</a>
+        <a class="btn btn-ghost" href="#servers">{t.hero.ctaServers}</a>
+      </div>
+      <div class="hero-meta">
+        <div class="meta-chip cd">
+          <span class="v">{t.hero.chip1value}</span>
+          <span class="k">{t.hero.chip1label}</span>
+        </div>
+        <div class="meta-chip cd">
+          <span class="v">{t.hero.chip2value}</span>
+          <span class="k">{t.hero.chip2label}</span>
+        </div>
+        <div class="meta-chip cd">
+          <span class="v">{t.hero.chip3value}</span>
+          <span class="k">{t.hero.chip3label}</span>
+        </div>
+      </div>
+      <p class="hero-note">{t.hero.note}</p>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,53 @@
+---
+import type { Dict } from "../i18n/es";
+
+interface Props {
+  t: Dict;
+}
+
+const { t } = Astro.props;
+
+const mark: Record<string, string> = {
+  ok: `<span class="st st-ok">${t.compare.legend.yes}</span>`,
+  no: `<span class="st st-no">${t.compare.legend.no}</span>`,
+  part: `<span class="st st-part">${t.compare.legend.part}</span>`,
+  na: `<span class="st st-na">${t.compare.legend.na}</span>`,
+};
+---
+
+<section class="why" id="why">
+  <div class="container">
+    <div class="sec-lb">{t.compare.sec}</div>
+    <h2 class="sec-h" set:html={t.compare.title} />
+    <p class="sec-sub">{t.compare.sub}</p>
+
+    <div class="cmp-head">
+      <span class="cmp-hd-sp" aria-hidden="true"></span>
+      {
+        t.compare.cols.map((c, i) => (
+          <span class:list={["cmp-hd", { us: i === 0 }]}>{c}</span>
+        ))
+      }
+    </div>
+
+    <div class="cmp-list">
+      {
+        t.compare.rows.map((r) => (
+          <article class="cmp-item">
+            <div class="cmp-f">
+              <h3>{r.k}</h3>
+              <p>{r.d}</p>
+            </div>
+            <div class="cmp-vals">
+              {
+                r.v.map((v, i) => (
+                  <span class:list={["cmp-cell", { us: i === 0 }]} set:html={mark[v]} />
+                ))
+              }
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>

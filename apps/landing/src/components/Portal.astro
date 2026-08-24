@@ -1,0 +1,63 @@
+---
+import type { Dict } from "../i18n/es";
+
+interface Props {
+  t: Dict;
+}
+
+const { t } = Astro.props;
+---
+
+<section class="portal" id="portal">
+  <div class="container">
+    <div class="portal-head">
+      <div class="portal-copy">
+        <div class="sec-lb">{t.portal.sec}</div>
+        <h2 class="sec-h" set:html={t.portal.title} />
+        <p class="sec-sub">{t.portal.sub}</p>
+      </div>
+
+      <aside class="profile cd" aria-label="Ejemplo de perfil público">
+        <div class="pf-head">
+          <span class="pf-ava">K</span>
+          <div class="pf-id">
+            <b>{t.portal.profileName}</b>
+            <span>{t.portal.profileSub}</span>
+          </div>
+          <span class="bd bd-on"><span class="dot"></span>{t.portal.profileBadge}</span>
+        </div>
+        <div class="pf-stats">
+          <div class="pf-stat"><span>{t.portal.profileMeta1}</span><b>70</b></div>
+          <div class="pf-stat"><span>{t.portal.profileMeta2}</span><b>1240</b></div>
+          <div class="pf-stat"><span>{t.portal.profileMeta3}</span><b>82</b></div>
+          <div class="pf-stat"><span>{t.portal.profileGuild}</span><b>Υ</b></div>
+        </div>
+        <div class="pf-gear">
+          <h4>{t.portal.profileGear}</h4>
+          <div class="pf-slots">
+            <span class="slot" style="--t:#8dbb3e"></span>
+            <span class="slot" style="--t:#b8a76a"></span>
+            <span class="slot" style="--t:#8dbb3e"></span>
+            <span class="slot" style="--t:#b8a76a"></span>
+            <span class="slot" style="--t:#8dbb3e"></span>
+            <span class="slot" style="--t:#b8a76a"></span>
+          </div>
+        </div>
+        <a class="pf-view" href="#cta">{t.portal.profileView} →</a>
+      </aside>
+    </div>
+
+    <div class="grid-2">
+      {
+        t.portal.features.map((f, i) => (
+          <article class="feat cd">
+            <span class="ic" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+            <h3>{f.t}</h3>
+            <p>{f.d}</p>
+          </article>
+        ))
+      }
+    </div>
+    <p class="portal-note">{t.portal.note}</p>
+  </div>
+</section>

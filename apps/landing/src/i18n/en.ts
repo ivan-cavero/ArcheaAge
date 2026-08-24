@@ -1,0 +1,256 @@
+// Arcadia — English translation (mirrors the exact shape of es.ts).
+import type { Dict } from "./es";
+
+const en: Dict = {
+  meta: {
+    title: "ARCADIA — ArcheAge reborn, open source",
+    description:
+      "Arcadia is an open source ArcheAge platform: our own servers by phase (1.2 to 1.7 and beyond), a living world populated by AI, own content and a web with profiles, leaderboards and gear.",
+  },
+  nav: {
+    features: "The project",
+    servers: "Servers",
+    world: "Living world",
+    compare: "Why Arcadia",
+    portal: "Beyond the game",
+    benchmarks: "Performance",
+    roadmap: "Roadmap",
+    download: "Download launcher",
+  },
+  hero: {
+    kicker: "The golden age",
+    title: "ARCADIA",
+    sub: "We are relighting <strong>ArcheAge 1.2</strong> and already climbing toward <strong>1.7</strong>. An open source platform: our own servers by phase, constant updates and unique content.",
+    ctaDownload: "Download launcher",
+    ctaServers: "View servers",
+    chip1label: "Current phase",
+    chip1value: "1.2",
+    chip2label: "Next era",
+    chip2value: "1.7",
+    chip3label: "Living world",
+    chip3value: "24/7",
+    note: "Windows · Free · No pay-to-win · The beta opens when the server is ready.",
+  },
+  stats: {
+    items: [
+      { v: "1.2 → 1.7", l: "First eras of the journey" },
+      { v: "∞", l: "Own content & updates" },
+      { v: "24/7", l: "World with AI residents" },
+      { v: "100%", l: "Open source LGPL-3" },
+    ],
+  },
+  features: {
+    sec: "The project",
+    title: "A complete platform, <em>not just another emulator</em>",
+    sub: "Arcadia sits on top of the emulator: launcher, metaserver, brand-new servers, plugins and custom content — all open source and connected.",
+    cards: [
+      {
+        ic: "rocket",
+        title: "All-in-one launcher",
+        desc: "Pick a version, see servers with live players, download and patch the client with SHA256 verification, then press Play.",
+      },
+      {
+        ic: "cpu",
+        title: "Servers built from scratch",
+        desc: "A Go rewrite of login and game servers. Clean, tested, auditable code — no leaked files, no closed heritage.",
+      },
+      {
+        ic: "layers",
+        title: "Own content and updates",
+        desc: "New zones, QoL, balance and our own events. The project ships weekly and you see the changelog.",
+      },
+      {
+        ic: "plugin",
+        title: "Community plugins",
+        desc: "Public SDK (ArcheaAge.Sdk): anyone compiles a plugin without cloning the server and proposes it via the catalog.",
+      },
+      {
+        ic: "live",
+        title: "Living world with AI residents",
+        desc: "Cities with people, trade and 24/7 routines. No more empty worlds: AI complements real players.",
+      },
+      {
+        ic: "globe",
+        title: "Web platform",
+        desc: "Registration, public profiles, players online, characters, leaderboards and verifiable gear — from any browser.",
+        soon: "In development",
+      },
+    ],
+  },
+  servers: {
+    sec: "Servers",
+    title: "Multi-version. <em>Each era, a phase</em>",
+    sub: "We climb versions phase by phase: you play in the current era and, when the next one lands, the whole world migrates to it. Nothing gets frozen.",
+    eraTag: "Version path",
+    eras: [
+      { version: "1.2" },
+      { version: "1.7" },
+      { version: "2.0" },
+      { version: "2.9" },
+      { version: "3.0" },
+    ],
+    currentEra: 0,
+    phase: "Current phase: 1.2 · next era: 1.7 — each jump migrates the world to the new version.",
+    status: { dev: "In development", soon: "Coming soon", planned: "Planned" },
+    rows: [
+      { region: "EU · North", name: "Arcadia · Europe", status: "dev", note: "Main server of the initial phase" },
+      { region: "NA · East", name: "Arcadia · North America", status: "planned", note: "Once the phase is stable" },
+      { region: "APAC", name: "Arcadia · Asia-Pacific", status: "planned", note: "By community demand" },
+    ],
+    note: "No server is open yet: the list will connect to the Registry's real telemetry when the beta arrives. Realms/languages will be shaped with the community.",
+  },
+  world: {
+    sec: "Living world",
+    title: "A world that <em>always feels full</em>",
+    sub: "Population is the soul of an MMO, and the 2014 numbers are gone. Arcadia solves that with simulated residents populating the world in real time.",
+    points: [
+      {
+        tag: "Real lives",
+        t: "Inhabitants with routines",
+        d: "Player-like NPCs with names, classes and routes: they go to port, trade, patrol, rest. They react to the world and the weather.",
+      },
+      {
+        tag: "Economy",
+        t: "Markets and activity",
+        d: "They buy and sell at auction, fill the docks, keep goods flowing for real players.",
+      },
+      {
+        tag: "Events",
+        t: "Always something to do",
+        d: "The server calendar never empties: convoys, storms and contests scheduled by the platform itself.",
+      },
+      {
+        tag: "Honesty",
+        t: "Visible and transparent",
+        d: "Each resident is a server-side entity with its own state, and public telemetry shows the inhabited world and its population.",
+      },
+    ],
+    statLabel: "Simulated population",
+    statNote: "The system is complementary: when real players arrive the AI integrates with them. It never competes against them.",
+    diaTitle: "Population engine",
+    diaBadge: "24/7",
+    diaCore: "AI core",
+    diaCoreSub: "per-zone scheduler · state and personality per entity",
+    nodes: [
+      { n: "Live auctions", d: "AI buyers bid, ask and buy in real time", v: "live" },
+      { n: "People everywhere", d: "they move around the world, you bump into them", v: "24/7" },
+      { n: "Real fights", d: "those guarding their turf will actually fight you", v: "real" },
+      { n: "Chat & personality", d: "each one has a name, chat and their own character", v: "—" },
+    ],
+    diaNote: "Not loose props or infinite hordes: each resident is an entity with routine, personality and chat — visible in the public telemetry.",
+  },
+  compare: {
+    sec: "The rest of the ecosystem",
+    title: "Against <em>what already exists</em>",
+    sub: "The real players: AAEmu (the reference open source emulator), ArcheRage and AA Classic (two of the largest private servers). Only verifiable facts.",
+    legend: { yes: "Yes", no: "No", part: "Partial", na: "—" },
+    cols: [
+      "Arcadia",
+      "AAEmu emulator",
+      "ArcheRage",
+      "AA Classic",
+    ],
+    rows: [
+      { k: "Open source and auditable", d: "All code and decisions in the open and forkable.", v: ["ok", "ok", "no", "no"] },
+      { k: "Servers without leaked files", d: "Our own emulator written from scratch, no leaks or closed keys.", v: ["ok", "ok", "no", "no"] },
+      { k: "Community plugin API", d: "Anyone compiles a plugin without cloning the server.", v: ["ok", "no", "no", "no"] },
+      { k: "Living world with AI residents", d: "Simulated residents 24/7 filling cities and routes.", v: ["ok", "no", "no", "no"] },
+      { k: "Web: profiles, leaderboards and gear", d: "Your character also lives outside the game.", v: ["ok", "no", "no", "no"] },
+      { k: "Own content and updates", d: "New zones, QoL and events with a public changelog.", v: ["ok", "part", "ok", "ok"] },
+      { k: "Transparent currency · no P2W", d: "Public and verifiable stance; donation-friendly.", v: ["ok", "na", "no", "part"] },
+      { k: "Public benchmarks and telemetry", d: "Server numbers published, not promises.", v: ["ok", "no", "no", "no"] },
+    ],
+  },
+  portal: {
+    sec: "Beyond the game",
+    title: "Your character also lives <em>on the web</em>",
+    sub: "The world does not end at the screen. Arcadia exposes server and account state from any browser.",
+    features: [
+      {
+        t: "Registration & accounts",
+        d: "Create your account or sign in from the web or the launcher. One identity everywhere.",
+      },
+      {
+        t: "Players online, live",
+        d: "Who is online, in which zone and since when — fed by the server heartbeat.",
+      },
+      {
+        t: "See your characters from outside",
+        d: "Full roster: race, class, level and progress visible without opening the game.",
+      },
+      {
+        t: "Public profiles",
+        d: "Public by default; you decide what shows up. Share your card with the community.",
+      },
+      {
+        t: "Leaderboards",
+        d: "Level, PvP, economy and achievement rankings — public from the web.",
+      },
+      {
+        t: "Gear and builds",
+        d: "Get inspired and copy loadouts from other players. Know who is who in Arcadia.",
+      },
+    ],
+    note: "M2-M3 roadmap: registration and live online first, then full profiles and leaderboards.",
+    profileBadge: "Public profile",
+    profileName: "Kaelen",
+    profileSub: "Firran · Court Claimant",
+    profileMeta1: "Lv.",
+    profileMeta2: "PvP",
+    profileMeta3: "Arena",
+    profileGuild: "Guild",
+    profileGear: "Gear",
+    profileView: "View profile",
+  },
+  benchmarks: {
+    sec: "Performance",
+    title: "We measure, we publish, <em>we improve</em>",
+    sub: "The ArcheAge ecosystem brags about everything except numbers. Here we publish them: benchmarks, not promises.",
+    items: [
+      { v: "8", u: "ms", k: "Tick budget" },
+      { v: "20k", u: "px/s", k: "Packets per second" },
+      { v: "100%", u: "uptime", k: "Target with telemetry" },
+      { v: "—", u: "", k: "World capacity" },
+      { v: "—", u: "", k: "Network latency" },
+      { v: "—", u: "", k: "Per-server usage" },
+    ],
+    note: "First public dashboard at M2. Values above are design targets; they will be measured on the bench and published.",
+  },
+  roadmap: {
+    sec: "Roadmap",
+    title: "The path of the world",
+    sub: "Project milestones, from the first stone to full operations.",
+    milestones: [
+      { when: "M1", t: "Operational base", d: "Go registry + launcher v1: single version, servers with live players and full client download.", done: true },
+      { when: "M2", t: "Game core", d: "Go login + Game network core, living world with AI residents and first end-to-end play.", done: false },
+      { when: "M3", t: "Full world", d: "Zones, plugins, the 3.0 line, content packs and the web platform: profiles, leaderboards, gear.", done: false },
+      { when: "M4", t: "Advanced content", d: "Large-scale new content, world editing, enemies and global events.", done: false },
+    ],
+  },
+  cta: {
+    title: "Your world starts today",
+    em: "ARCADIA",
+    sub: "Download the launcher, create your account and join when the beta opens. The code is open source from today.",
+    launcher: "Download launcher",
+    register: "Create account",
+    hint: "Arcadia is in development: servers open in phases and the roadmap is public.",
+  },
+  footer: {
+    tagline: "Arcadia — open source platform to preserve and revive ArcheAge from 1.2 toward future versions.",
+    col1: "Project",
+    links1: [
+      { t: "Code & docs", u: "https://github.com/ivan-cavero/ArcheaAge" },
+      { t: "Issues & roadmap", u: "https://github.com/ivan-cavero/ArcheaAge/issues" },
+      { t: "LGPL-3 license", u: "https://github.com/ivan-cavero/ArcheaAge/blob/main/LICENSE" },
+    ],
+    col2: "Community",
+    links2: [
+      { t: "Discord", u: "#" },
+      { t: "Server status", u: "/#status" },
+    ],
+    legal: "Arcadia is not affiliated or endorsed by XLGAMES or any of its publishers. ArcheAge, its client, art, music and trademarks belong to XLGAMES. This is an open interoperability effort for education and preservation, and does not distribute game assets.",
+    rights: "Own code under LGPL-3. Built with Astro.",
+  },
+};
+
+export default en;

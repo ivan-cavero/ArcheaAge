@@ -1,0 +1,25 @@
+---
+import type { Dict } from "../i18n/es";
+
+interface Props {
+  t: Dict;
+}
+
+const { t } = Astro.props;
+---
+
+<section class="cta" id="cta">
+  <div class="container">
+    <h2>
+      {t.cta.title}
+      <br />
+      <em>{t.cta.em}</em>
+    </h2>
+    <p>{t.cta.sub}</p>
+    <div class="cta-actions">
+      <a class="btn btn-pri" href="#top">{t.cta.launcher}</a>
+      <a class="btn btn-ghost" href="#top">{t.cta.register}</a>
+    </div>
+    <p class="cta-hint">{t.cta.hint}</p>
+  </div>
+</section>

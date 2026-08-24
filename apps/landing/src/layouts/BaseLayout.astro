@@ -1,0 +1,105 @@
+---
+// Arcadia landing — base layout (shared by ES + EN pages).
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+  lang: "es" | "en";
+}
+
+const { title, description, lang } = Astro.props;
+const site = "https://arcadia.archeaage.dev";
+const home = lang === "es" ? "/" : "/en/";
+const canonical = new URL(home, site);
+const ogImage = new URL("/images/hero-library.jpg", site);
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Arcadia",
+  url: site,
+  logo: `${site}/favicon.svg`,
+  description,
+  sameAs: [
+    "https://github.com/ivan-cavero/ArcheaAge",
+  ],
+});
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content="ArcheAge, ArcheAge private server, servidor privado ArcheAge, ArcheAge open source, ArcheAge 1.2, ArcheAge 3.0, launcher ArcheAge, MMORPG, ArcheAge live, Arcadia" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="es" href={`${site}/`} />
+    <link rel="alternate" hreflang="en" href={`${site}/en/`} />
+    <link rel="alternate" hreflang="x-default" href={`${site}/`} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Arcadia" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content={lang === "es" ? "es_ES" : "en_US"} />
+    <meta property="og:locale:alternate" content={lang === "es" ? "en_US" : "es_ES"} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <meta name="theme-color" content="#07100d" />
+
+    <!-- Structured data -->
+    <script type="application/ld+json" is:inline set:html={jsonLd}></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script is:inline>
+      // Auto-detect the user's language once (respects an explicit, recent
+      // choice stored by the ES/EN switcher — 30 days).
+      (function () {
+        try {
+          var raw = null;
+          try { raw = localStorage.getItem("arcadia-lang"); } catch (e) {}
+          if (raw) {
+            try {
+              var j = JSON.parse(raw);
+              if (j && j.v && Date.now() - j.t < 30 * 24 * 3600 * 1000) return;
+            } catch (e) {}
+          }
+          var list = (navigator.languages && navigator.languages.length)
+            ? navigator.languages
+            : [navigator.language || ""];
+          var want = "en";
+          for (var i = 0; i < list.length; i++) {
+            var l = (list[i] || "").toLowerCase();
+            if (l.indexOf("es") === 0) { want = "es"; break; }
+            if (l.indexOf("en") === 0) { want = "en"; break; }
+          }
+          var docLang = document.documentElement.lang;
+          if (want === "en" && docLang === "es") location.replace("/en/");
+          else if (want === "es" && docLang === "en") location.replace("/");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

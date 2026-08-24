@@ -1,0 +1,35 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import en from "../../i18n/en";
+import Nav from "../../components/Nav.astro";
+import Hero from "../../components/Hero.astro";
+import Stats from "../../components/Stats.astro";
+import Servers from "../../components/Servers.astro";
+import Features from "../../components/Features.astro";
+import World from "../../components/World.astro";
+import Compare from "../../components/Compare.astro";
+import Portal from "../../components/Portal.astro";
+import Benchmarks from "../../components/Benchmarks.astro";
+import Roadmap from "../../components/Roadmap.astro";
+import CTA from "../../components/CTA.astro";
+import Footer from "../../components/Footer.astro";
+
+const t = en;
+---
+
+<BaseLayout title={t.meta.title} description={t.meta.description} lang="en">
+  <Nav t={t} lang="en" />
+  <main>
+    <Hero t={t} />
+    <Stats t={t} />
+    <Servers t={t} />
+    <Features t={t} />
+    <World t={t} />
+    <Compare t={t} />
+    <Portal t={t} />
+    <Benchmarks t={t} />
+    <Roadmap t={t} />
+    <CTA t={t} />
+  </main>
+  <Footer t={t} />
+</BaseLayout>
