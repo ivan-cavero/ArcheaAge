@@ -85,11 +85,13 @@ Configuración exacta (evita duplicar `apps/landing` y que falle al crear `.env`
 | **Path** (build path dentro del repo) | `./apps/landing` |
 | **Build Type** | `Dockerfile` |
 | **Dockerfile Path** | `Dockerfile` ⚠️ (solo el nombre, relativo al Path) |
-| **Docker Context Path** | `./apps/landing` (o dejarlo vacío → usa la carpeta del Dockerfile) |
+| **Docker Context Path** | `./apps/landing` — **NUNCA `.`** (`.` en Dokploy = raíz del clone, no la carpeta del Dockerfile) |
 | **Watch Paths** | `./apps/landing/**` |
 | **Port** | `8080` |
 
-> ⚠️ Error típico: si pones `ImagePath/Dockerfile` en **Dockerfile Path** mientras el **Path** ya es `apps/landing`, Dokploy resuelve la ruta duplicada (`code/apps/landing/apps/landing/Dockerfile`) y falla al crear `.env`.
+> ⚠️ Si el contexto apunta a la raíz, Docker buscará `package.json`, `bun.lock` y `serve.ts` en la raíz del repo (donde no están) y fallará con `"/package.json": not found`. El contexto debe ser la carpeta donde vive el Dockerfile: `./apps/landing`.
+>
+> ⚠️ Error doble típico: **Dockerfile Path** debe ser solo `Dockerfile` (no `apps/landing/Dockerfile`), porque Dokploy ya lo resuelve contra el **Path**. Así evitamos la ruta duplicada `code/apps/landing/apps/landing/Dockerfile`.
 
 2. En **Domains**, añade tu **dominio custom** — Dokploy genera el
    certificado HTTPS automáticamente y enruta al puerto 8080 del contenedor.
