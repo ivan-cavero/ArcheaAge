@@ -77,15 +77,25 @@ que sirve el sitio estático.
 
 ### Despliegue en Dokploy
 
-1. Crea una nueva **Application** en Dokploy apuntando a este repo
-   (subcarpeta `apps/landing`).
-2. En el build, usa el **Dockerfile** (Dokploy lo detecta y lo ejecuta; el
-   contenedor expone el puerto 8080).
-3. En **Domains**, añade tu **dominio custom** — Dokploy genera el
-   certificado HTTPS automáticamente y enruta al puerto 8080 del contenedor.
-4. Opcional: variables de entorno (`PORT`, `TZ`).
+Configuración exacta (evita duplicar `apps/landing` y que falle al crear `.env`):
 
-### Local (sin compose)
+| Campo | Valor |
+|---|---|
+| **Source / Repository** | `github.com/ivan-cavero/ArcheaAge` (branch `main`) |
+| **Path** (build path dentro del repo) | `./apps/landing` |
+| **Build Type** | `Dockerfile` |
+| **Dockerfile Path** | `Dockerfile` ⚠️ (solo el nombre, relativo al Path) |
+| **Docker Context Path** | `./apps/landing` (o dejarlo vacío → usa la carpeta del Dockerfile) |
+| **Watch Paths** | `./apps/landing/**` |
+| **Port** | `8080` |
+
+> ⚠️ Error típico: si pones `ImagePath/Dockerfile` en **Dockerfile Path** mientras el **Path** ya es `apps/landing`, Dokploy resuelve la ruta duplicada (`code/apps/landing/apps/landing/Dockerfile`) y falla al crear `.env`.
+
+2. En **Domains**, añade tu **dominio custom** — Dokploy genera el
+   certificado HTTPS automáticamente y enruta al puerto 8080 del contenedor.
+3. Opcional: variables de entorno (`PORT`, `TZ`).
+
+### Local (docker build)
 
 ```bash
 cd apps/landing
