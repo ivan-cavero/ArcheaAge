@@ -41,6 +41,38 @@ jobs:
         working-directory: apps/launcher/src-tauri
         run: cargo check
 
+  studio:
+    name: Studio (cargo check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Tauri Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/studio/src-tauri
+      - name: Check
+        working-directory: apps/studio/src-tauri
+        run: cargo check
+
+  tools:
+    name: Tools (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile
+        run: python -m compileall -q -f tools
+
   go:
     name: Go (servers/go)
     runs-on: ubuntu-latest

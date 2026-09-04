@@ -1,8 +1,13 @@
 # Plan de reorganización — ArcheaAge
 
-> Estado: propuesta (2026-08). Objetivo: que el repo sea gestionable, rápido,
-> sin duplicados, y que siente la base para el editor 3D (mapa, modelos, UI,
-> elementos del juego) tipo game engine.
+> Estado 2026-09: Fase 0 casi cerrada (P1–P3 hechos: árbol duplicado,
+> editor predecesor y scripts MEGA). Lectura de `game_pak` unificada en
+> Python (`python -m tools.pak`); escritura sigue en C# (`tools/pak-put`).
+> Studio resuelve el repo con `ARCHEAAGE_ROOT` o walk-up. CI cubre studio
+> + compileall de `tools/`.
+>
+> Objetivo original (2026-08): repo gestionable, rápido, sin duplicados,
+> base para el editor 3D (mapa, modelos, UI, elementos del juego).
 >
 > Relacionado: [ARQUITECTURA.md](ARQUITECTURA.md) (qué es cada cosa),
 > [MODDING.md](MODDING.md) (ingeniería inversa del cliente),
@@ -26,11 +31,11 @@
 | P1 | **Mismo árbol de scripts en 2 sitios** | `tools/src` y `tools/ui/src` son copias **byte-idénticas** (966 ficheros, 0 diferencias) | `tools/src/` |
 | P2 | **Dos editores de UI** | `tools/ui/editor/` (experimento temprano) y `apps/studio/` (el producto actual) conviven | `tools/ui/editor/` |
 | P3 | **3 scripts MEGA que hacen lo mismo** | `mega-get.py`, `mega-ls.py`, `mega-ls2.py`: mismo dominio, enfoques distintos | `tools/client-sourcing/` |
-| P4 | **3 proyectos C# para pak** | `pak-grep`, `pak-put`, `pak-scan`: 239 líneas totales repartidas en 3 csproj + 3 árboles bin/obj | `tools/pak-*` |
+| P4 | **3 proyectos C# para pak** | Hecho: lectura = `python -m tools.pak`. Escritura = `tools/pak-put`. `pak-scan`/`pak-grep` eliminados. | `tools/pak*` |
 | P5 | **10 GB en `apps/`** | 7.1 GB `launcher/src-tauri/target` + 3 GB `studio/src-tauri/target` (artefactos de build). Ya ignorados por git, pero comen disco local | local |
-| P6 | **Rutas hardcodeadas** | `apps/studio/src-tauri/src/lib.rs` resuelve el repo por "profundidad de exe" (4 niveles arriba) | `apps/studio` |
+| P6 | **Rutas hardcodeadas** | Hecho: `ARCHEAAGE_ROOT` + walk-up desde cwd/exe buscando `tools/ui`. | `apps/studio` |
 | P7 | **`sync-tree.ps1` existe porque hay 2 árboles** | síntoma de P1: se sincronizan a mano dos copias en vez de tener una canónica | `tools/ui/` |
-| P8 | **CI no cubre studio ni tools** | solo .NET + cargo check del launcher | `.github/workflows/ci.yml` |
+| P8 | **CI no cubre studio ni tools** | Hecho: cargo check de studio + `python -m compileall tools`. | `.github/workflows/ci.yml` |
 | P9 | **`clients` locales gigantes** | `.clients/` (~158 GB) y `.client_files/` (cliente extraído) sin documentar cómo regenerarlos | local |
 | P10 | **Referencia sin documentar** | `.reference/AAEmu-Launcher` (clon de referencia) sin README que diga qué es | `.reference/` |
 

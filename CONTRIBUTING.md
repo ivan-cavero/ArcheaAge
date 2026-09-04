@@ -14,12 +14,13 @@ Be excellent to each other. Keep criticism technical, welcome newcomers.
 | --- | --- |
 | `apps/registry/` | Metaserver (C#/ASP.NET Core): versions, live servers, manifests, news |
 | `apps/launcher/` | Tauri v2 launcher (Rust + web): version picker, server browser, client manager |
+| `apps/studio/` | ArcheaAge Editor (Tauri + three.js): world viewport + UI tools |
 | `servers/aaemu/` | AAEmu fork (**git submodule** → `ivan-cavero/AAEmu`, branch `archeaage/develop`) |
 | `servers/go/` | Go rewrite of the servers (ADR-001): registry (Slice 0), login, game |
 | `sdk/` | Plugin contract (`ArcheaAge.Sdk`) — compiles without cloning the server |
 | `plugins/` | Community plugin catalog (one folder per plugin) |
 | `content/` | Client manifests per version + launcher news feed + content packs |
-| `tools/` | Client sourcing, packing, opcode/RE utilities, editors (future) |
+| `tools/` | Client sourcing, pak reader, world bake, UI pipeline |
 | `db/migrations/` | Our own SQL migrations (forward-only) |
 | `scripts/` | Dev ops: start-dev, stop-dev, upload-client, write-aelcf |
 | `docs/` | Research, architecture, spec, ADRs, version table |
@@ -30,7 +31,8 @@ Be excellent to each other. Keep criticism technical, welcome newcomers.
 | --- | --- | --- |
 | .NET SDK | registry, sdk, plugins | 10.0 |
 | Go | servers/go | 1.25+ |
-| Rust + Node | apps/launcher | stable / LTS |
+| Rust + Node (npm) | apps/launcher, apps/studio | stable / LTS — lockfile is `package-lock.json`, not bun |
+| Python 3.12+ | tools/pak, tools/world, tools/ui | 3.12 (`pip install -r tools/requirements.txt`) |
 | Podman or Docker | dev DB (compose.yaml) | any recent |
 
 ## Build & test
@@ -46,6 +48,13 @@ cd servers/go && go vet ./... && go test ./...
 
 # Launcher
 cd apps/launcher && npm install && npm run tauri dev
+
+# Studio
+cd apps/studio && npm install && npm run dev
+
+# Python tools
+python -m compileall -q tools
+python -m tools.pak scan <game_pak>
 
 # Dev stack (MariaDB + everything)
 bash scripts/start-dev.sh      # stop with scripts/stop-dev.sh

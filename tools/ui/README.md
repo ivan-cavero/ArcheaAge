@@ -106,4 +106,4 @@ deleted freely.
 3. **Visual editor**: small web app rendering the dumped tree as draggable
    boxes over a screenshot, exporting the override file.
 4. **Textures/backgrounds**: same pak pipeline — extract `.dds` with
-   `pak-scan`, edit, `pak-put` back.
+   `python -m tools.pak extract`, edit, `pak-put` back.

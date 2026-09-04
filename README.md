@@ -30,6 +30,7 @@ anymore. This project exists so the community can keep it alive: see
 | Component | What it is | Stack |
 | --- | --- | --- |
 | **Launcher** (`apps/launcher`) | Desktop app players run: picks a version, lists servers with live player counts, downloads/patches/verifies the client and launches `archeage.exe`. | Rust + Tauri + web |
+| **Studio** (`apps/studio`) | In-house editor: 3D world viewport (terrain, CGF, NPCs, doodads) plus the UI layout tools. Bakes from `game_pak` via `tools/world`. | Rust + Tauri + three.js |
 | **Registry** (`apps/registry`, Go port in `servers/go/registry`) | Metaserver the launcher queries: available versions, per-version server list with live players (heartbeats from game servers), client manifests, news feed. It never speaks the game protocol. | C#/ASP.NET Core → Go |
 | **AAEmu fork** (`servers/aaemu`) | The working game+login servers (submodule of our fork). Production during M1–M2; becomes the protocol/data reference once the Go rewrite catches up. | C#/.NET |
 | **Go servers** (`servers/go`) | Clean-room rewrite (ADR-001): registry done, login next, then the game network core and world simulation, slice by slice. | Go |
@@ -44,14 +45,19 @@ anymore. This project exists so the community can keep it alive: see
 ```text
 apps/
 ├── registry/  # ASP.NET Core metaserver (today) — Go port lives in servers/go/registry
-└── launcher/  # Tauri v2 (Rust + web): version selector + server browser + client manager
+├── launcher/  # Tauri v2 (Rust + web): version selector + server browser + client manager
+└── studio/    # ArcheaAge Editor: 3D world viewport + UI tools
 servers/
 ├── aaemu/     # AAEmu fork — submodule (origin = ivan-cavero/AAEmu, upstream = AAEmu/AAEmu)
 └── go/        # Go rewrite (ADR-001): Slice 0 registry done; login/game next
 sdk/          # ArcheaAge.Sdk — plugin contract (NuGet, no AAEmu dependency)
 plugins/      # Plugin catalog (Example included)
 content/      # Client manifests and content packs
-tools/        # client-sourcing utilities (MEGA/Drive listing, re-archive)
+tools/
+├── pak/       # Python game_pak reader + CLI (scan/extract/grep). Write = tools/pak-put
+├── world/     # heightmap/CGF/vegetation parsers + bake_studio.py
+├── ui/        # Lua UI pipeline (decompile → edit → push)
+└── client-sourcing/
 compose.yaml  # dev DB stack (MariaDB + auto-migrations) — podman/docker compose up -d
 db/           # our own SQL migrations (aaemu's live in servers/aaemu/SQL)
 scripts/      # dev ops (start-dev, stop-dev, upload-client, write-aelcf)
@@ -99,6 +105,22 @@ dotnet build plugins/Example
 cd apps/launcher
 npm install
 npm run tauri dev
+```
+
+### Studio / editor (requires Rust + Node + Python)
+
+```bash
+pip install -r tools/requirements.txt
+cd apps/studio
+npm install
+npm run dev
+```
+
+World cache (gitignored) is baked from a local `game_pak`:
+
+```bash
+python tools/world/bake_studio.py --pak ".client_files/ArcheAge 1.2 (r208022) for AAEmu/game_pak" \
+  --world main_world --overview --out apps/studio/ui/cache
 ```
 
 ### Server (AAEmu fork)
