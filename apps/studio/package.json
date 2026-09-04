@@ -2,7 +2,7 @@
   "name": "archeaage-studio",
   "version": "0.1.0",
   "private": true,
-  "description": "ArcheaAge UI Studio - visual editor for the aa_ui client addon",
+  "description": "ArcheaAge Editor - world viewport and UI tools",
   "scripts": {
     "dev": "tauri dev",
     "build": "tauri build"

@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "ArcheaAge UI Studio",
+  "productName": "ArcheaAge Editor",
   "version": "0.1.0",
   "identifier": "dev.archeaage.studio",
   "build": {
@@ -10,11 +10,11 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "ArcheaAge UI Studio",
-        "width": 1100,
-        "height": 640,
-        "minWidth": 900,
-        "minHeight": 560,
+        "title": "ArcheaAge Editor",
+        "width": 1600,
+        "height": 900,
+        "minWidth": 1280,
+        "minHeight": 720,
         "resizable": true,
         "decorations": false,
         "center": true

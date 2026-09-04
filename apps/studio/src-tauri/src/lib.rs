@@ -1,6 +1,38 @@
-//! ArcheaAge UI Studio — visual editor for the aa_ui client addon config.
+//! ArcheaAge Editor — world viewport and UI tools.
 
 use std::path::PathBuf;
+
+/// Repo root: `ARCHEAAGE_ROOT` if set, otherwise walk up from cwd / exe
+/// looking for `tools/ui`.
+fn repo_root() -> Option<PathBuf> {
+    if let Ok(raw) = std::env::var("ARCHEAAGE_ROOT") {
+        let p = PathBuf::from(raw);
+        if p.join("tools").join("ui").is_dir() {
+            return Some(p);
+        }
+    }
+    let mut seeds: Vec<PathBuf> = Vec::new();
+    if let Ok(cwd) = std::env::current_dir() {
+        seeds.push(cwd);
+    }
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(dir) = exe.parent() {
+            seeds.push(dir.to_path_buf());
+        }
+    }
+    for seed in seeds {
+        let mut dir = seed;
+        for _ in 0..8 {
+            if dir.join("tools").join("ui").is_dir() {
+                return Some(dir);
+            }
+            if !dir.pop() {
+                break;
+            }
+        }
+    }
+    None
+}
 
 fn panel_config_path() -> PathBuf {
     let home = std::env::var("USERPROFILE").unwrap_or_else(|_| ".".into());
@@ -47,64 +79,42 @@ async fn open_game_documents() -> Result<String, String> {
 }
 
 /// Saves generated native-window overrides into tools/ui/overrides.lua so
-/// push-ui.ps1 picks them up. Resolves the repo layout relative to cwd/exe.
+/// push-ui.ps1 picks them up.
 #[tauri::command]
 async fn overrides_save(content: String) -> Result<String, String> {
-    let mut candidates: Vec<PathBuf> = Vec::new();
-    if let Ok(cwd) = std::env::current_dir() {
-        candidates.push(cwd.join("../tools/ui/overrides.lua"));
-    }
-    if let Ok(exe) = std::env::current_exe() {
-        if let Some(dir) = exe.parent() {
-            // dev: apps/studio/src-tauri/target/debug -> repo root is 4 up
-            let mut p = dir.to_path_buf();
-            for _ in 0..4 { p = p.parent().map(|x| x.to_path_buf()).unwrap_or(p); }
-            candidates.push(p.join("tools/ui/overrides.lua"));
-            // installed: exe beside repo root
-            if let Some(parent) = dir.parent() {
-                candidates.push(parent.join("tools/ui/overrides.lua"));
-            }
-        }
-    }
-    let mut errors = String::new();
-    for c in &candidates {
-        let Some(parent) = c.parent() else { continue };
-        if !parent.exists() { continue; }
-        return match std::fs::write(c, content.clone()) {
-            Ok(_) => Ok(c.to_string_lossy().into_owned()),
-            Err(e) => { errors.push_str(&format!("{}: {e}\n", c.display())); Err(errors) }
-        };
-    }
-    Err(format!("no tools/ui directory found near the app. Tried:\n{errors}\
-        \nFallback: save the file manually into tools\\ui\\overrides.lua"))
+    let root = repo_root().ok_or_else(|| {
+        "no tools/ui directory found. Set ARCHEAAGE_ROOT to the repo root, \
+         or save the file manually into tools\\ui\\overrides.lua"
+            .to_string()
+    })?;
+    let path = root.join("tools").join("ui").join("overrides.lua");
+    std::fs::write(&path, content).map_err(|e| format!("{}: {e}", path.display()))?;
+    Ok(path.to_string_lossy().into_owned())
 }
 
 /// Opens the decompiled Lua source folder of a loginstage module in Explorer.
 #[tauri::command]
 async fn open_decompiled_source(module: String) -> Result<String, String> {
-    // resolve like overrides_save: repo root relative to cwd or exe depth
-    let mut candidates: Vec<PathBuf> = Vec::new();
-    if let Ok(cwd) = std::env::current_dir() {
-        candidates.push(cwd.join("../tools/ui/decompiled"));
+    let root = repo_root().ok_or_else(|| {
+        "decompiled sources not found — run tools\\ui\\decompile.py first \
+         (or set ARCHEAAGE_ROOT)"
+            .to_string()
+    })?;
+    let target = root
+        .join("tools")
+        .join("ui")
+        .join("decompiled")
+        .join("game/scriptsbin/x2ui/loginstage")
+        .join(&module);
+    if !target.exists() {
+        return Err("decompiled sources not found — run tools\\ui\\decompile.py first".into());
     }
-    if let Ok(exe) = std::env::current_exe() {
-        if let Some(dir) = exe.parent() {
-            let mut p = dir.to_path_buf();
-            for _ in 0..4 { p = p.parent().map(|x| x.to_path_buf()).unwrap_or(p); }
-            candidates.push(p.join("tools/ui/decompiled"));
-        }
-    }
-    for c in &candidates {
-        let target = c.join(format!("game/scriptsbin/x2ui/loginstage/{}", module));
-        if target.exists() {
-            let t = target.clone();
-            std::process::Command::new("explorer.exe")
-                .arg("/select,").arg(t.into_os_string())
-                .spawn().map_err(|e| e.to_string())?;
-            return Ok(target.to_string_lossy().into_owned());
-        }
-    }
-    Err("decompiled sources not found — run tools\\ui\\decompile.ps1 first".into())
+    std::process::Command::new("explorer.exe")
+        .arg("/select,")
+        .arg(target.clone().into_os_string())
+        .spawn()
+        .map_err(|e| e.to_string())?;
+    Ok(target.to_string_lossy().into_owned())
 }
 
 pub fn run() {
@@ -115,8 +125,7 @@ pub fn run() {
             open_game_documents,
             overrides_save,
             open_decompiled_source,
-            overrides_save
         ])
         .run(tauri::generate_context!())
-        .expect("error while running UI Studio");
+        .expect("error while running ArcheaAge Editor");
 }
