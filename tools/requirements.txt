@@ -1,0 +1,3 @@
+# Python deps for tools/ (pak reader, world bake, UI textures, MEGA).
+pycryptodome>=3.20
+Pillow>=10.0

@@ -74,3 +74,5 @@ tools/ui/src/game/
 
 # studio: generated world cell JSON (regenerate with tools/world/world_to_json.py)
 apps/studio/ui/cells/
+# baked CGF meshes + DDS conversions (tools/world/bake_studio.py)
+apps/studio/ui/cache/

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """paklib.py — read-only Python library for ArcheAge game_pak (AAPack).
 
-Byte-identical extraction to AAEmu's C# AAPak (tools/pak-scan / pak-put).
+Byte-identical extraction to AAEmu's C# AAPak (write path: tools/pak-put).
 Format reverse-engineered from servers/aaemu/AAEmu.Commons/Utils/AAPak/AAPak.cs.
 
 Format (read path):
@@ -115,7 +115,12 @@ def _parse_entry(block: bytes, pak_type: str) -> PakEntry:
 
 
 class GamePak:
-    """Read-only view of an ArcheAge game_pak (AAPack)."""
+    """Read-only view of an ArcheAge game_pak (AAPack).
+
+    Keeps one file handle open for the lifetime of the object so sequential
+    reads (bake, extract, grep) do not reopen a multi-GB archive per file.
+    Not thread-safe: all reads share a single seek pointer.
+    """
 
     def __init__(self, path: str | Path):
         self.path = Path(path)
@@ -125,13 +130,26 @@ class GamePak:
         self._fat_offset = 0
         self._entries: dict[str, PakEntry] = {}
         self._extra: list[PakEntry] = []
-        self._read_header()
+        self._lower: dict[str, str] = {}
+        self._fp = None
+        try:
+            self._read_header()
+        except Exception:
+            self.close()
+            raise
+
+    def _ensure_open(self):
+        if self._fp is None or self._fp.closed:
+            self._fp = open(self.path, "rb")
+        return self._fp
 
     # ---- header / FAT -------------------------------------------------
     def _read_header(self) -> None:
-        with open(self.path, "rb") as f:
-            f.seek(-HEADER_SIZE, 2)
-            raw = f.read(HEADER_SIZE)
+        f = self._ensure_open()
+        f.seek(0, 2)
+        end = f.tell()
+        f.seek(-HEADER_SIZE, 2)
+        raw = f.read(HEADER_SIZE)
 
         data = _decrypt(raw)
         if data[:4] == b"WIBO":
@@ -153,14 +171,12 @@ class GamePak:
 
         total = self.file_count + self.extra_file_count
         total_info_size = total * FILE_INFO_SIZE
-        end = self.path.stat().st_size
         fat_offset = end - HEADER_SIZE - total_info_size
         fat_offset -= fat_offset % 0x200  # align down to 512
         self._fat_offset = fat_offset
 
-        with open(self.path, "rb") as f:
-            f.seek(fat_offset)
-            fat = f.read(total * FILE_INFO_SIZE)
+        f.seek(fat_offset)
+        fat = f.read(total * FILE_INFO_SIZE)
         self._parse_fat(fat)
 
     def _parse_fat(self, fat: bytes) -> None:
@@ -183,8 +199,26 @@ class GamePak:
                 elif to_go_files > 0:
                     to_go_files -= 1
                     self._entries[entry.name] = entry
+        self._lower = {n.lower().replace("\\", "/"): n for n in self._entries}
 
     # ---- public API ----------------------------------------------------
+    def resolve(self, name: str) -> str | None:
+        """Canonical pak path, or None. Accepts ``\\`` / case variants."""
+        n = name.replace("\\", "/").lstrip("/")
+        if n in self._entries:
+            return n
+        return self._lower.get(n.lower())
+
+    def read(self, name: str) -> bytes | None:
+        """Raw payload bytes, or None if the entry is missing."""
+        key = self.resolve(name)
+        if key is None:
+            return None
+        e = self._entries[key]
+        f = self._ensure_open()
+        f.seek(e.offset)
+        return f.read(e.size)
+
     def list_entries(self, filter_: str | None = None) -> list[tuple[str, int]]:
         """All (name, size) pairs, optionally filtered by case-insensitive substring."""
         if filter_ is None:
@@ -195,60 +229,127 @@ class GamePak:
         ]
 
     def file_size(self, name: str) -> int | None:
-        e = self._entries.get(name)
-        return e.size if e else None
+        key = self.resolve(name)
+        if key is None:
+            return None
+        return self._entries[key].size
 
     def extract(self, name: str, out_path: str | Path) -> bool:
         """Extract one entry to out_path (raw bytes). Returns False if missing."""
-        e = self._entries.get(name)
-        if e is None:
+        data = self.read(name)
+        if data is None:
             return False
-        with open(self.path, "rb") as f:
-            f.seek(e.offset)
-            data = f.read(e.size)
         Path(out_path).parent.mkdir(parents=True, exist_ok=True)
         Path(out_path).write_bytes(data)
         return True
 
-    def extract_prefix(self, prefix: str, out_dir: str | Path) -> int:
-        """Extract all entries whose name starts with prefix. Returns count."""
+    def extract_matching(
+        self,
+        out_dir: str | Path,
+        filter_: str | None = None,
+        *,
+        match: str = "substring",
+    ) -> int:
+        """Extract entries to out_dir. ``match`` is 'substring' or 'prefix'."""
         out_dir = Path(out_dir)
+        needle = filter_.lower().replace("\\", "/") if filter_ else None
+        f = self._ensure_open()
         count = 0
         for name, e in self._entries.items():
-            if name.lower().startswith(prefix.lower()):
-                target = out_dir / name.replace("\\", "/")
-                target.parent.mkdir(parents=True, exist_ok=True)
-                with open(self.path, "rb") as f:
-                    f.seek(e.offset)
-                    target.write_bytes(f.read(e.size))
-                count += 1
+            nlow = name.lower().replace("\\", "/")
+            if needle:
+                if match == "prefix":
+                    if not nlow.startswith(needle):
+                        continue
+                elif needle not in nlow:
+                    continue
+            target = out_dir / name.replace("\\", "/")
+            target.parent.mkdir(parents=True, exist_ok=True)
+            f.seek(e.offset)
+            target.write_bytes(f.read(e.size))
+            count += 1
         return count
 
-    def stream(self, name: str) -> Iterator[bytes]:
-        """Yield raw file bytes in chunks (avoids loading big files at once)."""
-        e = self._entries.get(name)
-        if e is None:
-            return
-        with open(self.path, "rb") as f:
+    def extract_prefix(self, prefix: str, out_dir: str | Path) -> int:
+        """Extract all entries whose name starts with prefix. Returns count."""
+        return self.extract_matching(out_dir, prefix, match="prefix")
+
+    def grep(self, needle: str, max_size: int = 2**63 - 1) -> list[tuple[str, int]]:
+        """Entries whose payload contains *needle* as ASCII or UTF-16LE."""
+        ascii_b = needle.encode("ascii", "replace")
+        utf16 = needle.encode("utf-16le")
+        f = self._ensure_open()
+        hits: list[tuple[str, int]] = []
+        for name, e in self._entries.items():
+            if e.size > max_size:
+                continue
             f.seek(e.offset)
-            remaining = e.size
-            while remaining > 0:
-                chunk = f.read(min(1 << 20, remaining))
-                if not chunk:
-                    break
-                remaining -= len(chunk)
-                yield chunk
+            data = f.read(e.size)
+            if ascii_b in data or utf16 in data:
+                hits.append((name, e.size))
+        return hits
+
+    def stream(self, name: str) -> Iterator[bytes]:
+        """Yield raw file bytes in chunks (avoids loading big files at once).
+
+        Consume the generator before calling read/extract again — the handle
+        is shared.
+        """
+        key = self.resolve(name)
+        if key is None:
+            return
+        e = self._entries[key]
+        f = self._ensure_open()
+        f.seek(e.offset)
+        remaining = e.size
+        while remaining > 0:
+            chunk = f.read(min(1 << 20, remaining))
+            if not chunk:
+                break
+            remaining -= len(chunk)
+            yield chunk
+
+    @property
+    def entries(self) -> dict[str, PakEntry]:
+        return self._entries
 
     @property
     def entry_count(self) -> int:
         return len(self._entries)
 
-    def close(self) -> None:  # no-op, kept for API symmetry
-        pass
+    def close(self) -> None:
+        if self._fp is not None and not self._fp.closed:
+            self._fp.close()
+        self._fp = None
+
+    def __enter__(self):
+        self._ensure_open()
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+        return False
+
+
+class PakIndex:
+    """Case-insensitive lookup + read facade used by ``tools.world`` bakers.
+
+    One instance per bake: ``idx.read(path)`` does not reopen the pak.
+    """
+
+    def __init__(self, pak: GamePak):
+        self.pak = pak
+        self.lower = pak._lower
+
+    def get(self, name: str) -> str | None:
+        return self.pak.resolve(name)
+
+    def read(self, name: str) -> bytes | None:
+        return self.pak.read(name)
 
 
 def open_pak(path: str | Path) -> GamePak:
     return GamePak(path)
 
 
-__all__ = ["open_pak", "GamePak", "PakEntry", "XLGAMES_KEY"]
+__all__ = ["open_pak", "GamePak", "PakEntry", "PakIndex", "XLGAMES_KEY"]

@@ -5,24 +5,32 @@ Reads the ArcheAge 1.2 client world (game_pak) into JSON for the 3D editor.
 ## Pipeline
 
 ```text
-game_pak ──pak-scan──▶ cell files (heightmap.dat, entities.xml)
+game_pak ──paklib──▶ cell files + CGF/DDS
                 │
-                ├─▶ heightmap.py  ─▶ 512x512 height grid + terrain.obj
-                └─▶ entities.py   ─▶ entity list (pos/rotate/scale/model)
-                     │
-                     └─▶ world_to_json.py ─▶ <world>_<cell>.json (editor contract)
+                ├─▶ heightmap.py / objects_dat.py / cgf.py / mtl.py
+                └─▶ bake_studio.py ─▶ apps/studio/ui/cache (meshes + terrain)
 ```
 
 ## Usage
 
 ```bash
-# one cell -> one JSON
+# editor bake (heightmaps, CGF meshes, DDS → PNG, vegetation, NPC markers)
+python tools/world/bake_studio.py \
+  --pak ".client_files/ArcheAge 1.2 (r208022) for AAEmu/game_pak" \
+  --world main_world \
+  --cells 010_012 010_013 011_011 011_012 011_013 012_012 \
+  --out apps/studio/ui/cache
+
+# coarse heightmap of every cell (continent silhouette in the editor)
+python tools/world/bake_studio.py \
+  --pak ".client_files/ArcheAge 1.2 (r208022) for AAEmu/game_pak" \
+  --world main_world --overview \
+  --out apps/studio/ui/cache
+
+# one cell -> height JSON only
 python tools/world/world_to_json.py \
   --pak ".client_files/ArcheAge 1.2 (r208022) for AAEmu/game_pak" \
   --world arche_mall_world --cells 003_003 004_004 --out out/
-
-# standalone: parse a heightmap + write an OBJ mesh
-python tools/world/heightmap.py <path>/terrain/heightmap.dat
 ```
 
 ## Formats (verified against AAEmu source)
@@ -76,13 +84,20 @@ model, layer, material}`. `object_Model` lives on the `<Properties>` child.
 }
 ```
 
-`heights` are raw u16 values; meters = `value / height_max_coefficient`
-where `height_max_coefficient = 65535 / (max_height / 4)` (AAEmu formula).
+`heights` are meters (float).
+
+### vegetation.dat (4×4 sectors of 256 m)
+
+World groups live in `game/worlds/<world>/vegetation.xml` (`<group id modelFileName fSize>`).
+Each cell file starts with version + 16 offsets + 16 sizes, then 64-byte
+instances: AABB min/max at 0x00/0x0C, unaligned `uint16` group id at 0x37.
+
+NPC / doodad markers are filtered from AAEmu `npc_spawns.json` / `doodad_spawns.json`.
 
 ## Notes
 
-- `pak_extract.py` shells out to `tools/pak-scan` (C#) to read the pak;
-  it needs the `servers/aaemu` submodule checked out (AAEmu.Commons).
+- Reads go through `tools.pak` (Python). `pak_extract.py` no longer
+  spawns `dotnet run`. Write/replace of the pak is still `tools/pak-put`.
 - Height parsing is a faithful port of AAEmu's `Hmap`/`NodeCell`
   (`servers/aaemu/AAEmu.Game/Models/ClientData/`), so server and editor
   agree on heights.

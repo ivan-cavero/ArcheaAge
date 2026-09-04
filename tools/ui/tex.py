@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """tex.py — extract / brand / replace background textures in the client pak.
 
-Requires: Pillow (pip install pillow), tools/pak-scan + tools/pak-put.
+Requires: Pillow (pip install pillow). Read path is Python (`tools.pak`);
+write/replace still uses tools/pak-put (C#).
 
 Usage:
   python tex.py extract <game_pak> <pak_entry> <out.png>
   python tex.py brand   <game_pak> <pak_entry> <text>     # stamp text bottom-right
   python tex.py replace <game_pak> <pak_entry> <in.png>   # resize+convert+inject
 """
-import io
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -17,30 +16,24 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[2]
-PAK_SCAN = ROOT / "tools" / "pak-scan"
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from tools.pak import open_pak  # noqa: E402
+
 PAK_PUT = ROOT / "tools" / "pak-put"
-TMP = Path(__file__).resolve().parents[2] / ".client_files" / ".tex_tmp"
-
-
-def run(cmd):
-    r = subprocess.run(cmd, capture_output=True, text=True)
-    if r.returncode != 0:
-        print(r.stdout[-800:], r.stderr[-800:], sep="\n")
-        raise SystemExit(f"command failed: {' '.join(str(c) for c in cmd)}")
-    return r.stdout
+TMP = ROOT / ".client_files" / ".tex_tmp"
 
 
 def extract_dds(pak, entry, out_dds):
-    out = subprocess.run(
-        ["dotnet", "run", "--project", str(PAK_SCAN), "--", str(pak), str(TMP), entry],
-        capture_output=True, text=True)
-    # pak-scan extracts by substring filter; locate the exact relative path
-    hits = list(TMP.rglob(Path(entry).name))
-    if not hits:
-        print(out.stdout[-1500:], out.stderr[-500:])
-        raise SystemExit(f"entry not found in pak: {entry}")
+    with open_pak(pak) as gp:
+        data = gp.read(entry)
+        if data is None:
+            matches = gp.list_entries(entry)
+            if not matches:
+                raise SystemExit(f"entry not found in pak: {entry}")
+            data = gp.read(matches[0][0])
     Path(out_dds).parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(hits[0], out_dds)
+    Path(out_dds).write_bytes(data)
 
 
 def dds_to_png(dds_path, png_path):

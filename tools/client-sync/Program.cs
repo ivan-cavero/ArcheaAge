@@ -5,7 +5,7 @@
 // Extracts every entry whose extension looks editable (lua/alb/xml/cfg/txt/
 // json/csv/sql/ini/htm/html/js/css/rb) plus game/db/compact.sqlite3 (all game
 // texts live there). Binary assets (models/textures/sounds) stay in the pak;
-// pull them individually with pak-scan when needed.
+// pull them individually with `python -m tools.pak extract` when needed.
 //
 // Point your LOCAL git at <outDir> to track every change you make. Never push
 // game assets to a public repository (see docs/LEGAL.md).

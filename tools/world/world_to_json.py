@@ -20,19 +20,18 @@ heights are raw ushort values; meters = value / height_max_coefficient
 import argparse
 import json
 import sys
-import tempfile
 from pathlib import Path
 
 # Resolve package imports (tools.world.*) when run as a script from anywhere.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from tools.world.entities import parse_entities  # noqa: E402
+from tools.pak import PakIndex, open_pak  # noqa: E402
+from tools.world.entities import parse_entities_text  # noqa: E402
 from tools.world.heightmap import (  # noqa: E402
     build_cell_grid,
     default_height_max_coefficient,
-    load_heightmap,
+    load_heightmap_bytes,
 )
-from tools.world.pak_extract import extract_cell  # noqa: E402
 
 
 def grid_max_height(hmap) -> float:
@@ -40,18 +39,19 @@ def grid_max_height(hmap) -> float:
     return 4096.0
 
 
-def cell_json(pak: Path, world: str, cell: str, tmp: Path) -> dict:
-    """Extract one cell, parse it, return the editor JSON contract."""
-    extract_cell(pak, world, cell, tmp)
-    cell_dir = tmp / "game" / "worlds" / world / "cells" / cell / "client"
-
-    hmap = load_heightmap(cell_dir / "terrain" / "heightmap.dat")
+def cell_json(idx: PakIndex, world: str, cell: str) -> dict:
+    """Read one cell from the pak, parse it, return the editor JSON contract."""
+    base = f"game/worlds/{world}/cells/{cell}/client"
+    hraw = idx.read(f"{base}/terrain/heightmap.dat")
+    if not hraw:
+        raise FileNotFoundError(f"missing heightmap for {world}/{cell}")
+    hmap = load_heightmap_bytes(hraw, f"{world}/{cell}/heightmap.dat")
     grid = build_cell_grid(hmap, default_height_max_coefficient(grid_max_height(hmap)))
 
     entities = []
-    ent_file = cell_dir / "entities.xml"
-    if ent_file.exists():
-        entities = parse_entities(ent_file)
+    xml = idx.read(f"{base}/entities.xml")
+    if xml:
+        entities = parse_entities_text(xml.decode("utf-8", "replace"))
 
     return {
         "cell": cell,
@@ -78,14 +78,13 @@ def main() -> int:
     parser.add_argument("--out", required=True, help="output directory")
     args = parser.parse_args()
 
-    pak = Path(args.pak)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
 
-    with tempfile.TemporaryDirectory(prefix="world_to_json_") as tmp:
-        tmp = Path(tmp)
+    with open_pak(args.pak) as pak:
+        idx = PakIndex(pak)
         for cell in args.cells:
-            data = cell_json(pak, args.world, cell, tmp)
+            data = cell_json(idx, args.world, cell)
             target = out / f"{args.world}_{cell}.json"
             target.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
             print(

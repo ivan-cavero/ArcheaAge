@@ -200,13 +200,17 @@ class Hmap:
         return nodes_read
 
 
-def load_heightmap(path: Path) -> Hmap:
-    data = path.read_bytes()
+def load_heightmap_bytes(data: bytes, name: str = "<bytes>") -> Hmap:
+    """Parse a heightmap.dat payload already in memory."""
     hmap = Hmap()
     n = hmap.read(data)
     if n < 0:
-        raise ValueError(f"failed to parse heightmap: {path}")
+        raise ValueError(f"failed to parse heightmap: {name}")
     return hmap
+
+
+def load_heightmap(path: Path) -> Hmap:
+    return load_heightmap_bytes(path.read_bytes(), str(path))
 
 
 def build_cell_grid(hmap: Hmap, height_max_coefficient: float | None = None):
@@ -239,6 +243,40 @@ def build_cell_grid(hmap: Hmap, height_max_coefficient: float | None = None):
         "unit_size": hmap.unit_size_in_meters,
         "max_height": 4096.0,
         "water_level": hmap.ocean_water_level,
+        "heights": heights,
+    }
+
+
+def build_overview_grid(hmap: Hmap, res: int = 16) -> dict:
+    """One height sample per terrain sector (default 16×16, 64 m)."""
+    sorted_nodes = sorted(
+        (n for n in hmap.nodes if n.p_hm_data),
+        key=lambda n: (n.box_min[0], n.box_min[1]),
+    )
+    res = max(1, min(res, SECTORS_PER_CELL))
+    step = SECTORS_PER_CELL // res
+    heights = []
+    lo, hi = 1e9, -1e9
+    for sx in range(res):
+        row = []
+        for sy in range(res):
+            idx = (sx * step) * SECTORS_PER_CELL + (sy * step)
+            if idx >= len(sorted_nodes):
+                h = 0.0
+            else:
+                node = sorted_nodes[idx]
+                mid = max(0, node.n_size // 2)
+                h = node.get_height(mid, mid)
+            lo = min(lo, h)
+            hi = max(hi, h)
+            row.append(round(h, 2))
+        heights.append(row)
+    return {
+        "width": res,
+        "unit_size": CELL_SIZE / res,
+        "water_level": hmap.ocean_water_level,
+        "min": round(lo, 2) if lo < 1e8 else 0.0,
+        "max": round(hi, 2) if hi > -1e8 else 0.0,
         "heights": heights,
     }
 

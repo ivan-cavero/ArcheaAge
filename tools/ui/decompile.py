@@ -26,6 +26,10 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 DEFAULT_CLIENT_DIR = Path(".client_files") / "ArcheAge 1.2 (r208022) for AAEmu"
 DEFAULT_DECOMPILER = Path(__file__).resolve().parent / "unluac.jar"
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from tools.pak import open_pak  # noqa: E402
 
 
 def resolve_pak(args: argparse.Namespace) -> Path:
@@ -47,21 +51,12 @@ def resolve_decompiler(args: argparse.Namespace) -> Path:
 
 
 def extract_albs(pak: Path, out_dir: Path, filter_str: str, no_print: bool) -> list[Path]:
-    """Extract matching pak entries under out_dir via pak-scan; return .alb paths."""
-    cmd = [
-        "dotnet", "run", "--project", str(REPO_ROOT / "tools" / "pak-scan"),
-        "--", str(pak), str(out_dir), filter_str,
-    ]
-    if no_print:
-        cmd.append("--no-print")
-    try:
-        subprocess.run(
-            cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        )
-    except subprocess.CalledProcessError as e:
-        raise RuntimeError(
-            f"pak-scan failed (exit {e.returncode}) extracting '{filter_str}' from {pak}"
-        ) from e
+    """Extract matching pak entries under out_dir; return .alb paths."""
+    del no_print  # kept in signature for callers; listing is no longer printed
+    with open_pak(pak) as gp:
+        n = gp.extract_matching(out_dir, filter_str)
+    if n == 0:
+        raise RuntimeError(f"no pak entries matching '{filter_str}' in {pak}")
     return sorted(out_dir.rglob("*.alb"))
 
 

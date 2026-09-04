@@ -44,9 +44,8 @@ def _attrs(tag_body: str) -> dict:
     return {m.group(1): m.group(2) for m in _ATTR.finditer(tag_body)}
 
 
-def parse_entities(path: Path) -> list[dict]:
-    """Parse entities.xml into a list of entity dicts."""
-    text = path.read_text(encoding="utf-8", errors="replace")
+def parse_entities_text(text: str) -> list[dict]:
+    """Parse entities.xml from a string."""
     entities = []
     for m in _ENTITY_TAG.finditer(text):
         props = _attrs(m.group(1))
@@ -70,19 +69,9 @@ def parse_entities(path: Path) -> list[dict]:
     return entities
 
 
-def parse_entities_text(text: str) -> list[dict]:
-    """Parse entities.xml from a string (for tests)."""
-    import tempfile
-
-    with tempfile.NamedTemporaryFile(
-        "w", suffix=".xml", delete=False, encoding="utf-8"
-    ) as f:
-        f.write(text)
-        tmp = f.name
-    try:
-        return parse_entities(Path(tmp))
-    finally:
-        Path(tmp).unlink(missing_ok=True)
+def parse_entities(path: Path) -> list[dict]:
+    """Parse entities.xml into a list of entity dicts."""
+    return parse_entities_text(path.read_text(encoding="utf-8", errors="replace"))
 
 
 if __name__ == "__main__":
